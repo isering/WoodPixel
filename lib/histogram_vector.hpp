@@ -29,9 +29,8 @@ class HistogramVector : public FeatureVector
 {
 public:
   HistogramVector() = default;
-  HistogramVector(const std::vector<cv::Mat>& histogram_vector, const std::vector<cv::Mat>& circular_rotation) :
-    FeatureVector(histogram_vector),
-    m_circular_rotation(circular_rotation)
+  HistogramVector(const std::vector<cv::Mat> &histogram_vector, const std::vector<cv::Mat> &circular_rotation) : FeatureVector(histogram_vector),
+                                                                                                                 m_circular_rotation(circular_rotation)
   {
   }
 

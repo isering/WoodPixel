@@ -34,13 +34,13 @@ class PatchRegion : public Serializable
 {
 public:
   PatchRegion() = default;
-  PatchRegion(const PatchRegion&) = default;
-  PatchRegion(int target_index, const std::vector<cv::Point>& points);
-  PatchRegion(int target_index, const cv::Point& coordinate, const BezierCurve& curve_top, const BezierCurve& curve_bot, const BezierCurve& curve_left, const BezierCurve& curve_right, const BezierCurve& curve_diag=BezierCurve(), cv::Rect bounding_box=cv::Rect());
-  PatchRegion(int target_index, const cv::Point& coordinate, const std::vector<BezierCurve>& curves_top, const std::vector<BezierCurve>& curves_bot, const std::vector<BezierCurve>& curves_left, const std::vector<BezierCurve>& curves_right, const std::vector<BezierCurve>& curves_diag=std::vector<BezierCurve>(), cv::Rect bounding_box=cv::Rect());
-  PatchRegion(int target_index, const cv::Point& coordinate, const cv::Rect& bounding_box);
+  PatchRegion(const PatchRegion &) = default;
+  PatchRegion(int target_index, const std::vector<cv::Point> &points);
+  PatchRegion(int target_index, const cv::Point &coordinate, const BezierCurve &curve_top, const BezierCurve &curve_bot, const BezierCurve &curve_left, const BezierCurve &curve_right, const BezierCurve &curve_diag = BezierCurve(), cv::Rect bounding_box = cv::Rect());
+  PatchRegion(int target_index, const cv::Point &coordinate, const std::vector<BezierCurve> &curves_top, const std::vector<BezierCurve> &curves_bot, const std::vector<BezierCurve> &curves_left, const std::vector<BezierCurve> &curves_right, const std::vector<BezierCurve> &curves_diag = std::vector<BezierCurve>(), cv::Rect bounding_box = cv::Rect());
+  PatchRegion(int target_index, const cv::Point &coordinate, const cv::Rect &bounding_box);
 
-  void set_sub_regions(const BezierCurve& separating_curve);
+  void set_sub_regions(const BezierCurve &separating_curve);
   bool diag_origin_tl() const;
   bool diag_origin_bl() const;
 
@@ -69,7 +69,7 @@ public:
     return !m_sub_regions.empty();
   }
 
-  static void fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br, PatchRegion& patch_bl, PatchRegion& patch_tl);
+  static void fix_fabricability(PatchRegion &patch_tr, PatchRegion &patch_br, PatchRegion &patch_bl, PatchRegion &patch_tl);
 
   cv::Mat mask() const
   {
@@ -83,12 +83,12 @@ public:
     return m_bounding_box.size();
   }
 
-  std::vector<PatchRegion>& sub_regions()
+  std::vector<PatchRegion> &sub_regions()
   {
     return m_sub_regions;
   }
 
-  const std::vector<PatchRegion>& sub_regions() const
+  const std::vector<PatchRegion> &sub_regions() const
   {
     return m_sub_regions;
   }
@@ -116,7 +116,7 @@ public:
   void set_target_index(int target_index)
   {
     m_target_index = target_index;
-    for (PatchRegion& sub_region : m_sub_regions)
+    for (PatchRegion &sub_region : m_sub_regions)
     {
       sub_region.m_target_index = target_index;
     }
@@ -127,7 +127,7 @@ public:
     return m_coordinate;
   }
 
-  const std::vector<BezierCurve>& curves_top() const
+  const std::vector<BezierCurve> &curves_top() const
   {
     return m_curves_top;
   }
@@ -136,14 +136,14 @@ public:
   {
     std::vector<BezierCurve> curves = m_curves_top;
     std::reverse(curves.begin(), curves.end());
-    for (BezierCurve& c : curves)
+    for (BezierCurve &c : curves)
     {
       c = c.reversed();
     }
     return curves;
   }
 
-    const std::vector<BezierCurve>& curves_bot() const
+  const std::vector<BezierCurve> &curves_bot() const
   {
     return m_curves_bot;
   }
@@ -152,14 +152,14 @@ public:
   {
     std::vector<BezierCurve> curves = m_curves_bot;
     std::reverse(curves.begin(), curves.end());
-    for (BezierCurve& c : curves)
+    for (BezierCurve &c : curves)
     {
       c = c.reversed();
     }
     return curves;
   }
 
-    const std::vector<BezierCurve>& curves_left() const
+  const std::vector<BezierCurve> &curves_left() const
   {
     return m_curves_left;
   }
@@ -168,14 +168,14 @@ public:
   {
     std::vector<BezierCurve> curves = m_curves_left;
     std::reverse(curves.begin(), curves.end());
-    for (BezierCurve& c : curves)
+    for (BezierCurve &c : curves)
     {
       c = c.reversed();
     }
     return curves;
   }
 
-    const std::vector<BezierCurve>& curves_right() const
+  const std::vector<BezierCurve> &curves_right() const
   {
     return m_curves_right;
   }
@@ -184,14 +184,14 @@ public:
   {
     std::vector<BezierCurve> curves = m_curves_right;
     std::reverse(curves.begin(), curves.end());
-    for (BezierCurve& c : curves)
+    for (BezierCurve &c : curves)
     {
       c = c.reversed();
     }
     return curves;
   }
 
-    const std::vector<BezierCurve>& curves_diag() const
+  const std::vector<BezierCurve> &curves_diag() const
   {
     return m_curves_diag;
   }
@@ -200,7 +200,7 @@ public:
   {
     std::vector<BezierCurve> curves = m_curves_diag;
     std::reverse(curves.begin(), curves.end());
-    for (BezierCurve& c : curves)
+    for (BezierCurve &c : curves)
     {
       c = c.reversed();
     }
@@ -212,9 +212,12 @@ public:
   PatchRegion scaled(double scale) const;
   void scale(double scale);
 
-  template <typename T> void draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::Point offset=cv::Point(0, 0)) const;
-  template<typename T> void draw(cv::Mat image, const T& color, double scale=1.0) const;
-  template <typename T, typename Iter> static void draw(cv::Mat image, const T& color, double scale, Iter begin, Iter end);
+  template <typename T>
+  void draw_edge_mask(cv::Mat image, const T &color, int dilate, cv::Point offset = cv::Point(0, 0)) const;
+  template <typename T>
+  void draw(cv::Mat image, const T &color, double scale = 1.0) const;
+  template <typename T, typename Iter>
+  static void draw(cv::Mat image, const T &color, double scale, Iter begin, Iter end);
 
   std::vector<cv::Point> get_draw_points() const;
 
@@ -223,19 +226,19 @@ public:
   std::string get_id_string() const;
   std::string get_short_id_string() const;
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 
 private:
   void init_curves(cv::Rect bounding_box);
   void init_rect();
   cv::Mat draw(double scale);
 
-  void update_bounding_box(cv::Rect bounding_box=cv::Rect());
-  
+  void update_bounding_box(cv::Rect bounding_box = cv::Rect());
+
   int m_target_index;
   cv::Point m_coordinate;
-  
+
   std::vector<BezierCurve> m_curves_top, m_curves_bot, m_curves_left, m_curves_right, m_curves_diag;
   cv::Rect m_bounding_box;
   cv::Mat m_mask;

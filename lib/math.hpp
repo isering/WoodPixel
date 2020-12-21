@@ -26,21 +26,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace math
 {
 
-inline int factorial(int n)
-{
-  int result = 1;
-  for (int i = 1; i <= n; ++i)
+  inline int factorial(int n)
   {
-    result *= i;
+    int result = 1;
+    for (int i = 1; i <= n; ++i)
+    {
+      result *= i;
+    }
+    return result;
   }
-  return result;
-}
 
-inline int n_choose_k(int n, int k)
-{
-  return factorial(n) / (factorial(k) * factorial(n - k));
-}
+  inline int n_choose_k(int n, int k)
+  {
+    return factorial(n) / (factorial(k) * factorial(n - k));
+  }
 
-};
+}; // namespace math
 
 #endif /* TRLIB_MATH_HPP_ */

@@ -28,40 +28,40 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace cvx
 {
 
-void addWithMask(cv::InputArray _src1, cv::InputArray _src2, cv::OutputArray _dst, cv::InputArray _mask)
-{
-  //CV_Assert(_src1.sameSize(_src2) && _src1.type() == _src2.type());
-  CV_Assert(_src1.sameSize(_mask));
-  cv::Mat mask = _mask.getMat();
-  CV_Assert(mask.type() == CV_8U);
-  cv::Mat dst(_src1.size(), _src1.type());
-  cv::Mat src1 = _src1.getMat(), src2 = _src2.getMat();
+  void addWithMask(cv::InputArray _src1, cv::InputArray _src2, cv::OutputArray _dst, cv::InputArray _mask)
+  {
+    //CV_Assert(_src1.sameSize(_src2) && _src1.type() == _src2.type());
+    CV_Assert(_src1.sameSize(_mask));
+    cv::Mat mask = _mask.getMat();
+    CV_Assert(mask.type() == CV_8U);
+    cv::Mat dst(_src1.size(), _src1.type());
+    cv::Mat src1 = _src1.getMat(), src2 = _src2.getMat();
 
-  cv::Mat mask_neg;
-  cv::add(src1, src2, dst);
-  cv::bitwise_not(mask, mask_neg);
-  src1.copyTo(dst, mask_neg);
+    cv::Mat mask_neg;
+    cv::add(src1, src2, dst);
+    cv::bitwise_not(mask, mask_neg);
+    src1.copyTo(dst, mask_neg);
 
-  dst.copyTo(_dst);
-}
+    dst.copyTo(_dst);
+  }
 
-void multiplywithMask(cv::InputArray _src1, cv::InputArray _src2, cv::OutputArray _dst, cv::InputArray _mask)
-{
-  //CV_Assert(_src1.sameSize(_src2) && _src1.type() == _src2.type());
-  CV_Assert(_src1.sameSize(_mask));
-  cv::Mat mask = _mask.getMat();
-  CV_Assert(mask.type() == CV_8U);
-  cv::Mat dst(_src1.size(), _src1.type());
-  cv::Mat src1 = _src1.getMat(), src2 = _src2.getMat();
+  void multiplywithMask(cv::InputArray _src1, cv::InputArray _src2, cv::OutputArray _dst, cv::InputArray _mask)
+  {
+    //CV_Assert(_src1.sameSize(_src2) && _src1.type() == _src2.type());
+    CV_Assert(_src1.sameSize(_mask));
+    cv::Mat mask = _mask.getMat();
+    CV_Assert(mask.type() == CV_8U);
+    cv::Mat dst(_src1.size(), _src1.type());
+    cv::Mat src1 = _src1.getMat(), src2 = _src2.getMat();
 
-  cv::Mat mask_neg;
-  cv::multiply(src1, src2, dst);
-  cv::bitwise_not(mask, mask_neg);
-  src1.copyTo(dst, mask_neg);
+    cv::Mat mask_neg;
+    cv::multiply(src1, src2, dst);
+    cv::bitwise_not(mask, mask_neg);
+    src1.copyTo(dst, mask_neg);
 
-  dst.copyTo(_dst);
-}
+    dst.copyTo(_dst);
+  }
 
-}
+} // namespace cvx
 
 #endif /* TRLIB_OPENCV_EXTRA_HPP_ */

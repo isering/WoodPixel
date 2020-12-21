@@ -37,14 +37,10 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "Show this help message")
-    ("in,i", po::value<fs::path>(), "Input JSON file")
-    ("out,o", po::value<fs::path>(), "Saliency image output filename")
-    ("scale,s", po::value<double>(), "Output image scale");
+  desc.add_options()("help,h", "Show this help message")("in,i", po::value<fs::path>(), "Input JSON file")("out,o", po::value<fs::path>(), "Saliency image output filename")("scale,s", po::value<double>(), "Output image scale");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
@@ -64,14 +60,14 @@ int main(int argc, char* argv[])
     if (!fs::exists(path_in) || !fs::is_regular_file(path_in))
     {
       std::cerr << "Input JSON file does not exist or is no regular file." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
   }
   else
   {
     std::cerr << "No input JSON file specified." << std::endl
-      << desc << std::endl;
+              << desc << std::endl;
     return -1;
   }
 
@@ -85,7 +81,7 @@ int main(int argc, char* argv[])
     if (fs::exists(path_out) && !fs::is_regular_file(path_out))
     {
       std::cerr << "Output file already exists but is no regular file." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
   }
@@ -97,7 +93,7 @@ int main(int argc, char* argv[])
     if (scale <= 0.0)
     {
       std::cerr << "Output image scale has to be greater than zero." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
   }

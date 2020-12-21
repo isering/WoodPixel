@@ -27,11 +27,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 struct RectanglePatch
 {
-  RectanglePatch(int index, cv::Rect region_source, cv::Rect region_target) :
-    index(index),
-    region_source(region_source),
-    region_target(region_target)
-  {}
+  RectanglePatch(int index, cv::Rect region_source, cv::Rect region_target) : index(index),
+                                                                              region_source(region_source),
+                                                                              region_target(region_target)
+  {
+  }
 
   int index;
   cv::Rect region_source;

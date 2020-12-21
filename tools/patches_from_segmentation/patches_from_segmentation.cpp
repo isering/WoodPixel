@@ -50,7 +50,7 @@ static cv::Vec3b hsv_to_bgr(int hue, int saturation, int value)
   return cv::Vec3b(rgb_mat.data[0], rgb_mat.data[1], rgb_mat.data[2]);
 }
 
-static cv::Mat load_image(const po::variables_map& vm, const std::string& key, int imread_flags=1)
+static cv::Mat load_image(const po::variables_map &vm, const std::string &key, int imread_flags = 1)
 {
   fs::path path_image;
   if (vm.count(key))
@@ -72,13 +72,10 @@ static cv::Mat load_image(const po::variables_map& vm, const std::string& key, i
   return cv::imread(path_image.string(), imread_flags);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "Show this help message")
-    ("in,i", po::value<fs::path>(), "Input image")
-    ("out,o", po::value<fs::path>(), "Output JSON file");
+  desc.add_options()("help,h", "Show this help message")("in,i", po::value<fs::path>(), "Input image")("out,o", po::value<fs::path>(), "Output JSON file");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
@@ -106,12 +103,12 @@ int main(int argc, char* argv[])
   else
   {
     std::cerr << "No output path specified." << std::endl
-      << desc << std::endl;
+              << desc << std::endl;
   }
 
   double max_val;
   cv::minMaxLoc(image, 0, &max_val);
-  
+
   const int num_level = static_cast<int>(max_val);
   std::cout << "num_level: " << num_level << std::endl;
 
@@ -123,31 +120,31 @@ int main(int argc, char* argv[])
 
   cv::Mat blob_image(image.size(), CV_8UC3);
 
-  for (const Blob& blob : blobs)
+  for (const Blob &blob : blobs)
   {
     cv::Vec3b color = hsv_to_bgr(distribution(generator), 128, 240);
-    for (const cv::Point& p : blob.points())
+    for (const cv::Point &p : blob.points())
     {
       blob_image.at<cv::Vec3b>(p) = color;
     }
   }
 
   std::vector<PatchRegion> patches;
-  for (const Blob& blob : blobs)
+  for (const Blob &blob : blobs)
   {
     patches.emplace_back(1, blob.points());
   }
 
   pt::ptree root;
   pt::ptree tree_patches;
-  for (const PatchRegion& patch : patches)
+  for (const PatchRegion &patch : patches)
   {
     tree_patches.push_back(std::make_pair("", patch.save(path_out_parent, "patches")));
   }
   root.add_child("patches", tree_patches);
   pt::write_json(path_out.string(), root);
 
-  cv::imshow("Image", image *(255.0/max_val));
+  cv::imshow("Image", image * (255.0 / max_val));
   cv::imshow("Blob Image", blob_image);
   cv::waitKey();
 

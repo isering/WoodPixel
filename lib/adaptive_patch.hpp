@@ -29,15 +29,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 struct AdaptivePatch
 {
-  AdaptivePatch(const std::vector<Patch>& patches, int level) :
-    patches(patches),
-    level(level)
-  {}
+  AdaptivePatch(const std::vector<Patch> &patches, int level) : patches(patches),
+                                                                level(level)
+  {
+  }
 
   double cost() const
   {
     double cost_val = 0.0;
-    for (const Patch& p : patches)
+    for (const Patch &p : patches)
     {
       cost_val += p.cost();
     }
@@ -47,7 +47,7 @@ struct AdaptivePatch
   int num_pixels() const
   {
     int n = 0;
-    for (const Patch& p : patches)
+    for (const Patch &p : patches)
     {
       n += p.size().area();
     }

@@ -49,7 +49,6 @@ const int curve_degree = 3;
 const double table_size_x_mm = 420.0;
 const double table_size_y_mm = 297.0;
 
-
 static cv::Vec3b hsv_to_bgr(int hue, int saturation, int value)
 {
   cv::Mat hsv_mat(1, 1, CV_8UC3, cv::Vec3b(hue, saturation, value));
@@ -58,21 +57,21 @@ static cv::Vec3b hsv_to_bgr(int hue, int saturation, int value)
   return cv::Vec3b(rgb_mat.data[0], rgb_mat.data[1], rgb_mat.data[2]);
 }
 
-static cv::Mat draw_cut_matrix(const std::vector<MergePatch>& patches, cv::Size merged_size, int subpatch_size, double factor = 1.0)
+static cv::Mat draw_cut_matrix(const std::vector<MergePatch> &patches, cv::Size merged_size, int subpatch_size, double factor = 1.0)
 {
   cv::Mat image = cv::Mat::zeros(merged_size, CV_8UC3);
 
   std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(0, 180);
 
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     cv::Vec3b color = hsv_to_bgr(distribution(generator), 128, 240);
     cv::Mat image_patch = image(cv::Rect(patch.region_subpatch.x * subpatch_size, patch.region_subpatch.y * subpatch_size, patch.region_subpatch.width * subpatch_size, patch.region_subpatch.height * subpatch_size));
     for (int y = 0; y < patch.active_pixel.rows; ++y)
     {
-      const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(patch.active_pixel.ptr(y));
-      cv::Vec3b* ptr_image = reinterpret_cast<cv::Vec3b*>(image_patch.ptr(y));
+      const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(patch.active_pixel.ptr(y));
+      cv::Vec3b *ptr_image = reinterpret_cast<cv::Vec3b *>(image_patch.ptr(y));
       for (int x = 0; x < patch.active_pixel.cols; ++x)
       {
         if (ptr_active[x])
@@ -96,7 +95,7 @@ static cv::Mat draw_cut_matrix(const std::vector<MergePatch>& patches, cv::Size 
   return image;
 }
 
-static std::vector<double> smooth_cut_coordinates(const std::vector<int>& coordinates_int)
+static std::vector<double> smooth_cut_coordinates(const std::vector<int> &coordinates_int)
 {
   std::vector<double> coordinates;
   coordinates.reserve(coordinates_int.size());
@@ -126,7 +125,7 @@ static std::vector<double> smooth_cut_coordinates(const std::vector<int>& coordi
   return coordinates;
 }
 
-static int get_position_code_x(int x, const MergePatch& patch)
+static int get_position_code_x(int x, const MergePatch &patch)
 {
   if (x == patch.region_subpatch.x)
   {
@@ -139,7 +138,7 @@ static int get_position_code_x(int x, const MergePatch& patch)
   return 4;
 }
 
-static int get_position_code_y(int y, const MergePatch& patch)
+static int get_position_code_y(int y, const MergePatch &patch)
 {
   if (y == patch.region_subpatch.y)
   {
@@ -152,17 +151,17 @@ static int get_position_code_y(int y, const MergePatch& patch)
   return 4;
 }
 
-static bool is_y_cut(int x, const std::vector<MergePatch>& patches, const std::vector<int> index_vec)
+static bool is_y_cut(int x, const std::vector<MergePatch> &patches, const std::vector<int> index_vec)
 {
   std::vector<int> position_codes_x(index_vec.size());
-  std::transform(index_vec.begin(), index_vec.end(), position_codes_x.begin(), [x, &patches](int i) {return get_position_code_x(x, patches[i]); });
+  std::transform(index_vec.begin(), index_vec.end(), position_codes_x.begin(), [x, &patches](int i) { return get_position_code_x(x, patches[i]); });
   return std::accumulate(position_codes_x.begin(), position_codes_x.end(), 0) == 7;
 }
 
-static bool is_x_cut(int y, const std::vector<MergePatch>& patches, const std::vector<int> index_vec)
+static bool is_x_cut(int y, const std::vector<MergePatch> &patches, const std::vector<int> index_vec)
 {
   std::vector<int> position_codes_y(index_vec.size());
-  std::transform(index_vec.begin(), index_vec.end(), position_codes_y.begin(), [y, &patches](int i) {return get_position_code_y(y, patches[i]); });
+  std::transform(index_vec.begin(), index_vec.end(), position_codes_y.begin(), [y, &patches](int i) { return get_position_code_y(y, patches[i]); });
   return std::accumulate(position_codes_y.begin(), position_codes_y.end(), 0) == 7;
 }
 
@@ -179,26 +178,26 @@ static int get_start(cv::Mat active_pixel)
   return index;
 }
 
-static bool is_valid_y_cut(const std::vector<MergePatch>& patches, const mat<std::vector<int>>& subpatch_index_mat, cv::Mat is_finished_mat, int y, int x)
+static bool is_valid_y_cut(const std::vector<MergePatch> &patches, const mat<std::vector<int>> &subpatch_index_mat, cv::Mat is_finished_mat, int y, int x)
 {
-  const std::vector<int>& index_vec = subpatch_index_mat(y, x);
+  const std::vector<int> &index_vec = subpatch_index_mat(y, x);
   const int num_patches = static_cast<int>(index_vec.size());
   return (
-    x >= 0 &&
-    x < subpatch_index_mat.width() &&
-    !is_finished_mat.at<uint8_t>(y, x) &&
-    (num_patches == 2 || (num_patches == 3 && is_y_cut(x, patches, index_vec))));
+      x >= 0 &&
+      x < subpatch_index_mat.width() &&
+      !is_finished_mat.at<uint8_t>(y, x) &&
+      (num_patches == 2 || (num_patches == 3 && is_y_cut(x, patches, index_vec))));
 }
 
-static bool is_valid_x_cut(const std::vector<MergePatch>& patches, const mat<std::vector<int>>& subpatch_index_mat, cv::Mat is_finished_mat, int y, int x)
+static bool is_valid_x_cut(const std::vector<MergePatch> &patches, const mat<std::vector<int>> &subpatch_index_mat, cv::Mat is_finished_mat, int y, int x)
 {
-  const std::vector<int>& index_vec = subpatch_index_mat(y, x);
+  const std::vector<int> &index_vec = subpatch_index_mat(y, x);
   const int num_patches = static_cast<int>(index_vec.size());
   return (
-    y >= 0 &&
-    y < subpatch_index_mat.height() &&
-    !is_finished_mat.at<uint8_t>(y, x) &&
-    (num_patches == 2 || (num_patches == 3 && is_x_cut(y, patches, index_vec))));
+      y >= 0 &&
+      y < subpatch_index_mat.height() &&
+      !is_finished_mat.at<uint8_t>(y, x) &&
+      (num_patches == 2 || (num_patches == 3 && is_x_cut(y, patches, index_vec))));
 }
 
 typedef struct
@@ -213,7 +212,7 @@ typedef struct
   boost::filesystem::path base_path;
 } MergeResult;
 
-MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg, double w_slope)
+MergeResult compute_patches(const fs::path &path_in, int target_id, double w_reg, double w_slope)
 {
   pt::ptree root;
   pt::read_json(path_in.string(), root);
@@ -240,7 +239,7 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
   */
   int x_min = std::numeric_limits<int>::max();
   int y_min = std::numeric_limits<int>::max();
-  for (const Patch& p : patches)
+  for (const Patch &p : patches)
   {
     x_min = std::min(x_min, p.anchor_target().x);
     y_min = std::min(y_min, p.anchor_target().y);
@@ -258,14 +257,14 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
         /*
         * Decide whether this is a vertical or horizontal cut.
         */
-        const std::vector<int>& index_vec = subpatch_index_mat(y, x);
+        const std::vector<int> &index_vec = subpatch_index_mat(y, x);
 
         std::vector<int> position_codes_x(index_vec.size());
-        std::transform(index_vec.begin(), index_vec.end(), position_codes_x.begin(), [x, &merge_patches](int i) {return get_position_code_x(x, merge_patches[i]); });
+        std::transform(index_vec.begin(), index_vec.end(), position_codes_x.begin(), [x, &merge_patches](int i) { return get_position_code_x(x, merge_patches[i]); });
         const int code_sum_x = std::accumulate(position_codes_x.begin(), position_codes_x.end(), 0);
 
         std::vector<int> position_codes_y(index_vec.size());
-        std::transform(index_vec.begin(), index_vec.end(), position_codes_y.begin(), [y, &merge_patches](int i) {return get_position_code_y(y, merge_patches[i]); });
+        std::transform(index_vec.begin(), index_vec.end(), position_codes_y.begin(), [y, &merge_patches](int i) { return get_position_code_y(y, merge_patches[i]); });
         const int code_sum_y = std::accumulate(position_codes_y.begin(), position_codes_y.end(), 0);
 
         if ((code_sum_x == 7 && code_sum_y == 7) || (code_sum_x != 7 && code_sum_y != 7))
@@ -406,9 +405,9 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
   {
     for (int x = 0; x < subpatch_index_mat.width(); ++x)
     {
-      const std::vector<int>& index_vec = subpatch_index_mat(y, x);
+      const std::vector<int> &index_vec = subpatch_index_mat(y, x);
       std::vector<cv::Mat> active_mat_vec(index_vec.size());
-      std::transform(index_vec.begin(), index_vec.end(), active_mat_vec.begin(), [&merge_patches, x, y](int i) {return merge_patches[i].get_active_pixel(y, x); });
+      std::transform(index_vec.begin(), index_vec.end(), active_mat_vec.begin(), [&merge_patches, x, y](int i) { return merge_patches[i].get_active_pixel(y, x); });
       for (int i = 0; i < static_cast<int>(active_mat_vec.size()); ++i)
       {
         for (int y_pix = 0; y_pix < subpatch_size; ++y_pix)
@@ -417,15 +416,14 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
           {
             if (active_mat_vec[i].at<uint8_t>(y_pix, x_pix) == 1)
             {
-              const bool is_connected = (
-                (x_pix == 0 && x > merge_patches[i].region_subpatch.x) ||
-                (x_pix == subpatch_size - 1 && x < merge_patches[i].region_subpatch.x + merge_patches[i].region_subpatch.width - 1) ||
-                (y_pix == 0 && y > merge_patches[i].region_subpatch.y) ||
-                (y_pix == subpatch_size - 1 && y < merge_patches[i].region_subpatch.y + merge_patches[i].region_subpatch.height - 1) ||
-                (x_pix > 0 && active_mat_vec[i].at<uint8_t>(y_pix, x_pix - 1) == 1) ||
-                (x_pix < subpatch_size - 1 && active_mat_vec[i].at<uint8_t>(y_pix, x_pix + 1) == 1) ||
-                (y_pix > 0 && active_mat_vec[i].at<uint8_t>(y_pix - 1, x_pix) == 1) ||
-                (y_pix < subpatch_size - 1 && active_mat_vec[i].at<uint8_t>(y_pix + 1, x_pix) == 1));
+              const bool is_connected = ((x_pix == 0 && x > merge_patches[i].region_subpatch.x) ||
+                                         (x_pix == subpatch_size - 1 && x < merge_patches[i].region_subpatch.x + merge_patches[i].region_subpatch.width - 1) ||
+                                         (y_pix == 0 && y > merge_patches[i].region_subpatch.y) ||
+                                         (y_pix == subpatch_size - 1 && y < merge_patches[i].region_subpatch.y + merge_patches[i].region_subpatch.height - 1) ||
+                                         (x_pix > 0 && active_mat_vec[i].at<uint8_t>(y_pix, x_pix - 1) == 1) ||
+                                         (x_pix < subpatch_size - 1 && active_mat_vec[i].at<uint8_t>(y_pix, x_pix + 1) == 1) ||
+                                         (y_pix > 0 && active_mat_vec[i].at<uint8_t>(y_pix - 1, x_pix) == 1) ||
+                                         (y_pix < subpatch_size - 1 && active_mat_vec[i].at<uint8_t>(y_pix + 1, x_pix) == 1));
               if (!is_connected)
               {
                 active_mat_vec[i].at<uint8_t>(y_pix, x_pix) = 0;
@@ -456,13 +454,13 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
   /*
   * Remove temporary patches
   */
-  merge_patches.erase(std::remove_if(merge_patches.begin(), merge_patches.end(), [](const MergePatch& p) {return p.pos_patch.x < 0; }), merge_patches.end());
+  merge_patches.erase(std::remove_if(merge_patches.begin(), merge_patches.end(), [](const MergePatch &p) { return p.pos_patch.x < 0; }), merge_patches.end());
   for (int y = 0; y < subpatch_index_mat.height(); ++y)
   {
     for (int x = 0; x < subpatch_index_mat.width(); ++x)
     {
-      std::vector<int>& indices = subpatch_index_mat(y, x);
-      indices.erase(std::remove_if(indices.begin(), indices.end(), [&merge_patches](int i) {return i >= merge_patches.size(); }), indices.end());
+      std::vector<int> &indices = subpatch_index_mat(y, x);
+      indices.erase(std::remove_if(indices.begin(), indices.end(), [&merge_patches](int i) { return i >= merge_patches.size(); }), indices.end());
     }
   }
 
@@ -500,7 +498,7 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
             const int position_code = get_position_code_y(y, merge_patches[j]);
             if (subpatch_index_mat(y, x + i).size() != 3 || position_code == 1 || position_code == 2)
             {
-              merge_patches[j].add_curve_horiz(y, x + i, curves[i] + cv::Point2d(x*subpatch_size+x_min, y*subpatch_size + y_min));
+              merge_patches[j].add_curve_horiz(y, x + i, curves[i] + cv::Point2d(x * subpatch_size + x_min, y * subpatch_size + y_min));
             }
           }
         }
@@ -543,7 +541,7 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
             const int position_code = get_position_code_x(x, merge_patches[j]);
             if (subpatch_index_mat(y + i, x).size() != 3 || position_code == 1 || position_code == 2)
             {
-              merge_patches[j].add_curve_vert(y + i, x, curves[i] + cv::Point2d(x*subpatch_size+x_min, y*subpatch_size+y_min));
+              merge_patches[j].add_curve_vert(y + i, x, curves[i] + cv::Point2d(x * subpatch_size + x_min, y * subpatch_size + y_min));
             }
           }
         }
@@ -551,7 +549,7 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
     }
   }
 
- /*
+  /*
   * Add image edge curves.
   */
   for (int y = 0; y < subpatch_index_mat.height(); ++y)
@@ -566,8 +564,8 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
       {
         for (int i : subpatch_index_mat(y, x))
         {
-          cv::Point2f p_start(static_cast<float>(x_min + (x-0.1f)*subpatch_size), static_cast<float>(y_min + y*subpatch_size));
-          cv::Point2f p_end(static_cast<float>(x_min + (x-0.1f)*subpatch_size), static_cast<float>(y_min + (y + 1)*subpatch_size));
+          cv::Point2f p_start(static_cast<float>(x_min + (x - 0.1f) * subpatch_size), static_cast<float>(y_min + y * subpatch_size));
+          cv::Point2f p_end(static_cast<float>(x_min + (x - 0.1f) * subpatch_size), static_cast<float>(y_min + (y + 1) * subpatch_size));
           merge_patches[i].add_curve_vert(y, x, BezierCurve(p_start, p_end, 3));
         }
       }
@@ -575,8 +573,8 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
       {
         for (int i : subpatch_index_mat(y, x))
         {
-          cv::Point2f p_start(static_cast<float>(x_min + (x + 1.1f)*subpatch_size), static_cast<float>(y_min + y*subpatch_size));
-          cv::Point2f p_end(static_cast<float>(x_min + (x + 1.1f)*subpatch_size), static_cast<float>(y_min + (y + 1)*subpatch_size));
+          cv::Point2f p_start(static_cast<float>(x_min + (x + 1.1f) * subpatch_size), static_cast<float>(y_min + y * subpatch_size));
+          cv::Point2f p_end(static_cast<float>(x_min + (x + 1.1f) * subpatch_size), static_cast<float>(y_min + (y + 1) * subpatch_size));
           merge_patches[i].add_curve_vert(y, x, BezierCurve(p_start, p_end, 3));
         }
       }
@@ -584,8 +582,8 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
       {
         for (int i : subpatch_index_mat(y, x))
         {
-          cv::Point2f p_start(static_cast<float>(x_min + x*subpatch_size), static_cast<float>(y_min + (y-0.1f)*subpatch_size));
-          cv::Point2f p_end(static_cast<float>(x_min + (x + 1)*subpatch_size), static_cast<float>(y_min + (y-0.1f)*subpatch_size));
+          cv::Point2f p_start(static_cast<float>(x_min + x * subpatch_size), static_cast<float>(y_min + (y - 0.1f) * subpatch_size));
+          cv::Point2f p_end(static_cast<float>(x_min + (x + 1) * subpatch_size), static_cast<float>(y_min + (y - 0.1f) * subpatch_size));
           merge_patches[i].add_curve_horiz(y, x, BezierCurve(p_start, p_end, 3));
         }
       }
@@ -593,8 +591,8 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
       {
         for (int i : subpatch_index_mat(y, x))
         {
-          cv::Point2f p_start(static_cast<float>(x_min + x*subpatch_size), static_cast<float>(y_min + (y + 1.1f)*subpatch_size));
-          cv::Point2f p_end(static_cast<float>(x_min + (x + 1)*subpatch_size), static_cast<float>(y_min + (y + 1.1f)*subpatch_size));
+          cv::Point2f p_start(static_cast<float>(x_min + x * subpatch_size), static_cast<float>(y_min + (y + 1.1f) * subpatch_size));
+          cv::Point2f p_end(static_cast<float>(x_min + (x + 1) * subpatch_size), static_cast<float>(y_min + (y + 1.1f) * subpatch_size));
           merge_patches[i].add_curve_horiz(y, x, BezierCurve(p_start, p_end, 3));
         }
       }
@@ -610,7 +608,7 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
   * Trim Bezier curves.
   */
   std::vector<MergePatch> merge_patches_trimmed = merge_patches;
-  for (MergePatch& p : merge_patches_trimmed)
+  for (MergePatch &p : merge_patches_trimmed)
   {
     p.trim_bezier_curves();
   }
@@ -618,18 +616,10 @@ MergeResult compute_patches(const fs::path& path_in, int target_id, double w_reg
   return {merge_patches, merge_patches_trimmed, textures_source, texture_target, merged_size, subpatch_size, x_min, y_min, base_path};
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "Show this help message")
-    ("in,i", po::value<std::vector<fs::path>>(), "Input JSON file")
-    ("out,o", po::value<fs::path>(), "Output directory")
-    ("scale,s", po::value<double>(), "Output scale")
-    ("target_id,t", po::value<int>(), "Target image ID")
-    ("w_reg", po::value<double>(), "Dynamic programming regularization penalty")
-    ("w_slope", po::value<double>(), "Dynamic programming slope penalty")
-    ("render_only", "Don't output cut patterns");
+  desc.add_options()("help,h", "Show this help message")("in,i", po::value<std::vector<fs::path>>(), "Input JSON file")("out,o", po::value<fs::path>(), "Output directory")("scale,s", po::value<double>(), "Output scale")("target_id,t", po::value<int>(), "Target image ID")("w_reg", po::value<double>(), "Dynamic programming regularization penalty")("w_slope", po::value<double>(), "Dynamic programming slope penalty")("render_only", "Don't output cut patterns");
 
   std::vector<fs::path> paths_in;
   fs::path path_out;
@@ -712,7 +702,7 @@ int main(int argc, char* argv[])
 
   try
   {
-    po::variables_map vm;    
+    po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
     po::notify(vm);
 
@@ -725,7 +715,7 @@ int main(int argc, char* argv[])
     if (vm.count("in"))
     {
       paths_in = vm["in"].as<std::vector<fs::path>>();
-      for (const fs::path& p : paths_in)
+      for (const fs::path &p : paths_in)
       {
         if (!fs::exists(p) || !fs::is_regular_file(p))
         {
@@ -737,10 +727,10 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No input JSON file specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
-    
+
     if (vm.count("out"))
     {
       path_out = vm["out"].as<fs::path>();
@@ -751,32 +741,32 @@ int main(int argc, char* argv[])
       if (!fs::exists(path_out) || !fs::is_directory(path_out))
       {
         std::cerr << "Unable to create output directory." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
     }
-    
+
     if (vm.count("scale"))
     {
       scale_output = vm["scale"].as<double>();
       if (scale_output <= 0.0)
       {
         std::cout << "Output scale must be greater zero." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
     }
-    
+
     if (vm.count("target_id"))
     {
       target_id = vm["target_id"].as<int>();
     }
-    
+
     if (vm.count("w_reg"))
     {
       w_reg = vm["w_reg"].as<double>();
     }
-    
+
     if (vm.count("w_slope"))
     {
       w_slope = vm["w_slope"].as<double>();
@@ -787,10 +777,10 @@ int main(int argc, char* argv[])
       render_only = true;
     }
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl
-      << desc << std::endl;
+              << desc << std::endl;
     return -1;
   }
 
@@ -806,14 +796,14 @@ int main(int argc, char* argv[])
     }
 
     std::vector<cv::Mat> images;
-    for (const Texture& t : merge_results.front().textures_source)
+    for (const Texture &t : merge_results.front().textures_source)
     {
       cv::Mat image = t.texture.clone();
       image.convertTo(image, CV_8UC3, 1.0 / 255.0);
       images.push_back(image);
     }
 
-    for (const MergeResult& r : merge_results)
+    for (const MergeResult &r : merge_results)
     {
       MergePatch::draw_bezier_curves_source(images, r.merge_patches_trimmed, 1.0);
     }
@@ -896,7 +886,7 @@ int main(int argc, char* argv[])
 
     for (size_t i = 0; i < merge_results.size(); ++i)
     {
-      const MergeResult& r = merge_results[i];
+      const MergeResult &r = merge_results[i];
 
       cv::Mat cut_image = draw_cut_matrix(r.merge_patches_trimmed, r.merged_size, r.subpatch_size, scale_output);
       cv::imwrite((path_out / (boost::format("cut_image_%04d.png") % i).str()).string(), cut_image);
@@ -928,7 +918,7 @@ int main(int argc, char* argv[])
       cv::imwrite((path_out / (boost::format("image_baseline_%04d.jpg") % i).str()).string(), image_baseline);
     }
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     return -1;

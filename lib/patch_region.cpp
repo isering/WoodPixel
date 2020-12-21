@@ -32,7 +32,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const std::string output_characters = "0123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-
 void PatchRegion::init_curves(cv::Rect bounding_box)
 {
   std::vector<cv::Rect> bounding_box_vec;
@@ -85,7 +84,7 @@ void PatchRegion::update_bounding_box(cv::Rect bounding_box)
   for (auto iter = curves.begin(); iter != curves.end(); ++iter)
   {
     std::vector<CurveDrawPoint> curve_draw_points = iter->get().get_draw_points();
-    for (const CurveDrawPoint& p : curve_draw_points)
+    for (const CurveDrawPoint &p : curve_draw_points)
     {
       draw_points.push_back(p.p);
     }
@@ -94,7 +93,7 @@ void PatchRegion::update_bounding_box(cv::Rect bounding_box)
 
   m_mask = cv::Mat::zeros(m_bounding_box.size(), CV_8UC1);
 
-  for (const BezierCurve& c : curves)
+  for (const BezierCurve &c : curves)
   {
     (c - m_bounding_box.tl()).draw<unsigned char>(m_mask, 255);
   }
@@ -109,7 +108,7 @@ void PatchRegion::init_rect()
   m_rectangular = true;
 }
 
-void PatchRegion::set_sub_regions(const BezierCurve& separating_curve)
+void PatchRegion::set_sub_regions(const BezierCurve &separating_curve)
 {
   if (separating_curve.degree() != 3)
   {
@@ -133,33 +132,32 @@ void PatchRegion::set_sub_regions(const BezierCurve& separating_curve)
   {
     m_sub_regions.emplace_back(m_target_index, m_coordinate, m_curves_top, no_curves, m_curves_left, no_curves, curves_diag);
     m_sub_regions.emplace_back(m_target_index, m_coordinate, no_curves, m_curves_bot, no_curves, m_curves_right, curves_diag);
-
   }
 }
 
 cv::Mat PatchRegion::draw(double scale)
 {
-  cv::Mat image = cv::Mat::zeros(static_cast<int>(m_mask.rows*scale), static_cast<int>(m_mask.cols*scale), CV_8UC3);
+  cv::Mat image = cv::Mat::zeros(static_cast<int>(m_mask.rows * scale), static_cast<int>(m_mask.cols * scale), CV_8UC3);
 
-  for (const BezierCurve& c : m_curves_top)
+  for (const BezierCurve &c : m_curves_top)
   {
-    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale*anchor());
+    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale * anchor());
   }
-  for (const BezierCurve& c : m_curves_bot)
+  for (const BezierCurve &c : m_curves_bot)
   {
-    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale*anchor());
+    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale * anchor());
   }
-  for (const BezierCurve& c : m_curves_left)
+  for (const BezierCurve &c : m_curves_left)
   {
-    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale*anchor());
+    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale * anchor());
   }
-  for (const BezierCurve& c : m_curves_right)
+  for (const BezierCurve &c : m_curves_right)
   {
-    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale*anchor());
+    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale * anchor());
   }
-  for (const BezierCurve& c : m_curves_diag)
+  for (const BezierCurve &c : m_curves_diag)
   {
-    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale*anchor());
+    c.scaled(scale).draw<cv::Vec3b>(image, cv::Vec3b(255, 255, 0), scale * anchor());
   }
 
   return image;
@@ -173,7 +171,6 @@ bool PatchRegion::diag_origin_tl() const
   }
 
   cv::Point2d p_tl, p_bl;
-
 
   bool has_tl = true;
   if (!m_curves_top.empty() && !m_curves_top[0].is_empty_curve())
@@ -196,7 +193,7 @@ bool PatchRegion::diag_origin_tl() const
   }
   else if (!m_curves_left.empty() && !m_curves_left.back().is_empty_curve())
   {
-    p_bl = m_curves_left.back().control_point(m_curves_left.back().num_control_points()-1);
+    p_bl = m_curves_left.back().control_point(m_curves_left.back().num_control_points() - 1);
   }
   else
   {
@@ -254,7 +251,7 @@ bool PatchRegion::diag_origin_bl() const
   }
   else if (!m_curves_left.empty() && !m_curves_left.back().is_empty_curve())
   {
-    p_bl = m_curves_left.back().control_point(m_curves_left.back().num_control_points()-1);
+    p_bl = m_curves_left.back().control_point(m_curves_left.back().num_control_points() - 1);
   }
   else
   {
@@ -282,7 +279,7 @@ bool PatchRegion::diag_origin_bl() const
   }
 }
 
-static double get_relative_angle(const cv::Point2d& p, const cv::Point2d& cp_1, const cv::Point2d& cp_2)
+static double get_relative_angle(const cv::Point2d &p, const cv::Point2d &cp_1, const cv::Point2d &cp_2)
 {
   const double pi = boost::math::constants::pi<double>();
 
@@ -307,7 +304,7 @@ static double get_relative_angle(const cv::Point2d& p, const cv::Point2d& cp_1, 
   return rel_a;
 }
 
-void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br, PatchRegion& patch_bl, PatchRegion& patch_tl)
+void PatchRegion::fix_fabricability(PatchRegion &patch_tr, PatchRegion &patch_br, PatchRegion &patch_bl, PatchRegion &patch_tl)
 {
   std::vector<std::reference_wrapper<cv::Point2d>> control_points;
 
@@ -352,7 +349,7 @@ void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br
 
     const double rel_angle = get_relative_angle(p, cp_iter->get(), cp_iter_2->get());
 
-    if (rel_angle < 0.0 && rel_angle > -0.5*boost::math::constants::pi<double>())
+    if (rel_angle < 0.0 && rel_angle > -0.5 * boost::math::constants::pi<double>())
     {
       std::swap(cp_iter->get(), cp_iter_2->get());
       cp_iter = control_points.begin();
@@ -364,7 +361,7 @@ void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br
   }
 
   patch_br.m_curves_top[0].control_point(1) = patch_tr.m_curves_bot[0].control_point(1);
-  for (PatchRegion& sub_patch : patch_br.sub_regions())
+  for (PatchRegion &sub_patch : patch_br.sub_regions())
   {
     if (!sub_patch.m_curves_top.empty())
     {
@@ -377,7 +374,7 @@ void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br
   }
 
   patch_bl.m_curves_right[0].control_point(1) = patch_br.m_curves_left[0].control_point(1);
-  for (PatchRegion& sub_patch : patch_bl.sub_regions())
+  for (PatchRegion &sub_patch : patch_bl.sub_regions())
   {
     if (!sub_patch.m_curves_right.empty())
     {
@@ -390,7 +387,7 @@ void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br
   }
 
   patch_tl.m_curves_bot.back().control_point(2) = patch_bl.m_curves_top.back().control_point(2);
-  for (PatchRegion& sub_patch : patch_tl.sub_regions())
+  for (PatchRegion &sub_patch : patch_tl.sub_regions())
   {
     if (!sub_patch.m_curves_bot.empty())
     {
@@ -403,7 +400,7 @@ void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br
   }
 
   patch_tr.m_curves_left.back().control_point(2) = patch_tl.m_curves_right.back().control_point(2);
-  for (PatchRegion& sub_patch : patch_tr.sub_regions())
+  for (PatchRegion &sub_patch : patch_tr.sub_regions())
   {
     if (!sub_patch.m_curves_left.empty())
     {
@@ -451,42 +448,42 @@ void PatchRegion::fix_fabricability(PatchRegion& patch_tr, PatchRegion& patch_br
 std::vector<cv::Point> PatchRegion::get_draw_points() const
 {
   std::vector<cv::Point> points;
-  for (const BezierCurve& curve : m_curves_top)
+  for (const BezierCurve &curve : m_curves_top)
   {
     const std::vector<CurveDrawPoint> curve_points = curve.get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    for (const CurveDrawPoint &c : curve_points)
     {
       points.push_back(c.p);
     }
   }
-  for (const BezierCurve& curve : m_curves_bot)
+  for (const BezierCurve &curve : m_curves_bot)
   {
     const std::vector<CurveDrawPoint> curve_points = curve.get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    for (const CurveDrawPoint &c : curve_points)
     {
       points.push_back(c.p);
     }
   }
-  for (const BezierCurve& curve : m_curves_left)
+  for (const BezierCurve &curve : m_curves_left)
   {
     const std::vector<CurveDrawPoint> curve_points = curve.get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    for (const CurveDrawPoint &c : curve_points)
     {
       points.push_back(c.p);
     }
   }
-  for (const BezierCurve& curve : m_curves_right)
+  for (const BezierCurve &curve : m_curves_right)
   {
     const std::vector<CurveDrawPoint> curve_points = curve.get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    for (const CurveDrawPoint &c : curve_points)
     {
       points.push_back(c.p);
     }
   }
-  for (const BezierCurve& curve : m_curves_diag)
+  for (const BezierCurve &curve : m_curves_diag)
   {
     const std::vector<CurveDrawPoint> curve_points = curve.get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    for (const CurveDrawPoint &c : curve_points)
     {
       points.push_back(c.p);
     }
@@ -509,7 +506,7 @@ PatchRegion PatchRegion::scaled(double scale) const
 
 void PatchRegion::scale(double scale)
 {
-  for (PatchRegion& p : m_sub_regions)
+  for (PatchRegion &p : m_sub_regions)
   {
     p.scale(scale);
   }
@@ -545,7 +542,7 @@ cv::Mat PatchRegion::mask(cv::Rect bounding_box) const
     cv::Rect rect_target(bbox_union.tl() - bounding_box.tl(), bbox_union.size());
     mask_out(rect_target).setTo(m_mask(rect_source));
   }
-  
+
   return mask_out;
 }
 
@@ -588,25 +585,23 @@ bool PatchRegion::valid() const
   return false;
 }
 
-PatchRegion::PatchRegion(int target_index, const std::vector<cv::Point>& points) :
-  m_target_index(target_index),
-  m_coordinate(0, 0)
+PatchRegion::PatchRegion(int target_index, const std::vector<cv::Point> &points) : m_target_index(target_index),
+                                                                                   m_coordinate(0, 0)
 {
   m_bounding_box = cv::boundingRect(points);
   m_tl = m_bounding_box.tl();
   m_mask = cv::Mat::zeros(m_bounding_box.size(), CV_8UC1);
 
-  for (const cv::Point& p : points)
+  for (const cv::Point &p : points)
   {
-    m_mask.at<unsigned char>(p-m_bounding_box.tl()) = 255;
+    m_mask.at<unsigned char>(p - m_bounding_box.tl()) = 255;
   }
 
   m_rectangular = cv::countNonZero(m_mask) == m_mask.size().area() ? true : false;
 }
 
-PatchRegion::PatchRegion(int target_index, const cv::Point& coordinate, const BezierCurve& curve_top, const BezierCurve& curve_bot, const BezierCurve& curve_left, const BezierCurve& curve_right, const BezierCurve& curve_diag, cv::Rect bounding_box) :
-  m_target_index(target_index),
-  m_coordinate(coordinate)
+PatchRegion::PatchRegion(int target_index, const cv::Point &coordinate, const BezierCurve &curve_top, const BezierCurve &curve_bot, const BezierCurve &curve_left, const BezierCurve &curve_right, const BezierCurve &curve_diag, cv::Rect bounding_box) : m_target_index(target_index),
+                                                                                                                                                                                                                                                           m_coordinate(coordinate)
 {
   if (!curve_top.is_empty_curve())
   {
@@ -636,22 +631,20 @@ PatchRegion::PatchRegion(int target_index, const cv::Point& coordinate, const Be
   init_curves(bounding_box);
 }
 
-PatchRegion::PatchRegion(int target_index, const cv::Point& coordinate, const std::vector<BezierCurve>& curves_top, const std::vector<BezierCurve>& curves_bot, const std::vector<BezierCurve>& curves_left, const std::vector<BezierCurve>& curves_right, const std::vector<BezierCurve>& curves_diag, cv::Rect bounding_box) :
-  m_target_index(target_index),
-  m_coordinate(coordinate),
-  m_curves_top(curves_top),
-  m_curves_bot(curves_bot),
-  m_curves_left(curves_left),
-  m_curves_right(curves_right),
-  m_curves_diag(curves_diag)
+PatchRegion::PatchRegion(int target_index, const cv::Point &coordinate, const std::vector<BezierCurve> &curves_top, const std::vector<BezierCurve> &curves_bot, const std::vector<BezierCurve> &curves_left, const std::vector<BezierCurve> &curves_right, const std::vector<BezierCurve> &curves_diag, cv::Rect bounding_box) : m_target_index(target_index),
+                                                                                                                                                                                                                                                                                                                                 m_coordinate(coordinate),
+                                                                                                                                                                                                                                                                                                                                 m_curves_top(curves_top),
+                                                                                                                                                                                                                                                                                                                                 m_curves_bot(curves_bot),
+                                                                                                                                                                                                                                                                                                                                 m_curves_left(curves_left),
+                                                                                                                                                                                                                                                                                                                                 m_curves_right(curves_right),
+                                                                                                                                                                                                                                                                                                                                 m_curves_diag(curves_diag)
 {
   init_curves(bounding_box);
 }
 
-PatchRegion::PatchRegion(int target_index, const cv::Point& coordinate, const cv::Rect& bounding_box) :
-  m_target_index(target_index),
-  m_coordinate(coordinate),
-  m_bounding_box(bounding_box)
+PatchRegion::PatchRegion(int target_index, const cv::Point &coordinate, const cv::Rect &bounding_box) : m_target_index(target_index),
+                                                                                                        m_coordinate(coordinate),
+                                                                                                        m_bounding_box(bounding_box)
 {
   init_rect();
 }
@@ -682,7 +675,7 @@ std::string PatchRegion::get_short_id_string() const
   return id_string;
 }
 
-boost::property_tree::ptree PatchRegion::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree PatchRegion::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize(tree, "curves_top", m_curves_top, base_path, path);
@@ -699,7 +692,7 @@ boost::property_tree::ptree PatchRegion::save(const boost::filesystem::path& bas
   return tree;
 }
 
-void PatchRegion::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void PatchRegion::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize(tree, "curves_top", m_curves_top, base_path);
   deserialize(tree, "curves_bot", m_curves_bot, base_path);

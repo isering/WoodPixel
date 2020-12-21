@@ -38,17 +38,13 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   try
   {
 
     po::options_description desc("Allowed options");
-    desc.add_options()
-      ("help,h", "Show this help message")
-      ("in,i", po::value<fs::path>(), "Input JSON file")
-      ("out,o", po::value<fs::path>(), "Output path")
-      ("scale,s", po::value<double>(), "Output image scale");
+    desc.add_options()("help,h", "Show this help message")("in,i", po::value<fs::path>(), "Input JSON file")("out,o", po::value<fs::path>(), "Output path")("scale,s", po::value<double>(), "Output image scale");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
@@ -75,7 +71,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No input JSON file specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
@@ -96,7 +92,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No output path specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
     }
 
     double scale = 1.0;
@@ -106,7 +102,7 @@ int main(int argc, char* argv[])
       if (scale <= 0.0)
       {
         std::cerr << "Output image scale has to be greater than zero." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
     }
@@ -118,7 +114,7 @@ int main(int argc, char* argv[])
     std::vector<Texture> textures = Serializable::deserialize_vec<Texture>(root, "textures_source", path_in.parent_path());
 
     std::vector<Texture> textures_fullres;
-    for (const Texture& t : textures)
+    for (const Texture &t : textures)
     {
       textures_fullres.emplace_back(base_path / t.filename, t.dpi, 1.0);
     }
@@ -126,7 +122,7 @@ int main(int argc, char* argv[])
     cv::Rect bbox = Patch::bounding_box(patches, scale);
     cv::Mat image(bbox.size(), CV_8UC3);
     cv::Mat edge_mask = cv::Mat::zeros(bbox.size(), CV_8UC1);
-    for (const Patch& p : patches)
+    for (const Patch &p : patches)
     {
       p.draw(image, scale, textures_fullres[p.source_index], textures[p.source_index].scale);
       p.draw_edge_mask(edge_mask, scale);
@@ -135,13 +131,13 @@ int main(int argc, char* argv[])
     cv::imwrite((path_out / "image.png").string(), image);
 
     const cv::Vec3b dark_brown(14, 29, 43);
-    edge_mask.convertTo(edge_mask, CV_32FC1, 1.0/255.0);
+    edge_mask.convertTo(edge_mask, CV_32FC1, 1.0 / 255.0);
     cv::GaussianBlur(edge_mask, edge_mask, cv::Size(5, 5), 0.0);
 
     for (int y = 0; y < image.rows; ++y)
     {
-      cv::Vec3b* ptr_image = reinterpret_cast<cv::Vec3b*>(image.ptr(y));
-      const float* ptr_mask = reinterpret_cast<const float*>(edge_mask.ptr(y));
+      cv::Vec3b *ptr_image = reinterpret_cast<cv::Vec3b *>(image.ptr(y));
+      const float *ptr_mask = reinterpret_cast<const float *>(edge_mask.ptr(y));
       for (int x = 0; x < image.cols; ++x)
       {
         ptr_image[x] = ptr_mask[x] * dark_brown + (1.0f - ptr_mask[x]) * ptr_image[x];
@@ -150,7 +146,7 @@ int main(int argc, char* argv[])
 
     cv::imwrite((path_out / "image_boundary.png").string(), image);
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     return -1;

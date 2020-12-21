@@ -1,32 +1,31 @@
 {
-"source_textures": [
-  {"texture": "wood_texture.jpg",
-   "mask": "wood_mask.png",
-   "id": "furnier_01",
-   "scale": 0.7,
-   "dpi": 300.0}
-],
-
-"targets": [
-  {"filename": "target.jpg",
-   "scale": 1.0,
-   "dpi": 300.0,
-   "morphed_grid": "grid/grid.json"}
-],
-
-"num_source_rotations": 15,
-
-"min_patch_size": 48,
-"patch_levels": 1,
-"patch_quality_factor": 1.5,
-
-"weight_intensity": 0.5,
-"weight_sobel": 0.5,
-"weight_gabor": 0.0,
-
-"histogram_matching": 0.5,
-"filter_resolution": 32,
-"num_filter_directions": 4,
-"filter_bandwidth_octaves": 1.0,
-"sort_patches_saliency": true
+  "source_textures": [
+    {
+      "texture": "wood_texture.jpg",
+      "mask": "wood_mask.png",
+      "id": "furnier_01",
+      "scale": 0.7,
+      "dpi": 300.0
+    }
+  ],
+  "targets": [
+    {
+      "filename": "target.jpg",
+      "scale": 1.0,
+      "dpi": 300.0,
+      "morphed_grid": "grid/grid.json"
+    }
+  ],
+  "num_source_rotations": 15,
+  "min_patch_size": 48,
+  "patch_levels": 1,
+  "patch_quality_factor": 1.5,
+  "weight_intensity": 0.5,
+  "weight_sobel": 0.5,
+  "weight_gabor": 0.0,
+  "histogram_matching": 0.5,
+  "filter_resolution": 32,
+  "num_filter_directions": 4,
+  "filter_bandwidth_octaves": 1.0,
+  "sort_patches_saliency": true
 }

@@ -27,7 +27,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <opencv2/opencv.hpp>
 
-cv::Mat draw_bars(const std::vector<cv::Mat>& hist);
-cv::Mat draw_lines(const std::vector<cv::Mat>& hist);
+cv::Mat draw_bars(const std::vector<cv::Mat> &hist);
+cv::Mat draw_lines(const std::vector<cv::Mat> &hist);
 
 #endif /* TRLIB_DRAW_HPP_ */

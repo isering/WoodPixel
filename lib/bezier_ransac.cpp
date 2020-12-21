@@ -32,7 +32,7 @@ static std::random_device random_device;
 * Samples a vector of random points.
 */
 template <typename RNG>
-static std::vector<cv::Point2d> get_random_points(const std::vector<cv::Point2d>& points, int num_points, RNG& generator)
+static std::vector<cv::Point2d> get_random_points(const std::vector<cv::Point2d> &points, int num_points, RNG &generator)
 {
   if (points.size() == num_points)
   {
@@ -44,7 +44,7 @@ static std::vector<cv::Point2d> get_random_points(const std::vector<cv::Point2d>
     return std::vector<cv::Point2d>();
   }
 
-  std::uniform_int_distribution<> dist(0, static_cast<int>(points.size()-1));
+  std::uniform_int_distribution<> dist(0, static_cast<int>(points.size() - 1));
   std::vector<int> random_index_vec;
   while (random_index_vec.size() < num_points)
   {
@@ -65,7 +65,7 @@ static std::vector<cv::Point2d> get_random_points(const std::vector<cv::Point2d>
 }
 
 template <typename RNG>
-static std::vector<cv::Point2d> get_random_points_stable(const std::vector<cv::Point2d>& points, int num_points, RNG& generator)
+static std::vector<cv::Point2d> get_random_points_stable(const std::vector<cv::Point2d> &points, int num_points, RNG &generator)
 {
   if (points.size() == num_points)
   {
@@ -77,7 +77,7 @@ static std::vector<cv::Point2d> get_random_points_stable(const std::vector<cv::P
     return std::vector<cv::Point2d>();
   }
 
-  std::uniform_int_distribution<> dist(0, static_cast<int>(points.size()-1));
+  std::uniform_int_distribution<> dist(0, static_cast<int>(points.size() - 1));
   std::vector<int> random_index_vec;
   while (random_index_vec.size() < num_points)
   {
@@ -99,13 +99,13 @@ static std::vector<cv::Point2d> get_random_points_stable(const std::vector<cv::P
   return points_random;
 }
 
-static int compute_num_inliers(const BezierCurve& curve, const std::vector<cv::Point2d>& points, double inlier_dist)
+static int compute_num_inliers(const BezierCurve &curve, const std::vector<cv::Point2d> &points, double inlier_dist)
 {
   //const double inlier_dist = std::sqrt(2);
-//  const double inlier_dist = 1.0;
+  //  const double inlier_dist = 1.0;
   int num_inliers = 0;
 
-  for (const cv::Point2d& p : points)
+  for (const cv::Point2d &p : points)
   {
     if (curve.min_dist_approx(p) < inlier_dist)
     {
@@ -116,17 +116,17 @@ static int compute_num_inliers(const BezierCurve& curve, const std::vector<cv::P
   return num_inliers;
 }
 
-static double compute_error(const BezierCurve& curve, const std::vector<cv::Point2d>& points)
+static double compute_error(const BezierCurve &curve, const std::vector<cv::Point2d> &points)
 {
   double error = 0.0;
-  for (const cv::Point2d& p : points)
+  for (const cv::Point2d &p : points)
   {
     error += curve.min_dist_approx(p);
   }
   return error;
 }
 
-BezierCurve fit_bezier_cubic_ransac(const std::vector<cv::Point2d>& points, cv::Rect region, int num_estimate, int max_iterations)
+BezierCurve fit_bezier_cubic_ransac(const std::vector<cv::Point2d> &points, cv::Rect region, int num_estimate, int max_iterations)
 {
   if (points.size() < num_estimate)
   {
@@ -138,7 +138,7 @@ BezierCurve fit_bezier_cubic_ransac(const std::vector<cv::Point2d>& points, cv::
   double error_min = std::numeric_limits<double>::max();
 
   std::default_random_engine engine(random_device());
-  
+
   for (int i = 0; i < max_iterations; ++i)
   {
     const std::vector<cv::Point2d> points_random = get_random_points(points, num_estimate, random_device);
@@ -188,19 +188,18 @@ BezierCurve fit_bezier_cubic_ransac(const std::vector<cv::Point2d>& points, cv::
 
 struct proj_length_sort
 {
-  proj_length_sort(const cv::Point2d& c1, const cv::Point2d& c2) :
-    c(c1),
-    s(c2 - c1)
+  proj_length_sort(const cv::Point2d &c1, const cv::Point2d &c2) : c(c1),
+                                                                   s(c2 - c1)
   {
     denom = s.dot(s);
   }
 
-  bool operator()(const cv::Point2d& p1, const cv::Point2d& p2)
+  bool operator()(const cv::Point2d &p1, const cv::Point2d &p2)
   {
     return proj_length(p1) < proj_length(p2);
   }
 
-  double proj_length(const cv::Point2d& p)
+  double proj_length(const cv::Point2d &p)
   {
     return s.dot(p - c) / denom;
   }
@@ -209,7 +208,7 @@ struct proj_length_sort
   double denom;
 };
 
-BezierCurve fit_bezier_cubic_ransac(const cv::Point2d& p1, const cv::Point2d& p2, std::vector<cv::Point2d> points, int num_estimate, int max_iterations, double* inlier_ratio)
+BezierCurve fit_bezier_cubic_ransac(const cv::Point2d &p1, const cv::Point2d &p2, std::vector<cv::Point2d> points, int num_estimate, int max_iterations, double *inlier_ratio)
 {
   if (points.size() < num_estimate)
   {
@@ -281,8 +280,6 @@ BezierCurve fit_bezier_cubic_ransac(const cv::Point2d& p1, const cv::Point2d& p2
     }
     */
 
-    
-    
     //const int num_inliers = compute_num_inliers(curve, points, std::sqrt(2.0));
     const int num_inliers = compute_num_inliers(curve, points, std::sqrt(2.0));
     if (num_inliers > num_inliers_max)

@@ -27,10 +27,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "affine_transformation.hpp"
 #include "patch.hpp"
 
-cv::Rect Patch::bounding_box(const std::vector<Patch>& patches, double scale)
+cv::Rect Patch::bounding_box(const std::vector<Patch> &patches, double scale)
 {
   std::vector<cv::Point> points;
-  for (const Patch& patch : patches)
+  for (const Patch &patch : patches)
   {
     const std::vector<cv::Point> points_patch = patch.scaled(scale).region_target.get_draw_points();
     points.insert(points.end(), points_patch.begin(), points_patch.end());
@@ -38,7 +38,7 @@ cv::Rect Patch::bounding_box(const std::vector<Patch>& patches, double scale)
   return cv::boundingRect(points);
 }
 
-static cv::Vec3b interpolate_bilinear(cv::Mat image, const cv::Point2d& p)
+static cv::Vec3b interpolate_bilinear(cv::Mat image, const cv::Point2d &p)
 {
   const int x = static_cast<int>(p.x);
   const int y = static_cast<int>(p.y);
@@ -56,7 +56,7 @@ static cv::Vec3b interpolate_bilinear(cv::Mat image, const cv::Point2d& p)
   return cv::Vec3b(c);
 }
 
-void Patch::draw(cv::Mat image, double image_scale, const Texture& texture, double texture_scale) const
+void Patch::draw(cv::Mat image, double image_scale, const Texture &texture, double texture_scale) const
 {
   const cv::Rect bbox = bounding_box();
 
@@ -64,27 +64,27 @@ void Patch::draw(cv::Mat image, double image_scale, const Texture& texture, doub
   const cv::Mat T_2 = transformation_source_inv;
   const cv::Mat T_3 = AffineTransformation::T_scale(1.0 / image_scale, 1.0 / image_scale);
   const cv::Mat T_source = AffineTransformation::concat({T_1, T_2});
-  
+
   const PatchRegion region_scaled = region_target.scaled(image_scale);
   const cv::Rect bbox_scaled = region_scaled.bounding_box();
   cv::Mat mask_scaled = region_scaled.mask();
 
   cv::Point anchor_target_scaled = image_scale * anchor_target();
-  
+
   for (int y = 0; y < bbox_scaled.height; ++y)
   {
-    cv::Vec3b* image_ptr = reinterpret_cast<cv::Vec3b*>(image.ptr(bbox_scaled.y+y));
-    const unsigned char* mask_ptr = reinterpret_cast<const unsigned char*>(mask_scaled.ptr(y));
+    cv::Vec3b *image_ptr = reinterpret_cast<cv::Vec3b *>(image.ptr(bbox_scaled.y + y));
+    const unsigned char *mask_ptr = reinterpret_cast<const unsigned char *>(mask_scaled.ptr(y));
     for (int x = 0; x < bbox_scaled.width; ++x)
     {
       if (mask_ptr[x])
       {
         cv::Point2f p_source = AffineTransformation::transform(
-          T_source,
-          cv::Point2f(
-            static_cast<float>(anchor_source.x + (anchor_target_scaled.x - bbox_scaled.x + x) / image_scale),                       
-            static_cast<float>(anchor_source.y + (anchor_target_scaled.y - bbox_scaled.y + y) / image_scale)));
-        image_ptr[bbox_scaled.x+x] = texture.interpolate_texture(p_source);
+            T_source,
+            cv::Point2f(
+                static_cast<float>(anchor_source.x + (anchor_target_scaled.x - bbox_scaled.x + x) / image_scale),
+                static_cast<float>(anchor_source.y + (anchor_target_scaled.y - bbox_scaled.y + y) / image_scale)));
+        image_ptr[bbox_scaled.x + x] = texture.interpolate_texture(p_source);
       }
     }
   }
@@ -97,11 +97,11 @@ void Patch::draw_edge_mask(cv::Mat image, double image_scale) const
 
 Patch Patch::scaled(double scale) const
 {
-  cv::Mat transformation_scaled = AffineTransformation::concat(transformation_source, AffineTransformation::T_scale(1.0/scale, 1.0/scale));
-  return Patch(region_target.scaled(scale), scale*anchor_source, transformation_scaled, source_index, source_rot, cv::Mat(), -1.0);
+  cv::Mat transformation_scaled = AffineTransformation::concat(transformation_source, AffineTransformation::T_scale(1.0 / scale, 1.0 / scale));
+  return Patch(region_target.scaled(scale), scale * anchor_source, transformation_scaled, source_index, source_rot, cv::Mat(), -1.0);
 }
 
-boost::property_tree::ptree Patch::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree Patch::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize(tree, "region_target", region_target, base_path, path);
@@ -114,7 +114,7 @@ boost::property_tree::ptree Patch::save(const boost::filesystem::path& base_path
   return tree;
 }
 
-void Patch::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void Patch::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize(tree, "region_target", region_target, base_path);
   deserialize(tree, "anchor_source", anchor_source, base_path);

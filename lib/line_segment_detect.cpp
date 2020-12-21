@@ -52,7 +52,7 @@ std::vector<cv::Vec4f> line_segment_detect(cv::Mat texture)
   return lines;
 }
 
-void draw_line_segments(const std::string& window_name, cv::Mat texture, const std::vector<cv::Vec4f>& line_segments)
+void draw_line_segments(const std::string &window_name, cv::Mat texture, const std::vector<cv::Vec4f> &line_segments)
 {
   cv::Mat texture_uchar;
   texture.convertTo(texture_uchar, CV_8UC3, 255.0);
@@ -64,11 +64,11 @@ void draw_line_segments(const std::string& window_name, cv::Mat texture, const s
   cv::waitKey(1);
 }
 
-cv::Mat line_segments_to_binary_image(const std::vector<cv::Vec4f>& line_segments, int height, int width)
+cv::Mat line_segments_to_binary_image(const std::vector<cv::Vec4f> &line_segments, int height, int width)
 {
   cv::Mat binary_image = cv::Mat::zeros(height, width, CV_32FC1);
 
-  for (const cv::Vec4f& line : line_segments)
+  for (const cv::Vec4f &line : line_segments)
   {
     const cv::Point p1(static_cast<int>(line[0]), static_cast<int>(line[1]));
     const cv::Point p2(static_cast<int>(line[2]), static_cast<int>(line[3]));

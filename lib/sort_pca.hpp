@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <opencv2/opencv.hpp>
 
 template <typename T>
-void sort_pca(std::vector<cv::Point_<T>>& points)
+void sort_pca(std::vector<cv::Point_<T>> &points)
 {
   struct sort_pca_data
   {
@@ -39,7 +39,7 @@ void sort_pca(std::vector<cv::Point_<T>>& points)
 
   struct sort_pca_comp
   {
-    bool operator()(const sort_pca_data& lhs, const sort_pca_data& rhs)
+    bool operator()(const sort_pca_data &lhs, const sort_pca_data &rhs)
     {
       return (lhs.comp_1 < rhs.comp_1) || (lhs.comp_1 == rhs.comp_1 && lhs.comp_2 < rhs.comp_2);
     }
@@ -51,7 +51,7 @@ void sort_pca(std::vector<cv::Point_<T>>& points)
   cv::Mat pca_data(num_points, 2, CV_64FC1);
   for (int i = 0; i < num_points; ++i)
   {
-    double* ptr = reinterpret_cast<double*>(pca_data.ptr(i));
+    double *ptr = reinterpret_cast<double *>(pca_data.ptr(i));
     ptr[0] = points[i].x;
     ptr[1] = points[i].y;
   }
@@ -64,7 +64,7 @@ void sort_pca(std::vector<cv::Point_<T>>& points)
   std::vector<sort_pca_data> sort_data(points.size());
   for (int i = 0; i < num_points; ++i)
   {
-    const double* ptr = reinterpret_cast<const double*>(projected.ptr(i));
+    const double *ptr = reinterpret_cast<const double *>(projected.ptr(i));
     sort_data[i].comp_1 = ptr[0];
     sort_data[i].comp_2 = ptr[1];
     sort_data[i].index = i;

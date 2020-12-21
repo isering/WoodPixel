@@ -30,30 +30,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "hough_circle_detect.hpp"
 
-std::vector<cv::Vec3f> HoughCircleDetect::compute(const cv::Mat& image, double param_1, double param_2, double dpi, double circle_size_mm)
+std::vector<cv::Vec3f> HoughCircleDetect::compute(const cv::Mat &image, double param_1, double param_2, double dpi, double circle_size_mm)
 {
-  std::vector<cv::Vec3f> circle_vec;
+	std::vector<cv::Vec3f> circle_vec;
 
-  double circle_radius_pixel = 0.5 * circle_size_mm * dpi / 25.4;
-  int circle_radius_min = static_cast<int>(0.9 * circle_radius_pixel);
-  int circle_radius_max = static_cast<int>(1.1 * circle_radius_pixel);
-  
-  cv::HoughCircles(image, circle_vec, cv::HOUGH_GRADIENT, 2.0, 25.0, param_1, param_2, circle_radius_min, circle_radius_max);
+	double circle_radius_pixel = 0.5 * circle_size_mm * dpi / 25.4;
+	int circle_radius_min = static_cast<int>(0.9 * circle_radius_pixel);
+	int circle_radius_max = static_cast<int>(1.1 * circle_radius_pixel);
 
-  return circle_vec;
+	cv::HoughCircles(image, circle_vec, cv::HOUGH_GRADIENT, 2.0, 25.0, param_1, param_2, circle_radius_min, circle_radius_max);
+
+	return circle_vec;
 }
 
-std::future<std::vector<cv::Vec3f>> HoughCircleDetect::compute_background(const cv::Mat& image, double param_1, double param_2, double dpi, double circle_size_mm)
+std::future<std::vector<cv::Vec3f>> HoughCircleDetect::compute_background(const cv::Mat &image, double param_1, double param_2, double dpi, double circle_size_mm)
 {
 	return std::async(std::launch::async, &HoughCircleDetect::compute, this, image, param_1, param_2, dpi, circle_size_mm);
 }
 
-std::vector<cv::Vec3f> HoughCircleDetect::compute_interactive(const std::vector<cv::Vec3f>& segmentation_data_in, const cv::Mat& image, const cv::Mat& image_background, double dpi, double circle_size_mm, std::string window_name)
+std::vector<cv::Vec3f> HoughCircleDetect::compute_interactive(const std::vector<cv::Vec3f> &segmentation_data_in, const cv::Mat &image, const cv::Mat &image_background, double dpi, double circle_size_mm, std::string window_name)
 {
-  cv::Mat image_background_scaled;
-  cv::resize(image_background, image_background_scaled, cv::Size(), m_scale, m_scale);
+	cv::Mat image_background_scaled;
+	cv::resize(image_background, image_background_scaled, cv::Size(), m_scale, m_scale);
 
-	if (!cvGetWindowHandle(window_name.c_str())) {
+	if (!cvGetWindowHandle(window_name.c_str()))
+	{
 		m_param_1 = 100;
 		m_param_2 = 100;
 		cv::namedWindow(window_name);
@@ -75,17 +76,16 @@ std::vector<cv::Vec3f> HoughCircleDetect::compute_interactive(const std::vector<
 	draw();
 
 	do
-  {
+	{
 		if (segmentation_data_in.empty())
-    {
+		{
 			if (m_future.valid() && m_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-      {
+			{
 				m_data = m_future.get();
 				draw();
-
-			} 
-      else if (!m_future.valid() && (m_param_1 != m_param_old_1 || m_param_2 != m_param_old_2))
-      {
+			}
+			else if (!m_future.valid() && (m_param_1 != m_param_old_1 || m_param_2 != m_param_old_2))
+			{
 
 				m_param_old_1 = m_param_1;
 				m_param_old_2 = m_param_2;
@@ -96,8 +96,7 @@ std::vector<cv::Vec3f> HoughCircleDetect::compute_interactive(const std::vector<
 
 		if (cv::waitKey(1) > 0 || !cvGetWindowHandle(window_name.c_str()))
 			break;
-	}
-  while (true);
+	} while (true);
 
 	if (cvGetWindowHandle(window_name.c_str()))
 		cv::destroyWindow(window_name);
@@ -113,25 +112,25 @@ void HoughCircleDetect::draw()
 
 	cv::Mat im_out = m_image_background.clone();
 
-  for (const cv::Vec3f& s : m_data_in)
-  {
-    cv::Point center(static_cast<int>(m_scale * s[0]), static_cast<int>(m_scale * s[1]));
-    int radius = static_cast<int>(m_scale * s[2]);
-    cv::circle(im_out, center, radius, cyan, -1);
-  }
-	
-  for (const cv::Vec3f& s : m_data)
-  {
-    cv::Point center(static_cast<int>(m_scale * s[0]), static_cast<int>(m_scale * s[1]));
-    int radius = static_cast<int>(m_scale * s[2]);
-    cv::circle(im_out, center, radius, green, -1);
-  }
+	for (const cv::Vec3f &s : m_data_in)
+	{
+		cv::Point center(static_cast<int>(m_scale * s[0]), static_cast<int>(m_scale * s[1]));
+		int radius = static_cast<int>(m_scale * s[2]);
+		cv::circle(im_out, center, radius, cyan, -1);
+	}
+
+	for (const cv::Vec3f &s : m_data)
+	{
+		cv::Point center(static_cast<int>(m_scale * s[0]), static_cast<int>(m_scale * s[1]));
+		int radius = static_cast<int>(m_scale * s[2]);
+		cv::circle(im_out, center, radius, green, -1);
+	}
 
 	cv::imshow(m_window_name, im_out);
-  cv::waitKey(1);
+	cv::waitKey(1);
 }
 
-void HoughCircleDetect::draw_to_file(const std::string& fname, const cv::Mat& im, const std::vector<cv::Vec3f>& seg)
+void HoughCircleDetect::draw_to_file(const std::string &fname, const cv::Mat &im, const std::vector<cv::Vec3f> &seg)
 {
 	const cv::Vec3b green(0, 255, 0);
 	const cv::Vec3b red(0, 0, 255);
@@ -139,12 +138,12 @@ void HoughCircleDetect::draw_to_file(const std::string& fname, const cv::Mat& im
 
 	cv::Mat im_out = im.clone();
 
-  for (const cv::Vec3f& s : seg)
-  {
-    cv::Point center(static_cast<int>(s[0]), static_cast<int>(s[1]));
-    int radius = static_cast<int>(s[2]);
-    cv::circle(im_out, center, radius, green, -1);
-  }
+	for (const cv::Vec3f &s : seg)
+	{
+		cv::Point center(static_cast<int>(s[0]), static_cast<int>(s[1]));
+		int radius = static_cast<int>(s[2]);
+		cv::circle(im_out, center, radius, green, -1);
+	}
 
 	cv::imwrite(fname, im_out);
 }
@@ -153,10 +152,10 @@ static inline int dist_sqr(int x1, int y1, int x2, int y2)
 {
 	const int x_dist = x1 - x2;
 	const int y_dist = y1 - y2;
-	return x_dist*x_dist + y_dist*y_dist;
+	return x_dist * x_dist + y_dist * y_dist;
 }
 
-static inline int line_dist_sqr(int x, int y, const cv::Point& l1, const cv::Point& l2)
+static inline int line_dist_sqr(int x, int y, const cv::Point &l1, const cv::Point &l2)
 {
 	const cv::Vec2i M = l2 - l1;
 	const cv::Point P(x, y);
@@ -165,42 +164,41 @@ static inline int line_dist_sqr(int x, int y, const cv::Point& l1, const cv::Poi
 	t = std::max(t, 0.0);
 	t = std::min(t, 1.0);
 
-	const cv::Point P2 = l1 + t*l2;
+	const cv::Point P2 = l1 + t * l2;
 
 	const int x_dist = P.x - P2.x;
 	const int y_dist = P.y - P2.y;
 
-	return x_dist*x_dist + y_dist*y_dist;
+	return x_dist * x_dist + y_dist * y_dist;
 }
 
-void HoughCircleDetect::on_mouse(int event, int x, int y, int, void* ptr)
+void HoughCircleDetect::on_mouse(int event, int x, int y, int, void *ptr)
 {
-	HoughCircleDetect* p = static_cast<HoughCircleDetect*>(ptr);
+	HoughCircleDetect *p = static_cast<HoughCircleDetect *>(ptr);
 
 	if (event == cv::EVENT_RBUTTONUP)
-  {
+	{
 		p->m_data.erase(
-			std::remove_if(p->m_data.begin(), p->m_data.end(), [x, y, p](const cv::Vec3f& s){return dist_sqr(static_cast<int>(x / p->m_scale), static_cast<int>(y / p->m_scale), static_cast<int>(s[0]), static_cast<int>(s[1])) <= s[2] * s[2]; }),
-			p->m_data.end()
-			);
+			std::remove_if(p->m_data.begin(), p->m_data.end(), [x, y, p](const cv::Vec3f &s) { return dist_sqr(static_cast<int>(x / p->m_scale), static_cast<int>(y / p->m_scale), static_cast<int>(s[0]), static_cast<int>(s[1])) <= s[2] * s[2]; }),
+			p->m_data.end());
 
 		p->draw();
 	}
-  else if (event == cv::EVENT_LBUTTONUP)
-  {
-    /*
+	else if (event == cv::EVENT_LBUTTONUP)
+	{
+		/*
 		p->m_data.emplace_back(static_cast<float>(x) / m_scale, static_cast<float>(y) / m_scale, 25.0f);
 		p->draw();
 	*/
-  }
+	}
 }
 
 double HoughCircleDetect::raw_to_param_1(int val)
 {
-	return 0.5 * static_cast<double>(val)+1.0;
+	return 0.5 * static_cast<double>(val) + 1.0;
 }
 
 double HoughCircleDetect::raw_to_param_2(int val)
 {
-	return static_cast<double>(val)+1.0;
+	return static_cast<double>(val) + 1.0;
 }

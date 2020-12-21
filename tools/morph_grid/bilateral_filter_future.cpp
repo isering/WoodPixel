@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "bilateral_filter_future.hpp"
 
-boost::property_tree::ptree BilateralFilterFuture::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree BilateralFilterFuture::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize_image(tree, "image", m_image, base_path, path);
@@ -36,7 +36,7 @@ boost::property_tree::ptree BilateralFilterFuture::save(const boost::filesystem:
   return tree;
 }
 
-void BilateralFilterFuture::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void BilateralFilterFuture::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize_image(tree, "image", m_image, base_path);
   deserialize(tree, "d", m_d, base_path);

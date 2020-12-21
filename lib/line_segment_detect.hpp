@@ -29,8 +29,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 std::vector<cv::Vec4f> line_segment_detect(cv::Mat texture);
 
-void draw_line_segments(const std::string& window_name, cv::Mat texture, const std::vector<cv::Vec4f>& line_segments);
+void draw_line_segments(const std::string &window_name, cv::Mat texture, const std::vector<cv::Vec4f> &line_segments);
 
-cv::Mat line_segments_to_binary_image(const std::vector<cv::Vec4f>& line_segments, int height, int width);
+cv::Mat line_segments_to_binary_image(const std::vector<cv::Vec4f> &line_segments, int height, int width);
 
 #endif /* TRLIB_LINE_SEGMENT_HPP_ */

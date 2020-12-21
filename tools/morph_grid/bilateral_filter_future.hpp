@@ -32,12 +32,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class BilateralFilterFuture : public FutureBase, public Serializable
 {
 public:
-  BilateralFilterFuture(const std::string& window_name, cv::Mat image) :
-    FutureBase(window_name),
-    m_image(image),
-    m_d(7),
-    m_sigma_color(50),
-    m_sigma_space(50)
+  BilateralFilterFuture(const std::string &window_name, cv::Mat image) : FutureBase(window_name),
+                                                                         m_image(image),
+                                                                         m_d(7),
+                                                                         m_sigma_color(50),
+                                                                         m_sigma_space(50)
   {
     if (m_image.channels() == 3)
     {
@@ -71,14 +70,14 @@ public:
 
     if (m_filtered_image_future.valid() && m_filtered_image_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     {
-      m_filtered_image =  m_filtered_image_future.get();
+      m_filtered_image = m_filtered_image_future.get();
       m_ready = true;
     }
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
-  
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
+
 private:
   cv::Mat m_image;
   int m_d, m_sigma_color, m_sigma_space;

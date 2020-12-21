@@ -47,10 +47,9 @@ class Texture : public Serializable
 {
 public:
   Texture() = default;
-  Texture(const boost::filesystem::path& filename, double dpi, double scale, const TextureMarker marker=TextureMarker(), const std::string id=std::string()) :
-    dpi(scale * dpi),
-    scale(scale),
-    id(id)
+  Texture(const boost::filesystem::path &filename, double dpi, double scale, const TextureMarker marker = TextureMarker(), const std::string id = std::string()) : dpi(scale * dpi),
+                                                                                                                                                                   scale(scale),
+                                                                                                                                                                   id(id)
   {
     load_texture(filename, scale);
 
@@ -63,13 +62,12 @@ public:
     this->filename = filename;
   }
 
-  Texture(const boost::filesystem::path& filename, const boost::filesystem::path& filename_mask, double dpi, double scale, TextureMarker marker=TextureMarker(), const std::string id=std::string()) :
-    dpi(scale * dpi),
-    scale(scale),
-    id(id)
+  Texture(const boost::filesystem::path &filename, const boost::filesystem::path &filename_mask, double dpi, double scale, TextureMarker marker = TextureMarker(), const std::string id = std::string()) : dpi(scale * dpi),
+                                                                                                                                                                                                           scale(scale),
+                                                                                                                                                                                                           id(id)
   {
-	  load_texture(filename, scale);
-	  load_mask(filename_mask, scale);
+    load_texture(filename, scale);
+    load_mask(filename_mask, scale);
 
     this->marker = marker.scaled(scale);
     mask_rotation = cv::Mat(texture.size(), CV_8UC1, cv::Scalar(255));
@@ -79,13 +77,13 @@ public:
     this->filename = filename;
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 
   Texture clone() const;
 
-  Texture operator()(const cv::Range& row_range, const cv::Range& col_range);
-  Texture operator()(const cv::Rect& rect);
+  Texture operator()(const cv::Range &row_range, const cv::Range &col_range);
+  Texture operator()(const cv::Rect &rect);
 
   TextureRegion get_regions(cv::Rect region, cv::Mat edge_image);
 
@@ -96,7 +94,7 @@ public:
 
   Texture rotate(double angle_rad) const;
 
-  static void mask_patch(std::vector<Texture>& rotated_textures, int index, cv::Point anchor, const std::vector<cv::Point>& patch);
+  static void mask_patch(std::vector<Texture> &rotated_textures, int index, cv::Point anchor, const std::vector<cv::Point> &patch);
 
   cv::Mat mask_rotation_inv() const
   {
@@ -105,15 +103,15 @@ public:
 
   void downsample_nn(int factor);
 
-  static cv::Mat compute_transformation_matrix(const cv::Mat& texture, double angle_rad);
+  static cv::Mat compute_transformation_matrix(const cv::Mat &texture, double angle_rad);
 
-  cv::Mat template_match(const Texture& kernel) const;
-  cv::Mat template_match(const Texture& kernel, cv::Mat mask) const;
+  cv::Mat template_match(const Texture &kernel) const;
+  cv::Mat template_match(const Texture &kernel, cv::Mat mask) const;
 
   std::vector<cv::Vec3f> find_markers(double marker_size_mm, int num_markers);
 
-  cv::Vec3b interpolate_texture(const cv::Point2f& p) const;
-  
+  cv::Vec3b interpolate_texture(const cv::Point2f &p) const;
+
   cv::Mat texture;
   cv::Mat mask_done;
   cv::Mat mask_rotation;
@@ -132,9 +130,8 @@ public:
   boost::filesystem::path filename;
 
 private:
-  void load_texture(const boost::filesystem::path& filename, double scale);
-  void load_mask(const boost::filesystem::path& filename, double scale);
+  void load_texture(const boost::filesystem::path &filename, double scale);
+  void load_mask(const boost::filesystem::path &filename, double scale);
 };
-
 
 #endif /* TRLIB_TEXTURE_HPP_ */

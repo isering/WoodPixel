@@ -28,7 +28,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "affine_transformation.hpp"
 
 template <typename SaverT>
-void CutSaver::save(const std::vector<SaverT>& saver, const boost::filesystem::path& base_path, const std::string& base_filename, const cv::Size2d& table_dimensions_mm)
+void CutSaver::save(const std::vector<SaverT> &saver, const boost::filesystem::path &base_path, const std::string &base_filename, const cv::Size2d &table_dimensions_mm)
 {
   for (size_t i = 0; i < saver.size(); ++i)
   {
@@ -44,20 +44,20 @@ void CutSaver::save(const std::vector<SaverT>& saver, const boost::filesystem::p
 }
 
 template <typename SaverT>
-void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel)
+void CutSaver::add_sources_bezier(std::vector<SaverT> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel)
 {
   if (saver.empty())
   {
-    for (const Texture& texture : textures)
+    for (const Texture &texture : textures)
     {
       saver.emplace_back(texture);
     }
   }
 
-  for (const MergePatch& p : patches)
+  for (const MergePatch &p : patches)
   {
-    SaverT& s = saver[p.source_index];
-    const Texture& t = textures[p.source_index];
+    SaverT &s = saver[p.source_index];
+    const Texture &t = textures[p.source_index];
 
     MergePatch p_trimmed = p;
     p_trimmed.trim_bezier_curves();
@@ -79,14 +79,14 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
 
     std::vector<BezierCurve> curves_bottom = p_trimmed.source_curves_bottom();
     std::reverse(curves_bottom.begin(), curves_bottom.end());
-    for (BezierCurve& c : curves_bottom)
+    for (BezierCurve &c : curves_bottom)
     {
       c = c.reversed();
     }
 
     std::vector<BezierCurve> curves_left = p_trimmed.source_curves_left();
     std::reverse(curves_left.begin(), curves_left.end());
-    for (BezierCurve& c : curves_left)
+    for (BezierCurve &c : curves_left)
     {
       c = c.reversed();
     }
@@ -100,7 +100,7 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
   }
 }
 
-static std::vector<BezierCurve> get_bezier_curves(const PatchRegion& patch)
+static std::vector<BezierCurve> get_bezier_curves(const PatchRegion &patch)
 {
   std::vector<std::vector<BezierCurve>> curves;
   if (patch.has_diag_curve())
@@ -145,7 +145,7 @@ static std::vector<BezierCurve> get_bezier_curves(const PatchRegion& patch)
   }
 
   std::vector<BezierCurve> curves_out;
-  for (const std::vector<BezierCurve>& curve : curves)
+  for (const std::vector<BezierCurve> &curve : curves)
   {
     if (curve.empty())
     {
@@ -157,7 +157,7 @@ static std::vector<BezierCurve> get_bezier_curves(const PatchRegion& patch)
   return curves_out;
 }
 
-static std::vector<MaterialPanel>::const_iterator find_panel(int source_index, const std::vector<Texture>& textures, const std::vector<MaterialPanel>& material_panels)
+static std::vector<MaterialPanel>::const_iterator find_panel(int source_index, const std::vector<Texture> &textures, const std::vector<MaterialPanel> &material_panels)
 {
   const std::string id = textures[source_index].id;
 
@@ -172,7 +172,7 @@ static std::vector<MaterialPanel>::const_iterator find_panel(int source_index, c
 }
 
 template <typename SaverT>
-void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<Patch>& patches, const std::vector<MaterialPanel>& material_panels)
+void CutSaver::add_sources_bezier(std::vector<SaverT> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<Patch> &patches, const std::vector<MaterialPanel> &material_panels)
 {
   // First, determine which textures are active in current config.
   std::vector<int> source_ids;
@@ -193,7 +193,7 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
   // Then, determine which target_ids are active in current config.
   const size_t num_textures_used = source_ids.size();
   std::vector<int> target_ids;
-  for (const Patch& p : patches)
+  for (const Patch &p : patches)
   {
     if (std::find(target_ids.begin(), target_ids.end(), p.region_target.target_index()) == target_ids.end())
     {
@@ -216,29 +216,29 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
     std::cout << "Adding target " << i << std::endl;
   }
 
-  for (const Patch& p : patches)
+  for (const Patch &p : patches)
   {
     std::vector<MaterialPanel>::const_iterator panel = find_panel(p.source_index, textures, material_panels);
     if (panel == material_panels.end())
     {
       continue;
     }
- 
+
     const size_t source_index = std::distance(source_ids.begin(), std::find(source_ids.begin(), source_ids.end(), p.source_index));
     if (source_index >= source_ids.size())
     {
       continue;
     }
-    SaverT& s = saver[source_index];
- 
+    SaverT &s = saver[source_index];
+
     const size_t target_index = std::distance(target_ids.begin(), std::find(target_ids.begin(), target_ids.end(), p.region_target.target_index()));
     if (target_index < 0)
     {
       continue;
-    }    
-    SaverT& t = saver[num_textures_used + target_index];
+    }
+    SaverT &t = saver[num_textures_used + target_index];
 
-    const Texture& tex = textures[p.source_index];
+    const Texture &tex = textures[p.source_index];
     const cv::Mat T_texture_table = AffineTransformation::fit(tex.marker.markers_pix, panel->markers_table_mm);
 
     if (p.region_target.has_sub_regions())
@@ -248,15 +248,15 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
 
     std::vector<BezierCurve> curves_target = get_bezier_curves(p.region_target);
     cv::Mat T = AffineTransformation::concat(
-      p.transformation_source_inv,
-      AffineTransformation::T_translate(p.anchor_source.x - p.anchor_target().x, p.anchor_source.y - p.anchor_target().y));
+        p.transformation_source_inv,
+        AffineTransformation::T_translate(p.anchor_source.x - p.anchor_target().x, p.anchor_source.y - p.anchor_target().y));
     T = AffineTransformation::concat(T_texture_table, T);
 
     std::vector<BezierCurve> curves_source = BezierCurve::transformed(curves_target, T);
 
     s.add_bezier(curves_source);
     t.add_bezier(curves_source);
-    
+
     /*
      * Add text.
      * Get barycenter of curve midpoints as text anchor.
@@ -276,11 +276,11 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
     t.add_text(text_pos, p.region_target.get_short_id_string(), AffineTransformation::rotation_rad(T_text));
   }
 
-  for (SaverT& s : saver)
+  for (SaverT &s : saver)
   {
-    for (const MaterialPanel& panel : material_panels)
+    for (const MaterialPanel &panel : material_panels)
     {
-      for (const cv::Point2d& p : panel.markers_table_mm)
+      for (const cv::Point2d &p : panel.markers_table_mm)
       {
         s.add_debug_circle(cv::Point2f(p), 5.0);
       }
@@ -289,7 +289,7 @@ void CutSaver::add_sources_bezier(std::vector<SaverT>& saver, const boost::files
 }
 
 template <typename SaverT>
-void CutSaver::save_sources_bezier(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel, const cv::Size2d& table_dimensions_mm)
+void CutSaver::save_sources_bezier(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel, const cv::Size2d &table_dimensions_mm)
 {
   std::vector<SaverT> saver;
   add_sources_bezier(saver, path, textures, patches, material_panel);
@@ -297,11 +297,11 @@ void CutSaver::save_sources_bezier(const boost::filesystem::path& path, const st
 }
 
 template <typename SaverT>
-void CutSaver::add_target_bezier(std::vector<SaverT>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches)
+void CutSaver::add_target_bezier(std::vector<SaverT> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches)
 {
   saver.emplace_back(texture);
 
-  for (const MergePatch& p : patches)
+  for (const MergePatch &p : patches)
   {
     MergePatch p_trimmed = p;
     p_trimmed.trim_bezier_curves();
@@ -321,14 +321,14 @@ void CutSaver::add_target_bezier(std::vector<SaverT>& saver, const boost::filesy
 
     std::vector<BezierCurve> curves_bottom = p_trimmed.target_curves_bottom();
     std::reverse(curves_bottom.begin(), curves_bottom.end());
-    for (BezierCurve& c : curves_bottom)
+    for (BezierCurve &c : curves_bottom)
     {
       c = c.reversed();
     }
 
     std::vector<BezierCurve> curves_left = p_trimmed.target_curves_left();
     std::reverse(curves_left.begin(), curves_left.end());
-    for (BezierCurve& c : curves_left)
+    for (BezierCurve &c : curves_left)
     {
       c = c.reversed();
     }
@@ -343,7 +343,7 @@ void CutSaver::add_target_bezier(std::vector<SaverT>& saver, const boost::filesy
 }
 
 template <typename SaverT>
-void CutSaver::save_target_bezier(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm)
+void CutSaver::save_target_bezier(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm)
 {
   std::vector<SaverT> saver;
   add_target_bezier(saver, path, texture, patches);
@@ -351,20 +351,20 @@ void CutSaver::save_target_bezier(const boost::filesystem::path& path, const Tex
 }
 
 template <typename SaverT>
-void CutSaver::add_sources_rect(std::vector<SaverT>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches)
+void CutSaver::add_sources_rect(std::vector<SaverT> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches)
 {
   if (saver.empty())
   {
-    for (const Texture& texture : textures)
+    for (const Texture &texture : textures)
     {
       saver.emplace_back(texture);
     }
   }
 
-  for (const MergePatch& p : patches)
+  for (const MergePatch &p : patches)
   {
-    SaverT& s = saver[p.source_index];
-    const Texture& t = textures[p.source_index];
+    SaverT &s = saver[p.source_index];
+    const Texture &t = textures[p.source_index];
 
     /*
     * Add text.
@@ -384,13 +384,13 @@ void CutSaver::add_sources_rect(std::vector<SaverT>& saver, const boost::filesys
     const float br_x = p.anchor_source.x + 0.875f * p.size.width;
     const float br_y = p.anchor_source.y + 0.875f * p.size.height;
 
-    std::vector<cv::Point2f> polygon({ { tl_x, tl_y }, { br_x, tl_y }, { br_x, br_y }, { tl_x, br_y } });
+    std::vector<cv::Point2f> polygon({{tl_x, tl_y}, {br_x, tl_y}, {br_x, br_y}, {tl_x, br_y}});
     s.add_polygon(AffineTransformation::transform(p.transformation_source_inv, polygon));
   }
 }
 
 template <typename SaverT>
-static void CutSaver::save_sources_rect(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm)
+static void CutSaver::save_sources_rect(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm)
 {
   std::vector<SaverT> saver;
   add_sources_rect(saver, path, textures, patches);
@@ -398,11 +398,11 @@ static void CutSaver::save_sources_rect(const boost::filesystem::path& path, con
 }
 
 template <typename SaverT>
-void CutSaver::add_target_rect(std::vector<SaverT>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches)
+void CutSaver::add_target_rect(std::vector<SaverT> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches)
 {
   saver.emplace_back(texture);
 
-  for (const MergePatch& p : patches)
+  for (const MergePatch &p : patches)
   {
     /*
     * Add text.
@@ -420,13 +420,13 @@ void CutSaver::add_target_rect(std::vector<SaverT>& saver, const boost::filesyst
     float br_x = p.anchor_target.x + 0.875f * p.size.width;
     float br_y = p.anchor_target.y + 0.875f * p.size.height;
 
-    std::vector<cv::Point2f> polygon({ { tl_x, tl_y }, { br_x, tl_y }, { br_x, br_y }, { tl_x, br_y } });
+    std::vector<cv::Point2f> polygon({{tl_x, tl_y}, {br_x, tl_y}, {br_x, br_y}, {tl_x, br_y}});
     saver.back().add_polygon(polygon);
   }
 }
 
 template <typename SaverT>
-void CutSaver::save_target_rect(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm)
+void CutSaver::save_target_rect(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm)
 {
   std::vector<SaverT> saver;
   add_target_rect(saver, path, texture, patches);

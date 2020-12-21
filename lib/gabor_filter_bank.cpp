@@ -35,7 +35,7 @@ GaborFilterBank::GaborFilterBank(int filter_resolution, double frequency_octaves
   const double bandwidth_angular = boost::math::constants::pi<double>() / num_directions;
 
   std::vector<double> frequencies;
-  for (int freq = 4; freq <= filter_resolution/4; freq *= 2)
+  for (int freq = 4; freq <= filter_resolution / 4; freq *= 2)
   {
     frequencies.push_back((sqrt(2.0) * freq) / filter_resolution);
   }

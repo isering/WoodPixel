@@ -31,10 +31,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class CannyFuture : public FutureBase, public Serializable
 {
 public:
-  CannyFuture(const std::string& window_name, const std::string& class_name="canny") :
-    FutureBase(window_name),
-    m_canny_threshold_1(100),
-    m_canny_threshold_2(200)
+  CannyFuture(const std::string &window_name, const std::string &class_name = "canny") : FutureBase(window_name),
+                                                                                         m_canny_threshold_1(100),
+                                                                                         m_canny_threshold_2(200)
   {
     add_trackbar(class_name + "Thresh1", &m_canny_threshold_1, 500);
     add_trackbar(class_name + "Thresh2", &m_canny_threshold_2, 500);
@@ -73,8 +72,8 @@ public:
     }
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 
 private:
   cv::Mat m_image;

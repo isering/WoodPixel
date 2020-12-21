@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "convex_hull.hpp"
 
-ConvexHull::ConvexHull(const std::vector<cv::Point>& points)
+ConvexHull::ConvexHull(const std::vector<cv::Point> &points)
 {
   from_points(points);
 }
@@ -39,13 +39,13 @@ void ConvexHull::add_point(cv::Point p)
   cv::convexHull(points, m_convex_hull);
 }
 
-void ConvexHull::from_points(const std::vector<cv::Point>& points)
+void ConvexHull::from_points(const std::vector<cv::Point> &points)
 {
   m_convex_hull.clear();
   cv::convexHull(points, m_convex_hull);
 }
 
-void ConvexHull::fill(cv::Mat& mask) const
+void ConvexHull::fill(cv::Mat &mask) const
 {
   cv::fillConvexPoly(mask, m_convex_hull, cv::Scalar(1));
 }

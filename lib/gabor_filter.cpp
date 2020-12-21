@@ -45,7 +45,7 @@ cv::Mat GaborFilter::apply(cv::Mat texture) const
   }
 
   if (texture_gray.depth() == CV_8U)
-  { 
+  {
     texture_gray.convertTo(texture_gray, CV_32FC1, 1.0 / 255.0);
   }
   else if (texture_gray.depth() == CV_16U)
@@ -57,7 +57,7 @@ cv::Mat GaborFilter::apply(cv::Mat texture) const
   cv::filter2D(texture_gray, response_real, -1, kernel_real, cv::Point(-1, -1), 0.0, cv::BORDER_REFLECT_101);
   cv::filter2D(texture_gray, response_imag, -1, kernel_imag, cv::Point(-1, -1), 0.0, cv::BORDER_REFLECT_101);
   cv::magnitude(response_real, response_imag, response);
-  
+
   return response;
 }
 
@@ -69,11 +69,10 @@ cv::Mat GaborFilter::mask(cv::Mat mask_texture) const
   return mask_filter;
 }
 
-GaborFilter::GaborFilter(double frequency, double theta, double sigma_x, double sigma_y) :
-  frequency(frequency),
-  theta(theta),
-  sigma_x(sigma_x),
-  sigma_y(sigma_y)
+GaborFilter::GaborFilter(double frequency, double theta, double sigma_x, double sigma_y) : frequency(frequency),
+                                                                                           theta(theta),
+                                                                                           sigma_x(sigma_x),
+                                                                                           sigma_y(sigma_y)
 {
   const double cos_theta = std::cos(theta);
   const double sin_theta = std::sin(theta);
@@ -93,8 +92,8 @@ GaborFilter::GaborFilter(double frequency, double theta, double sigma_x, double 
   kernel_size_y = static_cast<int>(pi * std::max(sigma_x * std::abs(std::sin(theta)), sigma_y * std::abs(std::cos(theta))));
   */
 
-  kernel_real = cv::Mat(2*kernel_size_y+1, 2*kernel_size_x+1, CV_32FC1);
-  kernel_imag = cv::Mat(2*kernel_size_y+1, 2*kernel_size_x+1, CV_32FC1);
+  kernel_real = cv::Mat(2 * kernel_size_y + 1, 2 * kernel_size_x + 1, CV_32FC1);
+  kernel_imag = cv::Mat(2 * kernel_size_y + 1, 2 * kernel_size_x + 1, CV_32FC1);
 
   for (int y = -kernel_size_y; y <= kernel_size_y; ++y)
   {
@@ -102,11 +101,11 @@ GaborFilter::GaborFilter(double frequency, double theta, double sigma_x, double 
     {
       const double x_theta = x * cos_theta + y * sin_theta;
       const double y_theta = -x * sin_theta + y * cos_theta;
-      const double gaussian = std::exp(-0.5 * (x_theta*x_theta/sigma_x_squared + y_theta*y_theta/sigma_y_squared));
+      const double gaussian = std::exp(-0.5 * (x_theta * x_theta / sigma_x_squared + y_theta * y_theta / sigma_y_squared));
 
-      kernel_real.at<float>(y+kernel_size_y, x+kernel_size_x) = static_cast<float>(
+      kernel_real.at<float>(y + kernel_size_y, x + kernel_size_x) = static_cast<float>(
           factor * gaussian * std::cos(2.0 * pi * frequency * x_theta));
-      kernel_imag.at<float>(y+kernel_size_y, x+kernel_size_x) = static_cast<float>(
+      kernel_imag.at<float>(y + kernel_size_y, x + kernel_size_x) = static_cast<float>(
           factor * gaussian * std::sin(2.0 * pi * frequency * x_theta));
     }
   }

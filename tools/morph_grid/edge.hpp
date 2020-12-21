@@ -29,14 +29,14 @@ class Edge : public Serializable
 {
 public:
   Edge() = default;
-  Edge(const cv::Point& p1, const cv::Point& p2) :
-    p1(p1),
-    p2(p2)
-  {}
+  Edge(const cv::Point &p1, const cv::Point &p2) : p1(p1),
+                                                   p2(p2)
+  {
+  }
 
   cv::Point p1, p2;
 
-  boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override
+  boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override
   {
     boost::property_tree::ptree tree;
     serialize(tree, "p1", p1, base_path, path);
@@ -44,7 +44,7 @@ public:
     return tree;
   }
 
-  void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override
+  void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override
   {
     deserialize(tree, "p1", p1, base_path);
     deserialize(tree, "p2", p2, base_path);

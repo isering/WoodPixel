@@ -31,14 +31,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 const std::string MergePatch::output_characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-*#$%!<=>?~^";
 
-std::vector<MergePatch> MergePatch::from_patches(std::vector<Patch>& patches_in, int subpatch_size, int target_id)
+std::vector<MergePatch> MergePatch::from_patches(std::vector<Patch> &patches_in, int subpatch_size, int target_id)
 {
   /*
    * Get offset.
    */
   int x_min = std::numeric_limits<int>::max();
   int y_min = std::numeric_limits<int>::max();
-  for (const Patch& p : patches_in)
+  for (const Patch &p : patches_in)
   {
     x_min = std::min(x_min, p.anchor_target().x);
     y_min = std::min(y_min, p.anchor_target().y);
@@ -48,7 +48,7 @@ std::vector<MergePatch> MergePatch::from_patches(std::vector<Patch>& patches_in,
    * Find patch position in global grid.
    */
   std::set<int> x_coords, y_coords;
-  for (const Patch& patch : patches_in)
+  for (const Patch &patch : patches_in)
   {
     x_coords.insert(patch.anchor_target().x);
     y_coords.insert(patch.anchor_target().y);
@@ -58,7 +58,7 @@ std::vector<MergePatch> MergePatch::from_patches(std::vector<Patch>& patches_in,
    * Generate merge patches.
    */
   std::vector<MergePatch> patches;
-  for (const Patch& p : patches_in)
+  for (const Patch &p : patches_in)
   {
     cv::Rect region_subpatch;
     region_subpatch.x = (p.anchor_target().x - x_min) / subpatch_size;
@@ -75,7 +75,7 @@ std::vector<MergePatch> MergePatch::from_patches(std::vector<Patch>& patches_in,
   return patches;
 }
 
-mat<std::vector<int>> MergePatch::get_subpatch_index_mat(std::vector<MergePatch>& patches, int subpatch_size)
+mat<std::vector<int>> MergePatch::get_subpatch_index_mat(std::vector<MergePatch> &patches, int subpatch_size)
 {
   /*
    * Get size of index matrix and create map from coordinates to index.
@@ -84,7 +84,7 @@ mat<std::vector<int>> MergePatch::get_subpatch_index_mat(std::vector<MergePatch>
   int cols = 0;
   int anchor_x_min = std::numeric_limits<int>::max();
   int anchor_y_min = std::numeric_limits<int>::max();
-  for (const MergePatch& p : patches)
+  for (const MergePatch &p : patches)
   {
     rows = std::max(rows, p.region_subpatch.y + p.region_subpatch.height);
     cols = std::max(cols, p.region_subpatch.x + p.region_subpatch.width);
@@ -107,20 +107,20 @@ mat<std::vector<int>> MergePatch::get_subpatch_index_mat(std::vector<MergePatch>
     }
   }
 
-  for (int y = 0; y < rows-1; y += 3)
+  for (int y = 0; y < rows - 1; y += 3)
   {
-    for (int x = 0; x < cols-1; x += 3)
+    for (int x = 0; x < cols - 1; x += 3)
     {
-      if (subpatch_mat_filled.at<unsigned char>(y+1, x+1) == 0)
+      if (subpatch_mat_filled.at<unsigned char>(y + 1, x + 1) == 0)
       {
         const int patch_index = static_cast<int>(patches.size());
-        patches.emplace_back(cv::Rect(x, y, 4, 4), cv::Point(anchor_x_min+x*subpatch_size, anchor_y_min+y*subpatch_size), subpatch_size);
+        patches.emplace_back(cv::Rect(x, y, 4, 4), cv::Point(anchor_x_min + x * subpatch_size, anchor_y_min + y * subpatch_size), subpatch_size);
 
         for (int y_delta = 0; y_delta < 4; ++y_delta)
         {
           for (int x_delta = 0; x_delta < 4; ++x_delta)
           {
-            index_mat(y+y_delta, x+x_delta).push_back(patch_index);
+            index_mat(y + y_delta, x + x_delta).push_back(patch_index);
           }
         }
       }
@@ -140,7 +140,7 @@ enum directions
   uninitialized = 255
 };
 
-void MergePatch::merge_patches_x(MergePatch& patch_left, cv::Rect region_left, MergePatch& patch_right, cv::Rect region_right, int start_top, int start_bottom)
+void MergePatch::merge_patches_x(MergePatch &patch_left, cv::Rect region_left, MergePatch &patch_right, cv::Rect region_right, int start_top, int start_bottom)
 {
   if (region_left.size() != region_right.size())
   {
@@ -153,9 +153,9 @@ void MergePatch::merge_patches_x(MergePatch& patch_left, cv::Rect region_left, M
 
   for (int y = 0; y < active.rows; ++y)
   {
-    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(active.ptr(y));
-    uint8_t* ptr_left = reinterpret_cast<uint8_t*>(active_left.ptr(y));
-    uint8_t* ptr_right = reinterpret_cast<uint8_t*>(active_right.ptr(y));
+    const uint8_t *ptr = reinterpret_cast<const uint8_t *>(active.ptr(y));
+    uint8_t *ptr_left = reinterpret_cast<uint8_t *>(active_left.ptr(y));
+    uint8_t *ptr_right = reinterpret_cast<uint8_t *>(active_right.ptr(y));
     for (int x = 0; x < active.cols; ++x)
     {
       ptr_left[x] = ptr[x] == left ? 1 : 0;
@@ -178,9 +178,9 @@ cv::Mat MergePatch::merge_patches_x(cv::Mat error_left, cv::Mat error_right, int
 
   for (int y = 0; y < h; ++y)
   {
-    const float* ptr_error_top = reinterpret_cast<const float*>(error_left.ptr(y));
-    const float* ptr_error_bottom = reinterpret_cast<const float*>(error_right.ptr(y));
-    float* ptr_error = reinterpret_cast<float*>(error.ptr(y));
+    const float *ptr_error_top = reinterpret_cast<const float *>(error_left.ptr(y));
+    const float *ptr_error_bottom = reinterpret_cast<const float *>(error_right.ptr(y));
+    float *ptr_error = reinterpret_cast<float *>(error.ptr(y));
 
     for (int x = 0; x < w + 1; ++x)
     {
@@ -197,7 +197,7 @@ cv::Mat MergePatch::merge_patches_x(cv::Mat error_left, cv::Mat error_right, int
 
   if (start_top >= 0)
   {
-    float* ptr_error = reinterpret_cast<float*>(error.ptr(0));
+    float *ptr_error = reinterpret_cast<float *>(error.ptr(0));
     for (int x = 0; x < start_top - 1; ++x)
     {
       ptr_error[x] = std::numeric_limits<float>::infinity();
@@ -212,7 +212,7 @@ cv::Mat MergePatch::merge_patches_x(cv::Mat error_left, cv::Mat error_right, int
 
   if (start_bottom >= 0)
   {
-    float* ptr_error = reinterpret_cast<float*>(error.ptr(h - 1));
+    float *ptr_error = reinterpret_cast<float *>(error.ptr(h - 1));
     for (int x = 0; x < start_bottom - 1; ++x)
     {
       ptr_error[x] = std::numeric_limits<float>::infinity();
@@ -228,28 +228,28 @@ cv::Mat MergePatch::merge_patches_x(cv::Mat error_left, cv::Mat error_right, int
   // Accumulate errors / forward pass
   for (int y = 1; y < h; ++y)
   {
-    const float* ptr_last = reinterpret_cast<const float*>(error.ptr(y - 1));
-    float* ptr_error = reinterpret_cast<float*>(error.ptr(y));
+    const float *ptr_last = reinterpret_cast<const float *>(error.ptr(y - 1));
+    float *ptr_error = reinterpret_cast<float *>(error.ptr(y));
 
     ptr_error[0] += std::min(ptr_last[0], ptr_last[1]);
     ptr_error[w] += std::min(ptr_last[w - 1], ptr_last[w]);
 
     for (int x = 1; x < w; ++x)
     {
-      ptr_error[x] += std::min({ ptr_last[x - 1], ptr_last[x], ptr_last[x + 1] });
+      ptr_error[x] += std::min({ptr_last[x - 1], ptr_last[x], ptr_last[x + 1]});
     }
   }
 
   // Backward pass
   std::vector<int> x_vals;
   {
-    const float* ptr_error = reinterpret_cast<const float*>(error.ptr(h - 1));
+    const float *ptr_error = reinterpret_cast<const float *>(error.ptr(h - 1));
     x_vals.push_back(static_cast<int>(std::distance(ptr_error, std::min_element(ptr_error, ptr_error + w + 1))));
   }
 
   for (int y = h - 2; y >= 0; --y)
   {
-    const float* ptr_error = reinterpret_cast<const float*>(error.ptr(y));
+    const float *ptr_error = reinterpret_cast<const float *>(error.ptr(y));
     int x_min = x_vals.back() == 0 ? 0 : x_vals.back() - 1;
     int x_max = x_vals.back() == w ? w + 1 : x_vals.back() + 2;
     x_vals.push_back(static_cast<int>(std::distance(ptr_error, std::min_element(ptr_error + x_min, ptr_error + x_max))));
@@ -260,7 +260,7 @@ cv::Mat MergePatch::merge_patches_x(cv::Mat error_left, cv::Mat error_right, int
   cv::Mat active(h, w, CV_8UC1);
   for (int y = 0; y < h; ++y)
   {
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(active.ptr(y));
+    uint8_t *ptr = reinterpret_cast<uint8_t *>(active.ptr(y));
     for (int x = 0; x < x_vals[y]; ++x)
     {
       ptr[x] = left;
@@ -274,7 +274,7 @@ cv::Mat MergePatch::merge_patches_x(cv::Mat error_left, cv::Mat error_right, int
   return active;
 }
 
-void MergePatch::merge_patches_y(MergePatch& patch_top, cv::Rect region_top, MergePatch& patch_bottom, cv::Rect region_bottom, int start_left, int start_right)
+void MergePatch::merge_patches_y(MergePatch &patch_top, cv::Rect region_top, MergePatch &patch_bottom, cv::Rect region_bottom, int start_left, int start_right)
 {
   if (region_top.size() != region_bottom.size())
   {
@@ -287,9 +287,9 @@ void MergePatch::merge_patches_y(MergePatch& patch_top, cv::Rect region_top, Mer
 
   for (int y = 0; y < active.rows; ++y)
   {
-    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(active.ptr(y));
-    uint8_t* ptr_top = reinterpret_cast<uint8_t*>(active_top.ptr(y));
-    uint8_t* ptr_bottom = reinterpret_cast<uint8_t*>(active_bottom.ptr(y));
+    const uint8_t *ptr = reinterpret_cast<const uint8_t *>(active.ptr(y));
+    uint8_t *ptr_top = reinterpret_cast<uint8_t *>(active_top.ptr(y));
+    uint8_t *ptr_bottom = reinterpret_cast<uint8_t *>(active_bottom.ptr(y));
 
     for (int x = 0; x < active.cols; ++x)
     {
@@ -309,13 +309,13 @@ cv::Mat MergePatch::merge_patches_y(cv::Mat error_top, cv::Mat error_bottom, int
   const int h = error_top.rows;
   const int w = error_bottom.cols;
 
-  cv::Mat error = cv::Mat::zeros(h+1, w, CV_32FC1);
+  cv::Mat error = cv::Mat::zeros(h + 1, w, CV_32FC1);
 
   for (int x = 0; x < w; ++x)
   {
     for (int y = 0; y < h + 1; ++y)
     {
-      float& val = error.at<float>(y, x);
+      float &val = error.at<float>(y, x);
       for (int y_left = 0; y_left < y; ++y_left)
       {
         val += error_top.at<float>(y_left, x);
@@ -358,7 +358,7 @@ cv::Mat MergePatch::merge_patches_y(cv::Mat error_top, cv::Mat error_bottom, int
     error.at<float>(h, x) += std::min(error.at<float>(h - 1, x - 1), error.at<float>(h, x - 1));
     for (int y = 1; y < h; ++y)
     {
-      error.at<float>(y, x) += std::min({ error.at<float>(y - 1, x - 1), error.at<float>(y, x - 1), error.at<float>(y + 1, x - 1) });
+      error.at<float>(y, x) += std::min({error.at<float>(y - 1, x - 1), error.at<float>(y, x - 1), error.at<float>(y + 1, x - 1)});
     }
   }
 
@@ -404,8 +404,8 @@ cv::Mat MergePatch::merge_patches_y(cv::Mat error_top, cv::Mat error_bottom, int
   cv::Mat active(h, w, CV_8UC1);
   for (int y = 0; y < h; ++y)
   {
-    uint8_t* ptr = reinterpret_cast<uint8_t*>(active.ptr(y));
-    
+    uint8_t *ptr = reinterpret_cast<uint8_t *>(active.ptr(y));
+
     for (int x = 0; x < w; ++x)
     {
       ptr[x] = y < y_vals[x] ? top : bottom;
@@ -415,7 +415,7 @@ cv::Mat MergePatch::merge_patches_y(cv::Mat error_top, cv::Mat error_bottom, int
   return active;
 }
 
-int get_start(const cv::Mat& active_pixel)
+int get_start(const cv::Mat &active_pixel)
 {
   int index = 0;
   for (auto iter = active_pixel.begin<uint8_t>(); iter != active_pixel.end<uint8_t>(); ++iter, ++index)
@@ -428,7 +428,7 @@ int get_start(const cv::Mat& active_pixel)
   return index;
 }
 
-void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, MergePatch& patch_bl, cv::Rect region_bl, MergePatch& patch_tr, cv::Rect region_tr, MergePatch& patch_br, cv::Rect region_br)
+void MergePatch::merge_patches_cross(MergePatch &patch_tl, cv::Rect region_tl, MergePatch &patch_bl, cv::Rect region_bl, MergePatch &patch_tr, cv::Rect region_tr, MergePatch &patch_br, cv::Rect region_br)
 {
   if (region_tl.size() != region_bl.size() || region_bl.size() != region_tr.size() || region_tr.size() != region_br.size())
   {
@@ -481,7 +481,7 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
   active[1][0] = patch_bl.active_pixel(region_bl);
   active[1][1] = patch_br.active_pixel(region_br);
 
-  int start_left = get_start(patch_tl.active_pixel(cv::Rect(region_tl.x-1, region_tl.y, 1, region_tl.height)));
+  int start_left = get_start(patch_tl.active_pixel(cv::Rect(region_tl.x - 1, region_tl.y, 1, region_tl.height)));
   int start_top = get_start(patch_tl.active_pixel(cv::Rect(region_tl.x, region_tl.y - 1, region_tl.width, 1)));
   int start_right = get_start(patch_tr.active_pixel(cv::Rect(region_tr.x + region_tr.width, region_tr.y, 1, region_tr.height)));
   int start_bottom = get_start(patch_bl.active_pixel(cv::Rect(region_bl.x, region_bl.y + region_bl.height, region_bl.width, 1)));
@@ -489,7 +489,7 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
   cv::Mat active_mat(region_tl.size(), CV_8UC2);
   for (int y = 0; y < active_mat.rows; ++y)
   {
-    cv::Vec2b* ptr = reinterpret_cast<cv::Vec2b*>(active_mat.ptr(y));
+    cv::Vec2b *ptr = reinterpret_cast<cv::Vec2b *>(active_mat.ptr(y));
     for (int x = 0; x < active_mat.cols; ++x)
     {
       ptr[x][0] = y < active_mat.rows / 2 ? top : bottom;
@@ -507,13 +507,13 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
      */
     for (int y = 0; y < h; ++y)
     {
-      const cv::Vec2b* ptr_active = reinterpret_cast<const cv::Vec2b*>(active_mat.ptr(y));
-      const float* ptr_error_tl = reinterpret_cast<const float*>(error[0][0].ptr(y));
-      const float* ptr_error_tr = reinterpret_cast<const float*>(error[0][1].ptr(y));
-      const float* ptr_error_bl = reinterpret_cast<const float*>(error[1][0].ptr(y));
-      const float* ptr_error_br = reinterpret_cast<const float*>(error[1][1].ptr(y));
-      float* ptr_error_1 = reinterpret_cast<float*>(error_1.ptr(y));
-      float* ptr_error_2 = reinterpret_cast<float*>(error_2.ptr(y));
+      const cv::Vec2b *ptr_active = reinterpret_cast<const cv::Vec2b *>(active_mat.ptr(y));
+      const float *ptr_error_tl = reinterpret_cast<const float *>(error[0][0].ptr(y));
+      const float *ptr_error_tr = reinterpret_cast<const float *>(error[0][1].ptr(y));
+      const float *ptr_error_bl = reinterpret_cast<const float *>(error[1][0].ptr(y));
+      const float *ptr_error_br = reinterpret_cast<const float *>(error[1][1].ptr(y));
+      float *ptr_error_1 = reinterpret_cast<float *>(error_1.ptr(y));
+      float *ptr_error_2 = reinterpret_cast<float *>(error_2.ptr(y));
       for (int x = 0; x < w; ++x)
       {
         ptr_error_1[x] = ptr_active[x][1] == left ? ptr_error_tl[x] : ptr_error_tr[x];
@@ -525,8 +525,8 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
 
     for (int y = 0; y < h; ++y)
     {
-      cv::Vec2b* ptr_active = reinterpret_cast<cv::Vec2b*>(active_mat.ptr(y));
-      const uint8_t* ptr_active_y = reinterpret_cast<const uint8_t*>(active_y.ptr(y));
+      cv::Vec2b *ptr_active = reinterpret_cast<cv::Vec2b *>(active_mat.ptr(y));
+      const uint8_t *ptr_active_y = reinterpret_cast<const uint8_t *>(active_y.ptr(y));
       for (int x = 0; x < w; ++x)
       {
         ptr_active[x][0] = ptr_active_y[x];
@@ -538,13 +538,13 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
      */
     for (int y = 0; y < h; ++y)
     {
-      const cv::Vec2b* ptr_active = reinterpret_cast<const cv::Vec2b*>(active_mat.ptr(y));
-      const float* ptr_error_tl = reinterpret_cast<const float*>(error[0][0].ptr(y));
-      const float* ptr_error_tr = reinterpret_cast<const float*>(error[0][1].ptr(y));
-      const float* ptr_error_bl = reinterpret_cast<const float*>(error[1][0].ptr(y));
-      const float* ptr_error_br = reinterpret_cast<const float*>(error[1][1].ptr(y));
-      float* ptr_error_1 = reinterpret_cast<float*>(error_1.ptr(y));
-      float* ptr_error_2 = reinterpret_cast<float*>(error_2.ptr(y));
+      const cv::Vec2b *ptr_active = reinterpret_cast<const cv::Vec2b *>(active_mat.ptr(y));
+      const float *ptr_error_tl = reinterpret_cast<const float *>(error[0][0].ptr(y));
+      const float *ptr_error_tr = reinterpret_cast<const float *>(error[0][1].ptr(y));
+      const float *ptr_error_bl = reinterpret_cast<const float *>(error[1][0].ptr(y));
+      const float *ptr_error_br = reinterpret_cast<const float *>(error[1][1].ptr(y));
+      float *ptr_error_1 = reinterpret_cast<float *>(error_1.ptr(y));
+      float *ptr_error_2 = reinterpret_cast<float *>(error_2.ptr(y));
       for (int x = 0; x < w; ++x)
       {
         ptr_error_1[x] = ptr_active[x][0] == top ? ptr_error_tl[x] : ptr_error_bl[x];
@@ -556,8 +556,8 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
 
     for (int y = 0; y < h; ++y)
     {
-      cv::Vec2b* ptr_active = reinterpret_cast<cv::Vec2b*>(active_mat.ptr(y));
-      const uint8_t* ptr_active_x = reinterpret_cast<const uint8_t*>(active_x.ptr(y));
+      cv::Vec2b *ptr_active = reinterpret_cast<cv::Vec2b *>(active_mat.ptr(y));
+      const uint8_t *ptr_active_x = reinterpret_cast<const uint8_t *>(active_x.ptr(y));
       for (int x = 0; x < w; ++x)
       {
         ptr_active[x][1] = ptr_active_x[x];
@@ -569,14 +569,14 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
   active[0][1].setTo(0);
   active[1][0].setTo(0);
   active[1][1].setTo(0);
-  
+
   for (int y = 0; y < h; ++y)
   {
-    const cv::Vec2b* ptr_active = reinterpret_cast<const cv::Vec2b*>(active_mat.ptr(y));
-    uint8_t* ptr_active_tl = reinterpret_cast<uint8_t*>(active[0][0].ptr(y));
-    uint8_t* ptr_active_tr = reinterpret_cast<uint8_t*>(active[0][1].ptr(y));
-    uint8_t* ptr_active_bl = reinterpret_cast<uint8_t*>(active[1][0].ptr(y));
-    uint8_t* ptr_active_br = reinterpret_cast<uint8_t*>(active[1][1].ptr(y));
+    const cv::Vec2b *ptr_active = reinterpret_cast<const cv::Vec2b *>(active_mat.ptr(y));
+    uint8_t *ptr_active_tl = reinterpret_cast<uint8_t *>(active[0][0].ptr(y));
+    uint8_t *ptr_active_tr = reinterpret_cast<uint8_t *>(active[0][1].ptr(y));
+    uint8_t *ptr_active_bl = reinterpret_cast<uint8_t *>(active[1][0].ptr(y));
+    uint8_t *ptr_active_br = reinterpret_cast<uint8_t *>(active[1][1].ptr(y));
     for (int x = 0; x < w; ++x)
     {
       if (ptr_active[x][0] == top)
@@ -605,7 +605,7 @@ void MergePatch::merge_patches_cross(MergePatch& patch_tl, cv::Rect region_tl, M
   }
 }
 
-static cv::Mat get_patch_boundary(const MergePatch& patch, int overscan, double scale)
+static cv::Mat get_patch_boundary(const MergePatch &patch, int overscan, double scale)
 {
   const double delta = 1.0 / scale;
 
@@ -625,7 +625,7 @@ static cv::Mat get_patch_boundary(const MergePatch& patch, int overscan, double 
     double pos_x = patch.anchor_target.x + (x - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_top())
+    for (const BezierCurve &b : patch.target_curves_top())
     {
       const double t = b.find_x(pos_x);
       p = p_invalid;
@@ -662,7 +662,7 @@ static cv::Mat get_patch_boundary(const MergePatch& patch, int overscan, double 
     double pos_x = patch.anchor_target.x + (x - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_bottom())
+    for (const BezierCurve &b : patch.target_curves_bottom())
     {
       const double t = b.find_x(pos_x);
       p = p_invalid;
@@ -699,7 +699,7 @@ static cv::Mat get_patch_boundary(const MergePatch& patch, int overscan, double 
     double pos_y = patch.anchor_target.y + (y - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_left())
+    for (const BezierCurve &b : patch.target_curves_left())
     {
       const double t = b.find_y(pos_y);
       if (t >= 0.0 && t <= 1.0)
@@ -735,13 +735,13 @@ static cv::Mat get_patch_boundary(const MergePatch& patch, int overscan, double 
     double pos_y = patch.anchor_target.y + (y - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_right())
+    for (const BezierCurve &b : patch.target_curves_right())
     {
       const double t = b.find_y(pos_y);
       if (t >= 0.0 && t <= 1.0)
       {
         int x = static_cast<int>((b.eval_x(t) - patch.anchor_target.x) * scale + overscan);
-        x = std::min(x, mask.cols-1);
+        x = std::min(x, mask.cols - 1);
         p.x = x;
         p.y = y;
         break;
@@ -771,7 +771,7 @@ static cv::Mat get_patch_boundary(const MergePatch& patch, int overscan, double 
   return mask;
 }
 
-static cv::Mat get_source_patch_boundary(const MergePatch& patch, int overscan, double scale)
+static cv::Mat get_source_patch_boundary(const MergePatch &patch, int overscan, double scale)
 {
   const double delta = 1.0 / scale;
 
@@ -791,7 +791,7 @@ static cv::Mat get_source_patch_boundary(const MergePatch& patch, int overscan, 
     double pos_x = patch.anchor_target.x + (x - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_top())
+    for (const BezierCurve &b : patch.target_curves_top())
     {
       const double t = b.find_x(pos_x);
       p = p_invalid;
@@ -828,7 +828,7 @@ static cv::Mat get_source_patch_boundary(const MergePatch& patch, int overscan, 
     double pos_x = patch.anchor_target.x + (x - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_bottom())
+    for (const BezierCurve &b : patch.target_curves_bottom())
     {
       const double t = b.find_x(pos_x);
       p = p_invalid;
@@ -865,7 +865,7 @@ static cv::Mat get_source_patch_boundary(const MergePatch& patch, int overscan, 
     double pos_y = patch.anchor_target.y + (y - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_left())
+    for (const BezierCurve &b : patch.target_curves_left())
     {
       const double t = b.find_y(pos_y);
       if (t >= 0.0 && t <= 1.0)
@@ -901,13 +901,13 @@ static cv::Mat get_source_patch_boundary(const MergePatch& patch, int overscan, 
     double pos_y = patch.anchor_target.y + (y - overscan) * delta;
 
     p = p_invalid;
-    for (const BezierCurve& b : patch.target_curves_right())
+    for (const BezierCurve &b : patch.target_curves_right())
     {
       const double t = b.find_y(pos_y);
       if (t >= 0.0 && t <= 1.0)
       {
         int x = static_cast<int>((b.eval_x(t) - patch.anchor_target.x) * scale + overscan);
-        x = std::min(x, mask.cols-1);
+        x = std::min(x, mask.cols - 1);
         p.x = x;
         p.y = y;
         break;
@@ -937,7 +937,7 @@ static cv::Mat get_source_patch_boundary(const MergePatch& patch, int overscan, 
   return mask;
 }
 
-static cv::Mat get_patch_mask(const MergePatch& patch, int overscan, double scale)
+static cv::Mat get_patch_mask(const MergePatch &patch, int overscan, double scale)
 {
   /*
    * Get patch boundary.
@@ -952,13 +952,13 @@ static cv::Mat get_patch_mask(const MergePatch& patch, int overscan, double scal
   for (int x = 0; x < mask.cols; ++x)
   {
     stack.emplace_back(x, 0);
-    stack.emplace_back(x, mask.rows-1);
+    stack.emplace_back(x, mask.rows - 1);
   }
 
   for (int y = 0; y < mask.rows; ++y)
   {
     stack.emplace_back(0, y);
-    stack.emplace_back(mask.cols-1, y);
+    stack.emplace_back(mask.cols - 1, y);
   }
 
   while (!stack.empty())
@@ -967,8 +967,8 @@ static cv::Mat get_patch_mask(const MergePatch& patch, int overscan, double scal
     stack.pop_front();
 
     if (p.x >= 0 && p.x < mask.cols &&
-      p.y >= 0 && p.y < mask.rows &&
-      !mask.at<unsigned char>(p))
+        p.y >= 0 && p.y < mask.rows &&
+        !mask.at<unsigned char>(p))
     {
       mask.at<unsigned char>(p) = 255;
       stack.emplace_back(p.x, p.y + 1);
@@ -985,7 +985,7 @@ static cv::Mat get_patch_mask(const MergePatch& patch, int overscan, double scal
   return mask;
 }
 
-static void get_patch_boundaries(const MergePatch& patch, float dx, float dy, std::vector<float>& x_vals, std::vector<float>& y_vals, std::vector<float>& x_start, std::vector<float>& x_end, std::vector<float>& y_start, std::vector<float>& y_end)
+static void get_patch_boundaries(const MergePatch &patch, float dx, float dy, std::vector<float> &x_vals, std::vector<float> &y_vals, std::vector<float> &x_start, std::vector<float> &x_end, std::vector<float> &y_start, std::vector<float> &y_end)
 {
   const std::vector<BezierCurve> target_curves_top = patch.target_curves_top();
   const std::vector<BezierCurve> target_curves_bottom = patch.target_curves_bottom();
@@ -1008,7 +1008,7 @@ static void get_patch_boundaries(const MergePatch& patch, float dx, float dy, st
   {
     x_vals.push_back(x);
     bool success = false;
-    for (const BezierCurve& b : target_curves_top)
+    for (const BezierCurve &b : target_curves_top)
     {
       double t = b.find_x(x);
       if (t >= 0.0 && t <= 1.0)
@@ -1024,7 +1024,7 @@ static void get_patch_boundaries(const MergePatch& patch, float dx, float dy, st
     }
 
     success = false;
-    for (const BezierCurve& b : target_curves_bottom)
+    for (const BezierCurve &b : target_curves_bottom)
     {
       double t = b.find_x(x);
       if (t >= 0.0 && t <= 1.0)
@@ -1047,7 +1047,7 @@ static void get_patch_boundaries(const MergePatch& patch, float dx, float dy, st
   {
     y_vals.push_back(y);
     bool success = false;
-    for (const BezierCurve& b : target_curves_left)
+    for (const BezierCurve &b : target_curves_left)
     {
       double t = b.find_y(y);
       if (t >= 0.0 && t <= 1.0)
@@ -1063,7 +1063,7 @@ static void get_patch_boundaries(const MergePatch& patch, float dx, float dy, st
     }
 
     success = false;
-    for (const BezierCurve& b : target_curves_right)
+    for (const BezierCurve &b : target_curves_right)
     {
       double t = b.find_y(y);
       if (t >= 0.0 && t <= 1.0)
@@ -1080,7 +1080,7 @@ static void get_patch_boundaries(const MergePatch& patch, float dx, float dy, st
   }
 }
 
-cv::Mat MergePatch::draw(const std::vector<MergePatch>& patches, const std::vector<Texture>& textures, double scale, bool draw_boundaries)
+cv::Mat MergePatch::draw(const std::vector<MergePatch> &patches, const std::vector<Texture> &textures, double scale, bool draw_boundaries)
 {
   if (patches.empty())
   {
@@ -1088,19 +1088,19 @@ cv::Mat MergePatch::draw(const std::vector<MergePatch>& patches, const std::vect
   }
 
   cv::Rect bbox(patches[0].anchor_target, patches[0].size);
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     bbox = cv::boundingRect(std::vector<cv::Point>({bbox.tl(), bbox.br() - cv::Point(1, 1), patch.anchor_target, patch.anchor_target + cv::Point(patch.size)}));
   }
 
-  cv::Mat image(static_cast<int>((bbox.height-1) * scale), static_cast<int>((bbox.width-1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat image(static_cast<int>((bbox.height - 1) * scale), static_cast<int>((bbox.width - 1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
   cv::Mat boundary_mask;
   if (draw_boundaries)
   {
     boundary_mask = cv::Mat::zeros(image.size(), CV_32FC1);
   }
 
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     const int overscan = static_cast<int>(2 * scale);
     cv::Mat mask = get_patch_mask(patch, overscan, scale);
@@ -1141,15 +1141,15 @@ cv::Mat MergePatch::draw(const std::vector<MergePatch>& patches, const std::vect
     cv::Mat image_roi = image(rect_roi);
     for (int y = y_beg; y < y_end; ++y)
     {
-      const unsigned char* mask_ptr = reinterpret_cast<const unsigned char*>(mask.ptr(y));
-      cv::Vec3b* image_ptr = reinterpret_cast<cv::Vec3b*>(image_roi.ptr(y-y_beg));
+      const unsigned char *mask_ptr = reinterpret_cast<const unsigned char *>(mask.ptr(y));
+      cv::Vec3b *image_ptr = reinterpret_cast<cv::Vec3b *>(image_roi.ptr(y - y_beg));
       for (int x = x_beg; x < x_end; ++x)
       {
         if (mask_ptr[x])
         {
           cv::Point2f p_source = AffineTransformation::transform(patch.transformation_source_inv,
-            cv::Point2f(static_cast<float>(patch.anchor_source.x + (x - overscan) / scale), static_cast<float>(patch.anchor_source.y + (y - overscan) / scale)));
-          image_ptr[x-x_beg] = textures[patch.source_index].interpolate_texture(p_source);
+                                                                 cv::Point2f(static_cast<float>(patch.anchor_source.x + (x - overscan) / scale), static_cast<float>(patch.anchor_source.y + (y - overscan) / scale)));
+          image_ptr[x - x_beg] = textures[patch.source_index].interpolate_texture(p_source);
         }
       }
     }
@@ -1160,13 +1160,13 @@ cv::Mat MergePatch::draw(const std::vector<MergePatch>& patches, const std::vect
       cv::Mat boundary_mask_roi = boundary_mask(rect_roi);
       for (int y = y_beg; y < y_end; ++y)
       {
-        const unsigned char* mask_ptr = reinterpret_cast<const unsigned char*>(patch_boundary.ptr(y));
-        float* boundary_mask_ptr = reinterpret_cast<float*>(boundary_mask_roi.ptr(y-y_beg));
+        const unsigned char *mask_ptr = reinterpret_cast<const unsigned char *>(patch_boundary.ptr(y));
+        float *boundary_mask_ptr = reinterpret_cast<float *>(boundary_mask_roi.ptr(y - y_beg));
         for (int x = x_beg; x < x_end; ++x)
         {
           if (mask_ptr[x])
           {
-            boundary_mask_ptr[x-x_beg] = 1.0f;
+            boundary_mask_ptr[x - x_beg] = 1.0f;
           }
         }
       }
@@ -1177,11 +1177,11 @@ cv::Mat MergePatch::draw(const std::vector<MergePatch>& patches, const std::vect
   {
     const cv::Vec3b dark_brown(14, 29, 43);
     cv::GaussianBlur(boundary_mask, boundary_mask, cv::Size(5, 5), 0.0);
-    
+
     for (int y = 0; y < image.rows; ++y)
     {
-      cv::Vec3b* ptr_image = reinterpret_cast<cv::Vec3b*>(image.ptr(y));
-      const float* ptr_mask = reinterpret_cast<const float*>(boundary_mask.ptr(y));
+      cv::Vec3b *ptr_image = reinterpret_cast<cv::Vec3b *>(image.ptr(y));
+      const float *ptr_mask = reinterpret_cast<const float *>(boundary_mask.ptr(y));
       for (int x = 0; x < image.cols; ++x)
       {
         ptr_image[x] = ptr_mask[x] * dark_brown + (1.0f - ptr_mask[x]) * ptr_image[x];
@@ -1192,17 +1192,17 @@ cv::Mat MergePatch::draw(const std::vector<MergePatch>& patches, const std::vect
   return image;
 }
 
-cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const boost::filesystem::path& base_path, const std::vector<Texture>& textures, double scale, bool draw_boundaries)
+cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch> &patches, const boost::filesystem::path &base_path, const std::vector<Texture> &textures, double scale, bool draw_boundaries)
 {
   std::vector<Texture> textures_fullres;
-  for (const Texture& t : textures)
+  for (const Texture &t : textures)
   {
     textures_fullres.emplace_back(base_path / t.filename, t.dpi, 1.0);
   }
   return draw_fullres(patches, textures, textures_fullres, scale, draw_boundaries);
 }
 
-cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const std::vector<Texture>& textures, const std::vector<Texture>& textures_fullres, double scale, bool draw_boundaries)
+cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch> &patches, const std::vector<Texture> &textures, const std::vector<Texture> &textures_fullres, double scale, bool draw_boundaries)
 {
   if (patches.empty())
   {
@@ -1210,7 +1210,7 @@ cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const s
   }
 
   cv::Rect bbox(patches[0].anchor_target, patches[0].size);
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     bbox = cv::boundingRect(std::vector<cv::Point>({bbox.tl(), bbox.br() - cv::Point(1, 1), patch.anchor_target, patch.anchor_target + cv::Point(patch.size)}));
   }
@@ -1218,14 +1218,14 @@ cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const s
   const float dx = static_cast<float>(1.0f / scale);
   const float dy = static_cast<float>(1.0f / scale);
 
-  cv::Mat image(static_cast<int>((bbox.height-1) * scale), static_cast<int>((bbox.width-1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat image(static_cast<int>((bbox.height - 1) * scale), static_cast<int>((bbox.width - 1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
   cv::Mat boundary_mask;
   if (draw_boundaries)
   {
     boundary_mask = cv::Mat::zeros(image.size(), CV_32FC1);
   }
 
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     const double texture_scale = 1.0 / textures[patch.source_index].scale;
     const cv::Mat T_source = AffineTransformation::concat(AffineTransformation::T_scale(texture_scale, texture_scale), patch.transformation_source_inv);
@@ -1270,15 +1270,15 @@ cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const s
 
     for (int y = y_beg; y < y_end; ++y)
     {
-      const unsigned char* mask_ptr = reinterpret_cast<const unsigned char*>(mask.ptr(y));
-      cv::Vec3b* image_ptr = reinterpret_cast<cv::Vec3b*>(image_roi.ptr(y-y_beg));
+      const unsigned char *mask_ptr = reinterpret_cast<const unsigned char *>(mask.ptr(y));
+      cv::Vec3b *image_ptr = reinterpret_cast<cv::Vec3b *>(image_roi.ptr(y - y_beg));
       for (int x = x_beg; x < x_end; ++x)
       {
         if (mask_ptr[x])
         {
           cv::Point2f p_source = AffineTransformation::transform(T_source,
-            cv::Point2f(static_cast<float>(patch.anchor_source.x + (x - overscan) / scale), static_cast<float>(patch.anchor_source.y + (y - overscan) / scale)));
-          image_ptr[x-x_beg] = textures_fullres[patch.source_index].interpolate_texture(p_source);
+                                                                 cv::Point2f(static_cast<float>(patch.anchor_source.x + (x - overscan) / scale), static_cast<float>(patch.anchor_source.y + (y - overscan) / scale)));
+          image_ptr[x - x_beg] = textures_fullres[patch.source_index].interpolate_texture(p_source);
         }
       }
     }
@@ -1289,13 +1289,13 @@ cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const s
       cv::Mat boundary_mask_roi = boundary_mask(rect_roi);
       for (int y = y_beg; y < y_end; ++y)
       {
-        const unsigned char* mask_ptr = reinterpret_cast<const unsigned char*>(patch_boundary.ptr(y));
-        float* boundary_mask_ptr = reinterpret_cast<float*>(boundary_mask_roi.ptr(y-y_beg));
+        const unsigned char *mask_ptr = reinterpret_cast<const unsigned char *>(patch_boundary.ptr(y));
+        float *boundary_mask_ptr = reinterpret_cast<float *>(boundary_mask_roi.ptr(y - y_beg));
         for (int x = x_beg; x < x_end; ++x)
         {
           if (mask_ptr[x])
           {
-            boundary_mask_ptr[x-x_beg] = 1.0f;
+            boundary_mask_ptr[x - x_beg] = 1.0f;
           }
         }
       }
@@ -1309,8 +1309,8 @@ cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const s
 
     for (int y = 0; y < image.rows; ++y)
     {
-      cv::Vec3b* ptr_image = reinterpret_cast<cv::Vec3b*>(image.ptr(y));
-      const float* ptr_mask = reinterpret_cast<const float*>(boundary_mask.ptr(y));
+      cv::Vec3b *ptr_image = reinterpret_cast<cv::Vec3b *>(image.ptr(y));
+      const float *ptr_mask = reinterpret_cast<const float *>(boundary_mask.ptr(y));
       for (int x = 0; x < image.cols; ++x)
       {
         ptr_image[x] = ptr_mask[x] * dark_brown + (1.0f - ptr_mask[x]) * ptr_image[x];
@@ -1321,20 +1321,20 @@ cv::Mat MergePatch::draw_fullres(const std::vector<MergePatch>& patches, const s
   return image;
 }
 
-std::vector<cv::Mat> MergePatch::draw_source_fullres(const std::vector<MergePatch>& patches, const boost::filesystem::path& base_path, const std::vector<Texture>& textures, double scale)
+std::vector<cv::Mat> MergePatch::draw_source_fullres(const std::vector<MergePatch> &patches, const boost::filesystem::path &base_path, const std::vector<Texture> &textures, double scale)
 {
   std::vector<Texture> textures_fullres;
-  for (const Texture& t : textures)
+  for (const Texture &t : textures)
   {
     textures_fullres.emplace_back(base_path / t.filename, t.dpi, 1.0);
   }
   return draw_source_fullres(patches, textures, textures_fullres, scale);
 }
 
-std::vector<cv::Mat> MergePatch::draw_source_fullres(const std::vector<MergePatch>& patches, const std::vector<Texture>& textures, const std::vector<Texture>& textures_fullres, double scale)
+std::vector<cv::Mat> MergePatch::draw_source_fullres(const std::vector<MergePatch> &patches, const std::vector<Texture> &textures, const std::vector<Texture> &textures_fullres, double scale)
 {
   std::vector<cv::Mat> images;
-  for (const Texture& t : textures)
+  for (const Texture &t : textures)
   {
     cv::Mat image = t.texture.clone();
     image.convertTo(image, CV_8UC3, 1.0 / 255.0);
@@ -1343,7 +1343,7 @@ std::vector<cv::Mat> MergePatch::draw_source_fullres(const std::vector<MergePatc
 
   draw_bezier_curves_source(images, patches, scale);
 
-  for (const cv::Mat& image : images)
+  for (const cv::Mat &image : images)
   {
     cv::imshow("Image", image);
     cv::waitKey(0);
@@ -1351,7 +1351,7 @@ std::vector<cv::Mat> MergePatch::draw_source_fullres(const std::vector<MergePatc
   std::exit(0);
 }
 
-void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std::vector<int>>& patch_indices, int x, int y_start, int y_end, int subpatch_size, int start_top, int start_bottom)
+void MergePatch::merge_patches_x(std::vector<MergePatch> &patches, const mat<std::vector<int>> &patch_indices, int x, int y_start, int y_end, int subpatch_size, int start_top, int start_bottom)
 {
   /*
   * Build error matrix.
@@ -1365,7 +1365,7 @@ void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std
 
   for (int y = y_start; y < y_end; ++y)
   {
-    const std::vector<int>& indices_coord = patch_indices(y, x);
+    const std::vector<int> &indices_coord = patch_indices(y, x);
 
     indices_left_vec.emplace_back();
     indices_right_vec.emplace_back();
@@ -1395,11 +1395,11 @@ void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std
 
     for (int y_pix = 0; y_pix < subpatch_size; ++y_pix)
     {
-      float* ptr_error_left = reinterpret_cast<float*>(error_left_subpatch.ptr(y_pix));
+      float *ptr_error_left = reinterpret_cast<float *>(error_left_subpatch.ptr(y_pix));
       for (size_t i = 0; i < indices_left_vec.back().size(); ++i)
       {
-        const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(active_left_vec.back()[i].ptr(y_pix));
-        const float* ptr_error = reinterpret_cast<const float*>(error_left_vec.back()[i].ptr(y_pix));
+        const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(active_left_vec.back()[i].ptr(y_pix));
+        const float *ptr_error = reinterpret_cast<const float *>(error_left_vec.back()[i].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix])
@@ -1409,11 +1409,11 @@ void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std
         }
       }
 
-      float* ptr_error_right = reinterpret_cast<float*>(error_right_subpatch.ptr(y_pix));
+      float *ptr_error_right = reinterpret_cast<float *>(error_right_subpatch.ptr(y_pix));
       for (size_t i = 0; i < indices_right_vec.back().size(); ++i)
       {
-        const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(active_right_vec.back()[i].ptr(y_pix));
-        const float* ptr_error = reinterpret_cast<const float*>(error_right_vec.back()[i].ptr(y_pix));
+        const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(active_right_vec.back()[i].ptr(y_pix));
+        const float *ptr_error = reinterpret_cast<const float *>(error_right_vec.back()[i].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix])
@@ -1431,10 +1431,10 @@ void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std
     cv::Mat active_subpatch = active(cv::Rect(0, i * subpatch_size, subpatch_size, subpatch_size));
     for (int y_pix = 0; y_pix < subpatch_size; ++y_pix)
     {
-      const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(active_subpatch.ptr(y_pix));
+      const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(active_subpatch.ptr(y_pix));
       for (size_t j = 0; j < indices_left_vec[i].size(); ++j)
       {
-        uint8_t* ptr_active_left = reinterpret_cast<uint8_t*>(active_left_vec[i][j].ptr(y_pix));
+        uint8_t *ptr_active_left = reinterpret_cast<uint8_t *>(active_left_vec[i][j].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix] == right)
@@ -1445,7 +1445,7 @@ void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std
       }
       for (size_t j = 0; j < indices_right_vec[i].size(); ++j)
       {
-        uint8_t* ptr_active_right = reinterpret_cast<uint8_t*>(active_right_vec[i][j].ptr(y_pix));
+        uint8_t *ptr_active_right = reinterpret_cast<uint8_t *>(active_right_vec[i][j].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix] == left)
@@ -1458,7 +1458,7 @@ void MergePatch::merge_patches_x(std::vector<MergePatch>& patches, const mat<std
   }
 }
 
-void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std::vector<int>>& patch_indices, int y, int x_start, int x_end, int subpatch_size, int start_left, int start_right)
+void MergePatch::merge_patches_y(std::vector<MergePatch> &patches, const mat<std::vector<int>> &patch_indices, int y, int x_start, int x_end, int subpatch_size, int start_left, int start_right)
 {
   /*
    * Build error matrix.
@@ -1472,7 +1472,7 @@ void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std
 
   for (int x = x_start; x < x_end; ++x)
   {
-    const std::vector<int>& indices_coord = patch_indices(y, x);
+    const std::vector<int> &indices_coord = patch_indices(y, x);
 
     indices_top_vec.emplace_back();
     indices_bottom_vec.emplace_back();
@@ -1502,11 +1502,11 @@ void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std
 
     for (int y_pix = 0; y_pix < subpatch_size; ++y_pix)
     {
-      float* ptr_error_top = reinterpret_cast<float*>(error_top_subpatch.ptr(y_pix));
+      float *ptr_error_top = reinterpret_cast<float *>(error_top_subpatch.ptr(y_pix));
       for (size_t i = 0; i < indices_top_vec.back().size(); ++i)
       {
-        const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(active_top_vec.back()[i].ptr(y_pix));
-        const float* ptr_error = reinterpret_cast<const float*>(error_top_vec.back()[i].ptr(y_pix));
+        const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(active_top_vec.back()[i].ptr(y_pix));
+        const float *ptr_error = reinterpret_cast<const float *>(error_top_vec.back()[i].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix])
@@ -1516,11 +1516,11 @@ void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std
         }
       }
 
-      float* ptr_error_bottom = reinterpret_cast<float*>(error_bottom_subpatch.ptr(y_pix));
+      float *ptr_error_bottom = reinterpret_cast<float *>(error_bottom_subpatch.ptr(y_pix));
       for (size_t i = 0; i < indices_bottom_vec.back().size(); ++i)
       {
-        const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(active_bottom_vec.back()[i].ptr(y_pix));
-        const float* ptr_error = reinterpret_cast<const float*>(error_bottom_vec.back()[i].ptr(y_pix));
+        const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(active_bottom_vec.back()[i].ptr(y_pix));
+        const float *ptr_error = reinterpret_cast<const float *>(error_bottom_vec.back()[i].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix])
@@ -1538,10 +1538,10 @@ void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std
     cv::Mat active_subpatch = active(cv::Rect(i * subpatch_size, 0, subpatch_size, subpatch_size));
     for (int y_pix = 0; y_pix < subpatch_size; ++y_pix)
     {
-      const uint8_t* ptr_active = reinterpret_cast<const uint8_t*>(active_subpatch.ptr(y_pix));
+      const uint8_t *ptr_active = reinterpret_cast<const uint8_t *>(active_subpatch.ptr(y_pix));
       for (size_t j = 0; j < indices_top_vec[i].size(); ++j)
       {
-        uint8_t* ptr_active_top = reinterpret_cast<uint8_t*>(active_top_vec[i][j].ptr(y_pix));
+        uint8_t *ptr_active_top = reinterpret_cast<uint8_t *>(active_top_vec[i][j].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix] == bottom)
@@ -1552,7 +1552,7 @@ void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std
       }
       for (size_t j = 0; j < indices_bottom_vec[i].size(); ++j)
       {
-        uint8_t* ptr_active_bottom = reinterpret_cast<uint8_t*>(active_bottom_vec[i][j].ptr(y_pix));
+        uint8_t *ptr_active_bottom = reinterpret_cast<uint8_t *>(active_bottom_vec[i][j].ptr(y_pix));
         for (int x_pix = 0; x_pix < subpatch_size; ++x_pix)
         {
           if (ptr_active[x_pix] == top)
@@ -1565,7 +1565,7 @@ void MergePatch::merge_patches_y(std::vector<MergePatch>& patches, const mat<std
   }
 }
 
-void MergePatch::merge_patches_x(MergePatch& patch_left, MergePatch& patch_right, int y_subpatch, int x_subpatch)
+void MergePatch::merge_patches_x(MergePatch &patch_left, MergePatch &patch_right, int y_subpatch, int x_subpatch)
 {
   cv::Mat error_left = patch_left.get_error_mat(y_subpatch, x_subpatch);
   cv::Mat error_right = patch_right.get_error_mat(y_subpatch, x_subpatch);
@@ -1576,9 +1576,9 @@ void MergePatch::merge_patches_x(MergePatch& patch_left, MergePatch& patch_right
 
   for (int y = 0; y < active.rows; ++y)
   {
-    uint8_t* ptr_left = active_left.ptr(y);
-    uint8_t* ptr_right = active_right.ptr(y);
-    const uint8_t* ptr = active.ptr(y);
+    uint8_t *ptr_left = active_left.ptr(y);
+    uint8_t *ptr_right = active_right.ptr(y);
+    const uint8_t *ptr = active.ptr(y);
     for (int x = 0; x < active.cols; ++x)
     {
       if (ptr[x] == left)
@@ -1595,7 +1595,7 @@ void MergePatch::merge_patches_x(MergePatch& patch_left, MergePatch& patch_right
   }
 }
 
-void MergePatch::merge_patches_y(MergePatch& patch_top, MergePatch& patch_bottom, int y_subpatch, int x_subpatch)
+void MergePatch::merge_patches_y(MergePatch &patch_top, MergePatch &patch_bottom, int y_subpatch, int x_subpatch)
 {
   cv::Mat error_top = patch_top.get_error_mat(y_subpatch, x_subpatch);
   cv::Mat error_bottom = patch_bottom.get_error_mat(y_subpatch, x_subpatch);
@@ -1606,9 +1606,9 @@ void MergePatch::merge_patches_y(MergePatch& patch_top, MergePatch& patch_bottom
 
   for (int y = 0; y < active.rows; ++y)
   {
-    uint8_t* ptr_top = active_top.ptr(y);
-    uint8_t* ptr_bottom = active_bottom.ptr(y);
-    const uint8_t* ptr = active.ptr(y);
+    uint8_t *ptr_top = active_top.ptr(y);
+    uint8_t *ptr_bottom = active_bottom.ptr(y);
+    const uint8_t *ptr = active.ptr(y);
     for (int x = 0; x < active.cols; ++x)
     {
       if (ptr[x] == top)
@@ -1625,7 +1625,7 @@ void MergePatch::merge_patches_y(MergePatch& patch_top, MergePatch& patch_bottom
   }
 }
 
-void MergePatch::merge_patches_cross(std::vector<MergePatch>& patches, const std::vector<int> cross_indices, int subpatch_size)
+void MergePatch::merge_patches_cross(std::vector<MergePatch> &patches, const std::vector<int> cross_indices, int subpatch_size)
 {
   if (cross_indices.size() != 4)
   {
@@ -1649,10 +1649,10 @@ void MergePatch::merge_patches_cross(std::vector<MergePatch>& patches, const std
   /*
    * Find out which patch belongs to which corner of the overlapping region.
    */
-  MergePatch* patch_tl = 0;
-  MergePatch* patch_tr = 0;
-  MergePatch* patch_bl = 0;
-  MergePatch* patch_br = 0;
+  MergePatch *patch_tl = 0;
+  MergePatch *patch_tr = 0;
+  MergePatch *patch_bl = 0;
+  MergePatch *patch_br = 0;
   cv::Point overlap_region_center = (overlap_region.tl() + overlap_region.br()) / 2;
   for (int i : cross_indices)
   {
@@ -1704,8 +1704,6 @@ std::vector<int> MergePatch::get_cut_coordinates_horiz(int y_subpatch, int x_sub
 
   cv::Mat active_mat = get_active_pixel(y_subpatch, x_subpatch);
 
-
-
   for (int x = 0; x < active_mat.cols; ++x)
   {
     int y = 0;
@@ -1738,7 +1736,7 @@ std::vector<int> MergePatch::get_cut_coordinates_vert(int y_subpatch, int x_subp
   const uint val_left = subpatch_center.x < x_subpatch ? 1 : 0;
 
   cv::Mat active_mat = get_active_pixel(y_subpatch, x_subpatch);
-  
+
   for (int y = 0; y < active_mat.rows; ++y)
   {
     int x = 0;
@@ -1783,7 +1781,7 @@ cv::Mat MergePatch::get_active_pixel(cv::Rect region_global) const
   return active_pixel(region_local);
 }
 
-void MergePatch::add_curve_horiz(int y_subpatch, int x_subpatch, const BezierCurve& curve)
+void MergePatch::add_curve_horiz(int y_subpatch, int x_subpatch, const BezierCurve &curve)
 {
   if (region_subpatch.y + region_subpatch.height / 2 < y_subpatch)
   {
@@ -1795,7 +1793,7 @@ void MergePatch::add_curve_horiz(int y_subpatch, int x_subpatch, const BezierCur
   }
 }
 
-void MergePatch::add_curve_vert(int y_subpatch, int x_subpatch, const BezierCurve& curve)
+void MergePatch::add_curve_vert(int y_subpatch, int x_subpatch, const BezierCurve &curve)
 {
   if (region_subpatch.x + region_subpatch.width / 2 < x_subpatch)
   {
@@ -1807,54 +1805,54 @@ void MergePatch::add_curve_vert(int y_subpatch, int x_subpatch, const BezierCurv
   }
 }
 
-void MergePatch::draw_bezier_curves(cv::Mat image, const std::vector<MergePatch>& patches, double factor, const cv::Point2d& delta)
+void MergePatch::draw_bezier_curves(cv::Mat image, const std::vector<MergePatch> &patches, double factor, const cv::Point2d &delta)
 {
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
-    for (const BezierCurve& curve : patch.m_curves_left)
+    for (const BezierCurve &curve : patch.m_curves_left)
     {
       (curve + delta).draw(image, patch.subpatch_size, factor);
     }
-    for (const BezierCurve& curve : patch.m_curves_right)
+    for (const BezierCurve &curve : patch.m_curves_right)
     {
       (curve + delta).draw(image, patch.subpatch_size, factor);
     }
-    for (const BezierCurve& curve : patch.m_curves_top)
+    for (const BezierCurve &curve : patch.m_curves_top)
     {
       (curve + delta).draw(image, patch.subpatch_size, factor);
     }
-    for (const BezierCurve& curve : patch.m_curves_bottom)
+    for (const BezierCurve &curve : patch.m_curves_bottom)
     {
       (curve + delta).draw(image, patch.subpatch_size, factor);
     }
   }
 }
 
-void MergePatch::draw_bezier_curves_source(std::vector<cv::Mat>& images, const std::vector<MergePatch>& patches, double factor)
+void MergePatch::draw_bezier_curves_source(std::vector<cv::Mat> &images, const std::vector<MergePatch> &patches, double factor)
 {
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     cv::Mat image = images[patch.source_index];
-    for (const BezierCurve& curve : patch.source_curves_left())
+    for (const BezierCurve &curve : patch.source_curves_left())
     {
       curve.draw(image, patch.subpatch_size, factor);
     }
-    for (const BezierCurve& curve : patch.source_curves_right())
+    for (const BezierCurve &curve : patch.source_curves_right())
     {
       curve.draw(image, patch.subpatch_size, factor);
     }
-    for (const BezierCurve& curve : patch.source_curves_top())
+    for (const BezierCurve &curve : patch.source_curves_top())
     {
       curve.draw(image, patch.subpatch_size, factor);
     }
-    for (const BezierCurve& curve : patch.source_curves_bottom())
+    for (const BezierCurve &curve : patch.source_curves_bottom())
     {
       curve.draw(image, patch.subpatch_size, factor);
     }
   }
 }
 
-std::vector<int> MergePatch::get_cut_coordinates_horiz(const std::vector<MergePatch>& patches, const mat<std::vector<int>>& subpatch_index_mat, int y_subpatch, int x_subpatch, int subpatch_size)
+std::vector<int> MergePatch::get_cut_coordinates_horiz(const std::vector<MergePatch> &patches, const mat<std::vector<int>> &subpatch_index_mat, int y_subpatch, int x_subpatch, int subpatch_size)
 {
   std::vector<int> coordinates;
   cv::Mat active_mat = cv::Mat::zeros(subpatch_size, subpatch_size, CV_8UC1);
@@ -1883,7 +1881,7 @@ std::vector<int> MergePatch::get_cut_coordinates_horiz(const std::vector<MergePa
   return coordinates;
 }
 
-std::vector<int> MergePatch::get_cut_coordinates_vert(const std::vector<MergePatch>& patches, const mat<std::vector<int>>& subpatch_index_mat, int y_subpatch, int x_subpatch, int subpatch_size)
+std::vector<int> MergePatch::get_cut_coordinates_vert(const std::vector<MergePatch> &patches, const mat<std::vector<int>> &subpatch_index_mat, int y_subpatch, int x_subpatch, int subpatch_size)
 {
   std::vector<int> coordinates;
   cv::Mat active_mat = cv::Mat::zeros(subpatch_size, subpatch_size, CV_8UC1);
@@ -1919,44 +1917,44 @@ std::vector<int> MergePatch::get_cut_coordinates_vert(const std::vector<MergePat
   return coordinates;
 }
 
-void MergePatch::translate_all_curves(std::vector<MergePatch>& patches, const cv::Point2d delta)
+void MergePatch::translate_all_curves(std::vector<MergePatch> &patches, const cv::Point2d delta)
 {
-  for (MergePatch& patch : patches)
+  for (MergePatch &patch : patches)
   {
-    for (BezierCurve& curve : patch.m_curves_left)
+    for (BezierCurve &curve : patch.m_curves_left)
     {
       curve += delta;
     }
-    for (BezierCurve& curve : patch.m_curves_right)
+    for (BezierCurve &curve : patch.m_curves_right)
     {
       curve += delta;
     }
-    for (BezierCurve& curve : patch.m_curves_top)
+    for (BezierCurve &curve : patch.m_curves_top)
     {
       curve += delta;
     }
-    for (BezierCurve& curve : patch.m_curves_bottom)
+    for (BezierCurve &curve : patch.m_curves_bottom)
     {
       curve += delta;
     }
   }
 }
 
-static void put_front(std::vector<BezierCurve>& curves, const BezierCurve& b1, const BezierCurve& b2)
+static void put_front(std::vector<BezierCurve> &curves, const BezierCurve &b1, const BezierCurve &b2)
 {
   curves.front() = b2;
   curves[1].set_control_point(0, b2.control_point(3));
   curves.insert(curves.begin(), b1);
 }
 
-static void put_back(std::vector<BezierCurve>& curves, const BezierCurve& b1, const BezierCurve& b2)
+static void put_back(std::vector<BezierCurve> &curves, const BezierCurve &b1, const BezierCurve &b2)
 {
   curves.back() = b1;
   curves[curves.size() - 2].set_control_point(3, curves.back().control_point(0));
   curves.push_back(b2);
 }
 
-static void get_neighboring_patches(std::vector<MergePatch>& patches, const mat<std::vector<int>>& indices, int y_subpatch, int x_subpatch, MergePatch*& patch_tl, MergePatch*& patch_tr, MergePatch*& patch_bl, MergePatch*& patch_br)
+static void get_neighboring_patches(std::vector<MergePatch> &patches, const mat<std::vector<int>> &indices, int y_subpatch, int x_subpatch, MergePatch *&patch_tl, MergePatch *&patch_tr, MergePatch *&patch_bl, MergePatch *&patch_br)
 {
   if (indices(y_subpatch, x_subpatch).size() != 4)
   {
@@ -1991,20 +1989,20 @@ static void get_neighboring_patches(std::vector<MergePatch>& patches, const mat<
   }
 }
 
-void MergePatch::fix_curve_corners(std::vector<MergePatch>& patches, const mat<std::vector<int>>& subpatch_index_mat)
+void MergePatch::fix_curve_corners(std::vector<MergePatch> &patches, const mat<std::vector<int>> &subpatch_index_mat)
 {
   const double corner_threshold = 1.0;
-  MergePatch* patch_tl;
-  MergePatch* patch_tr;
-  MergePatch* patch_bl;
-  MergePatch* patch_br;
+  MergePatch *patch_tl;
+  MergePatch *patch_tr;
+  MergePatch *patch_bl;
+  MergePatch *patch_br;
 
   const int rows = subpatch_index_mat.height();
   const int cols = subpatch_index_mat.width();
-  
+
   mat<uint8_t> corner_handled(rows, cols, 0);
 
-  for (MergePatch& patch : patches)
+  for (MergePatch &patch : patches)
   {
     const int x_start = patch.region_subpatch.x;
     const int y_start = patch.region_subpatch.y;
@@ -2052,7 +2050,7 @@ void MergePatch::fix_curve_corners(std::vector<MergePatch>& patches, const mat<s
     }
 
     // Check top right corner
-    if (x_end < cols-1 && y_start > 0 && !corner_handled(y_start, x_end))
+    if (x_end < cols - 1 && y_start > 0 && !corner_handled(y_start, x_end))
     {
       BezierCurve b1 = patch.m_curves_top.back();
       BezierCurve b2 = patch.m_curves_right.front();
@@ -2091,7 +2089,7 @@ void MergePatch::fix_curve_corners(std::vector<MergePatch>& patches, const mat<s
     }
 
     // Check bottom left corner
-    if (x_start > 0 && y_end < rows-1 && !corner_handled(y_end, x_start))
+    if (x_start > 0 && y_end < rows - 1 && !corner_handled(y_end, x_start))
     {
       BezierCurve b1 = patch.m_curves_bottom.front();
       BezierCurve b2 = patch.m_curves_left.back();
@@ -2130,7 +2128,7 @@ void MergePatch::fix_curve_corners(std::vector<MergePatch>& patches, const mat<s
     }
 
     // Check bottom right corner
-    if (x_end < cols-1 && y_end < rows-1 && !corner_handled(y_end, x_end))
+    if (x_end < cols - 1 && y_end < rows - 1 && !corner_handled(y_end, x_end))
     {
       BezierCurve b1 = patch.m_curves_bottom.back();
       BezierCurve b2 = patch.m_curves_right.back();
@@ -2170,7 +2168,7 @@ void MergePatch::fix_curve_corners(std::vector<MergePatch>& patches, const mat<s
   }
 }
 
-cv::Mat MergePatch::draw_rect(const std::vector<MergePatch>& patches, const std::vector<Texture>& textures, double scale, int subpatch_size, bool draw_boundaries)
+cv::Mat MergePatch::draw_rect(const std::vector<MergePatch> &patches, const std::vector<Texture> &textures, double scale, int subpatch_size, bool draw_boundaries)
 {
   if (patches.empty())
   {
@@ -2178,7 +2176,7 @@ cv::Mat MergePatch::draw_rect(const std::vector<MergePatch>& patches, const std:
   }
 
   cv::Rect bbox(patches[0].anchor_target, patches[0].size);
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     bbox = cv::boundingRect(std::vector<cv::Point>({bbox.tl(), bbox.br() - cv::Point(1, 1), patch.anchor_target, patch.anchor_target + cv::Point(patch.size)}));
   }
@@ -2187,14 +2185,14 @@ cv::Mat MergePatch::draw_rect(const std::vector<MergePatch>& patches, const std:
   const float dx = static_cast<float>(1.0f / scale);
   const float dy = static_cast<float>(1.0f / scale);
 
-  cv::Mat image(static_cast<int>((bbox.height-1) * scale), static_cast<int>((bbox.width-1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat image(static_cast<int>((bbox.height - 1) * scale), static_cast<int>((bbox.width - 1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
   cv::Mat boundary_mask;
   if (draw_boundaries)
   {
     boundary_mask = cv::Mat::zeros(image.size(), CV_32FC1);
   }
 
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     float x_start = static_cast<float>(patch.anchor_target.x);
     float x_end = static_cast<float>(patch.anchor_target.x + patch.size.width);
@@ -2235,8 +2233,8 @@ cv::Mat MergePatch::draw_rect(const std::vector<MergePatch>& patches, const std:
 
     if (draw_boundaries)
     {
-      cv::Point p_target_scale(static_cast<int>((x_start - bbox.x)*scale), static_cast<int>((y_start - bbox.y) * scale));
-      cv::Size size_scale(static_cast<int>((x_end-x_start)*scale+1), static_cast<int>((y_end-y_start)*scale+1));
+      cv::Point p_target_scale(static_cast<int>((x_start - bbox.x) * scale), static_cast<int>((y_start - bbox.y) * scale));
+      cv::Size size_scale(static_cast<int>((x_end - x_start) * scale + 1), static_cast<int>((y_end - y_start) * scale + 1));
       cv::rectangle(boundary_mask, cv::Rect(p_target_scale, size_scale), cv::Scalar(1.0f));
     }
   }
@@ -2248,8 +2246,8 @@ cv::Mat MergePatch::draw_rect(const std::vector<MergePatch>& patches, const std:
 
     for (int y = 0; y < image.rows; ++y)
     {
-      cv::Vec3b* ptr_image = reinterpret_cast<cv::Vec3b*>(image.ptr(y));
-      const float* ptr_mask = reinterpret_cast<const float*>(boundary_mask.ptr(y));
+      cv::Vec3b *ptr_image = reinterpret_cast<cv::Vec3b *>(image.ptr(y));
+      const float *ptr_mask = reinterpret_cast<const float *>(boundary_mask.ptr(y));
       for (int x = 0; x < image.cols; ++x)
       {
         ptr_image[x] = ptr_mask[x] * dark_brown + (1.0f - ptr_mask[x]) * ptr_image[x];
@@ -2260,17 +2258,17 @@ cv::Mat MergePatch::draw_rect(const std::vector<MergePatch>& patches, const std:
   return image;
 }
 
-cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, const boost::filesystem::path& base_path, const std::vector<Texture>& textures, double scale, int subpatch_size, bool draw_boundaries)
+cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch> &patches, const boost::filesystem::path &base_path, const std::vector<Texture> &textures, double scale, int subpatch_size, bool draw_boundaries)
 {
   std::vector<Texture> textures_fullres;
-  for (const Texture& t : textures)
+  for (const Texture &t : textures)
   {
     textures_fullres.emplace_back(base_path / t.filename, t.dpi, 1.0);
   }
   return draw_rect_fullres(patches, textures, textures_fullres, scale, subpatch_size, draw_boundaries);
 }
 
-cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, const std::vector<Texture>& textures, const std::vector<Texture>& textures_fullres, double scale, int subpatch_size, bool draw_boundaries)
+cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch> &patches, const std::vector<Texture> &textures, const std::vector<Texture> &textures_fullres, double scale, int subpatch_size, bool draw_boundaries)
 {
   if (patches.empty())
   {
@@ -2278,7 +2276,7 @@ cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, co
   }
 
   cv::Rect bbox(patches[0].anchor_target, patches[0].size);
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     bbox = cv::boundingRect(std::vector<cv::Point>({bbox.tl(), bbox.br() - cv::Point(1, 1), patch.anchor_target, patch.anchor_target + cv::Point(patch.size)}));
   }
@@ -2287,14 +2285,14 @@ cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, co
   const float dx = static_cast<float>(1.0f / scale);
   const float dy = static_cast<float>(1.0f / scale);
 
-  cv::Mat image(static_cast<int>((bbox.height-1) * scale), static_cast<int>((bbox.width-1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
+  cv::Mat image(static_cast<int>((bbox.height - 1) * scale), static_cast<int>((bbox.width - 1) * scale), CV_8UC3, cv::Scalar(255, 255, 255));
   cv::Mat boundary_mask;
   if (draw_boundaries)
   {
     boundary_mask = cv::Mat::zeros(image.size(), CV_32FC1);
   }
 
-  for (const MergePatch& patch : patches)
+  for (const MergePatch &patch : patches)
   {
     const double scale_source = 1.0 / textures[patch.source_index].scale;
     const cv::Mat T_source = AffineTransformation::concat(AffineTransformation::T_scale(scale_source, scale_source), patch.transformation_source_inv);
@@ -2338,8 +2336,8 @@ cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, co
 
     if (draw_boundaries)
     {
-      cv::Point p_target_scale(static_cast<int>((x_start - bbox.x)*scale), static_cast<int>((y_start - bbox.y) * scale));
-      cv::Size size_scale(static_cast<int>((x_end-x_start)*scale+1), static_cast<int>((y_end-y_start)*scale+1));
+      cv::Point p_target_scale(static_cast<int>((x_start - bbox.x) * scale), static_cast<int>((y_start - bbox.y) * scale));
+      cv::Size size_scale(static_cast<int>((x_end - x_start) * scale + 1), static_cast<int>((y_end - y_start) * scale + 1));
       cv::rectangle(boundary_mask, cv::Rect(p_target_scale, size_scale), cv::Scalar(1.0f));
     }
   }
@@ -2351,8 +2349,8 @@ cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, co
 
     for (int y = 0; y < image.rows; ++y)
     {
-      cv::Vec3b* ptr_image = reinterpret_cast<cv::Vec3b*>(image.ptr(y));
-      const float* ptr_mask = reinterpret_cast<const float*>(boundary_mask.ptr(y));
+      cv::Vec3b *ptr_image = reinterpret_cast<cv::Vec3b *>(image.ptr(y));
+      const float *ptr_mask = reinterpret_cast<const float *>(boundary_mask.ptr(y));
       for (int x = 0; x < image.cols; ++x)
       {
         ptr_image[x] = ptr_mask[x] * dark_brown + (1.0f - ptr_mask[x]) * ptr_image[x];
@@ -2363,9 +2361,8 @@ cv::Mat MergePatch::draw_rect_fullres(const std::vector<MergePatch>& patches, co
   return image;
 }
 
-MergePatch::MergePatch(cv::Rect region_subpatch, cv::Point anchor_target, int subpatch_size) :
-  region_subpatch(region_subpatch),
-  subpatch_size(subpatch_size)
+MergePatch::MergePatch(cv::Rect region_subpatch, cv::Point anchor_target, int subpatch_size) : region_subpatch(region_subpatch),
+                                                                                               subpatch_size(subpatch_size)
 {
   size.height = region_subpatch.height * subpatch_size;
   size.width = region_subpatch.width * subpatch_size;
@@ -2373,7 +2370,7 @@ MergePatch::MergePatch(cv::Rect region_subpatch, cv::Point anchor_target, int su
   this->anchor_target = anchor_target;
   pos_patch.x = -1;
   pos_patch.y = -1;
-  active_pixel =  cv::Mat::zeros(size, CV_8UC1);
+  active_pixel = cv::Mat::zeros(size, CV_8UC1);
   target_id = -1;
 }
 
@@ -2403,10 +2400,10 @@ void MergePatch::trim_bezier_curves()
     m_curves_left.erase(std::remove_if(m_curves_left.begin(), m_curves_left.end(), std::mem_fn(&BezierCurve::is_empty_curve)), m_curves_left.end());
     m_curves_right.erase(std::remove_if(m_curves_right.begin(), m_curves_right.end(), std::mem_fn(&BezierCurve::is_empty_curve)), m_curves_right.end());
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl
-      << pos_patch << std::endl;
+              << pos_patch << std::endl;
     cv::Mat image = draw(16.0);
     cv::imshow("Image", image);
     cv::waitKey(0);
@@ -2419,26 +2416,26 @@ cv::Mat MergePatch::draw(double scale) const
   const float dx = static_cast<float>(1.0f / scale);
   const float dy = static_cast<float>(1.0f / scale);
 
-  cv::Mat image = cv::Mat::zeros(static_cast<int>((size.height+8) * scale), static_cast<int>((size.width+8) * scale), CV_8UC3);
+  cv::Mat image = cv::Mat::zeros(static_cast<int>((size.height + 8) * scale), static_cast<int>((size.width + 8) * scale), CV_8UC3);
 
-  cv::line(image, cv::Point(static_cast<int>(4.0*scale), 0), cv::Point(static_cast<int>(4.0*scale), image.rows - 1), cv::Scalar(255));
-  cv::line(image, cv::Point(image.cols - static_cast<int>(4.0*scale), 0), cv::Point(image.cols - static_cast<int>(4.0*scale), image.rows - 1), cv::Scalar(255));
-  cv::line(image, cv::Point(0, static_cast<int>(4.0*scale)), cv::Point(image.cols - 1, static_cast<int>(4.0*scale)), cv::Scalar(255));
-  cv::line(image, cv::Point(0, image.rows - static_cast<int>(4.0*scale)), cv::Point(image.cols - 1, image.rows - static_cast<int>(4.0*scale)), cv::Scalar(255));
+  cv::line(image, cv::Point(static_cast<int>(4.0 * scale), 0), cv::Point(static_cast<int>(4.0 * scale), image.rows - 1), cv::Scalar(255));
+  cv::line(image, cv::Point(image.cols - static_cast<int>(4.0 * scale), 0), cv::Point(image.cols - static_cast<int>(4.0 * scale), image.rows - 1), cv::Scalar(255));
+  cv::line(image, cv::Point(0, static_cast<int>(4.0 * scale)), cv::Point(image.cols - 1, static_cast<int>(4.0 * scale)), cv::Scalar(255));
+  cv::line(image, cv::Point(0, image.rows - static_cast<int>(4.0 * scale)), cv::Point(image.cols - 1, image.rows - static_cast<int>(4.0 * scale)), cv::Scalar(255));
 
-  for (const BezierCurve& curve : m_curves_left)
+  for (const BezierCurve &curve : m_curves_left)
   {
     (curve - anchor_target + cv::Point2d(4.0, 4.0)).draw(image, subpatch_size, scale);
   }
-  for (const BezierCurve& curve : m_curves_right)
+  for (const BezierCurve &curve : m_curves_right)
   {
     (curve - anchor_target + cv::Point2d(4.0, 4.0)).draw(image, subpatch_size, scale);
   }
-  for (const BezierCurve& curve : m_curves_top)
+  for (const BezierCurve &curve : m_curves_top)
   {
     (curve - anchor_target + cv::Point2d(4.0, 4.0)).draw(image, subpatch_size, scale);
   }
-  for (const BezierCurve& curve : m_curves_bottom)
+  for (const BezierCurve &curve : m_curves_bottom)
   {
     (curve - anchor_target + cv::Point2d(4.0, 4.0)).draw(image, subpatch_size, scale);
   }
@@ -2466,19 +2463,19 @@ cv::Mat MergePatch::draw(double scale) const
   return image;
 }
 
-cv::Mat MergePatch::draw_half_rect_fullres(const std::vector<MergePatch>& patches, const boost::filesystem::path& base_path, const std::vector<Texture>& textures, double scale, int subpatch_size, bool draw_boundaries)
+cv::Mat MergePatch::draw_half_rect_fullres(const std::vector<MergePatch> &patches, const boost::filesystem::path &base_path, const std::vector<Texture> &textures, double scale, int subpatch_size, bool draw_boundaries)
 {
   std::vector<Texture> textures_fullres;
-  for (const Texture& t : textures)
+  for (const Texture &t : textures)
   {
     textures_fullres.emplace_back(base_path / t.filename, t.dpi, 1.0);
   }
   return draw_half_rect_fullres(patches, textures, textures_fullres, scale, subpatch_size, draw_boundaries);
 }
 
-cv::Mat MergePatch::draw_half_rect_fullres(std::vector<MergePatch> patches, const std::vector<Texture>& textures, const std::vector<Texture>& textures_fullres, double scale, int subpatch_size, bool draw_boundaries)
+cv::Mat MergePatch::draw_half_rect_fullres(std::vector<MergePatch> patches, const std::vector<Texture> &textures, const std::vector<Texture> &textures_fullres, double scale, int subpatch_size, bool draw_boundaries)
 {
-  for (MergePatch& p : patches)
+  for (MergePatch &p : patches)
   {
     const float x_left = static_cast<float>(p.anchor_target.x + subpatch_size / 2);
     const float x_right = static_cast<float>(p.anchor_target.x + p.size.width - subpatch_size / 2);
@@ -2491,15 +2488,15 @@ cv::Mat MergePatch::draw_half_rect_fullres(std::vector<MergePatch> patches, cons
     for (int i = 0; i < 4; ++i)
     {
       curves_left.emplace_back(cv::Point2f(x_left, y_top + i * y_delta),
-                               cv::Point2f(x_left, y_top + (i+1) * y_delta), 3);
+                               cv::Point2f(x_left, y_top + (i + 1) * y_delta), 3);
 
       curves_right.emplace_back(cv::Point2f(x_right, y_top + i * y_delta),
-                                cv::Point2f(x_right, y_top + (i+1) * y_delta), 3);
+                                cv::Point2f(x_right, y_top + (i + 1) * y_delta), 3);
     }
 
     p.m_curves_left.swap(curves_left);
     p.m_curves_right.swap(curves_right);
-    p.trim_bezier_curves();    
+    p.trim_bezier_curves();
   }
 
   return draw_fullres(patches, textures, textures_fullres, scale, draw_boundaries);

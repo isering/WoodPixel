@@ -27,10 +27,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <opencv2/opencv.hpp>
 
-std::vector<cv::Point2f> feature_detect(cv::Mat texture, int max_corners=1500, double quality_level=0.01, double min_distance=25.0);
+std::vector<cv::Point2f> feature_detect(cv::Mat texture, int max_corners = 1500, double quality_level = 0.01, double min_distance = 25.0);
 
-void draw_features(const std::string& window_name, cv::Mat texture, const std::vector<cv::Point2f>& features);
+void draw_features(const std::string &window_name, cv::Mat texture, const std::vector<cv::Point2f> &features);
 
-cv::Mat features_to_binary_image(const std::vector<cv::Point2f>& features, int height, int width);
+cv::Mat features_to_binary_image(const std::vector<cv::Point2f> &features, int height, int width);
 
 #endif /* TRLIB_FEATURE_DETECT_HPP_ */

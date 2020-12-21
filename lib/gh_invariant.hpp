@@ -34,30 +34,29 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class GHBasis
 {
 public:
-  GHBasis(int degree, double size_mm) :
-    m_degree(degree),
-    m_size_mm(size_mm)
+  GHBasis(int degree, double size_mm) : m_degree(degree),
+                                        m_size_mm(size_mm)
   {
     /*
      * Construct (unnormalized) Hermite polynomials
      */
     hermite_polynomials.push_back(boost::math::tools::polynomial<double>{{1.0}});
     hermite_polynomials.push_back(boost::math::tools::polynomial<double>{{0.0, 2.0}});
-    
+
     for (int i = 2; i <= degree; ++i)
     {
-      hermite_polynomials.push_back(hermite_polynomials[1] * hermite_polynomials[i-1] - 2.0 * (i - 1.0) * hermite_polynomials[i-2]);
+      hermite_polynomials.push_back(hermite_polynomials[1] * hermite_polynomials[i - 1] - 2.0 * (i - 1.0) * hermite_polynomials[i - 2]);
     }
   }
 
   double hermite_polynomial(int p, double x)
   {
-    return boost::math::tools::evaluate_polynomial(hermite_polynomials[p].data().data(), x, p+1);
+    return boost::math::tools::evaluate_polynomial(hermite_polynomials[p].data().data(), x, p + 1);
   }
 
   double hermite_polynomial_normalized(int p, double x, double sigma)
   {
-     return hermite_polynomial(p, x / sigma) * std::exp(-0.5*x*x/(sigma*sigma));
+    return hermite_polynomial(p, x / sigma) * std::exp(-0.5 * x * x / (sigma * sigma));
   }
 
   /*

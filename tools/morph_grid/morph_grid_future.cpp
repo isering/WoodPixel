@@ -35,7 +35,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 void MorphGridFuture::loop()
 {
   handle_key_press();
-  
+
   // DEBUG
   //m_update = true;
 
@@ -81,17 +81,16 @@ void MorphGridFuture::loop()
     /*
      * Check patch validity.
      */
-    for (const PatchRegion& patch : m_patches)
+    for (const PatchRegion &patch : m_patches)
     {
       if (patch.has_sub_regions())
       {
-        for (const PatchRegion& sub_region : patch.sub_regions())
+        for (const PatchRegion &sub_region : patch.sub_regions())
         {
           if (!sub_region.valid())
           {
             throw(std::runtime_error(
-              (boost::format("MorphGridFuture: Encountered invalid subregion from patch %d %d %d")
-              % sub_region.target_index() % sub_region.coordinate().x % sub_region.coordinate().y).str()));
+                (boost::format("MorphGridFuture: Encountered invalid subregion from patch %d %d %d") % sub_region.target_index() % sub_region.coordinate().x % sub_region.coordinate().y).str()));
           }
         }
       }
@@ -100,8 +99,7 @@ void MorphGridFuture::loop()
         if (!patch.valid())
         {
           throw(std::runtime_error(
-            (boost::format("TreeMatch::load: Tried to load invalid patch %d %d %d")
-            % patch.target_index() % patch.coordinate().x % patch.coordinate().y).str()));
+              (boost::format("TreeMatch::load: Tried to load invalid patch %d %d %d") % patch.target_index() % patch.coordinate().x % patch.coordinate().y).str()));
         }
       }
     }
@@ -199,14 +197,14 @@ cv::Mat MorphGridFuture::draw() const
     break;
   case OutputImage::DISTANCE:
     cv::minMaxLoc(m_distance, 0, &max_val);
-    m_distance.convertTo(image_in, CV_8UC1, 255.0/max_val);
+    m_distance.convertTo(image_in, CV_8UC1, 255.0 / max_val);
     cv::applyColorMap(image_in, image_in, cv::COLORMAP_PARULA);
     image_in *= 0.5;
     break;
   case OutputImage::DISTANCE_GRAD:
     cv::magnitude(m_distance_grad_x, m_distance_grad_y, image_in);
     cv::minMaxLoc(image_in, 0, &max_val);
-    image_in.convertTo(image_in, CV_8UC1, 255.0/max_val);
+    image_in.convertTo(image_in, CV_8UC1, 255.0 / max_val);
     cv::applyColorMap(image_in, image_in, cv::COLORMAP_PARULA);
     image_in *= 0.5;
     break;
@@ -222,7 +220,7 @@ cv::Mat MorphGridFuture::draw() const
   switch (m_output_edge)
   {
   case OutputEdge::EDGE:
-    
+
     if (m_visibility_mode)
     {
       cv::dilate(edge_image(), edge_mat, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
@@ -232,7 +230,7 @@ cv::Mat MorphGridFuture::draw() const
     {
       image_out.setTo(cv::Vec3b(255, 255, 255), edge_image());
     }
-    
+
     break;
   case OutputEdge::EDGE_DRAW:
     draw_edge_image(image_out);
@@ -292,7 +290,7 @@ cv::Mat MorphGridFuture::draw() const
       {
         for (int x = 1; x < m_grid.cols(); ++x)
         {
-          cv::line(image_out, cv::Point(grid_draw(y, x-1)), cv::Point(grid_draw(y, x)), m_visibility_mode ? cv::Scalar(199, 155, 34) : cv::Scalar(200, 200, 200), m_visibility_mode ? 2 : 1);
+          cv::line(image_out, cv::Point(grid_draw(y, x - 1)), cv::Point(grid_draw(y, x)), m_visibility_mode ? cv::Scalar(199, 155, 34) : cv::Scalar(200, 200, 200), m_visibility_mode ? 2 : 1);
         }
       }
 
@@ -300,7 +298,7 @@ cv::Mat MorphGridFuture::draw() const
       {
         for (int x = 0; x < m_grid.cols(); ++x)
         {
-          cv::line(image_out, cv::Point(grid_draw(y-1, x)), cv::Point(grid_draw(y, x)), m_visibility_mode ? cv::Scalar(199, 155, 34) : cv::Scalar(200, 200, 200), m_visibility_mode ? 2 : 1);
+          cv::line(image_out, cv::Point(grid_draw(y - 1, x)), cv::Point(grid_draw(y, x)), m_visibility_mode ? cv::Scalar(199, 155, 34) : cv::Scalar(200, 200, 200), m_visibility_mode ? 2 : 1);
         }
       }
     }
@@ -313,7 +311,7 @@ cv::Mat MorphGridFuture::draw() const
       }
     }
 
-    for (const Edge& edge : m_selected_edges)
+    for (const Edge &edge : m_selected_edges)
     {
       cv::line(image_out, cv::Point(grid_draw(edge.p1)), cv::Point(grid_draw(edge.p2)), cv::Scalar(104, 138, 54), m_visibility_mode ? 3 : 2);
     }
@@ -322,7 +320,7 @@ cv::Mat MorphGridFuture::draw() const
   if (m_output_edge == OutputEdge::PATCHES)
   {
     cv::Mat mask = cv::Mat::zeros(image_out.size(), CV_8UC1);
-    for (const PatchRegion& p : m_patches)
+    for (const PatchRegion &p : m_patches)
     {
       p.draw<unsigned char>(mask, 255);
     }
@@ -335,7 +333,7 @@ cv::Mat MorphGridFuture::draw() const
     image_out.setTo(cv::Vec3b(255, 255, 255), mask != 0);
 
     mask = 0;
-    for (const BezierCurve& c : m_curves_fitted)
+    for (const BezierCurve &c : m_curves_fitted)
     {
       c.draw<unsigned char>(mask, 255);
     }
@@ -367,7 +365,7 @@ cv::Mat MorphGridFuture::draw() const
   const int font = cv::FONT_HERSHEY_TRIPLEX;
   const int thickness = 1;
   cv::copyMakeBorder(image_out, image_out, 0, 32, 0, 0, cv::BORDER_CONSTANT, cv::Scalar(255, 255, 255));
-  cv::putText(image_out, m_message, cv::Point(0, image_out.rows-10), font, font_scale, cv::Scalar(0, 0, 0), thickness);
+  cv::putText(image_out, m_message, cv::Point(0, image_out.rows - 10), font, font_scale, cv::Scalar(0, 0, 0), thickness);
 
   return image_out;
 }
@@ -379,8 +377,8 @@ MorphGridFuture::MorphGridData MorphGridFuture::update_morphed_grid(DataGrid<uns
   const double attraction_radius = 0.5 * grid_size;
 
   cv::Mat dist;
-  cv::distanceTransform(255-edge_image, dist, data.im_label, cv::DIST_L2, cv::DIST_MASK_PRECISE);  
-  dist = cv::min(dist, attraction_radius-dist);
+  cv::distanceTransform(255 - edge_image, dist, data.im_label, cv::DIST_L2, cv::DIST_MASK_PRECISE);
+  dist = cv::min(dist, attraction_radius - dist);
   dist = cv::max(dist, 0.0f);
   data.im_distance = dist;
 
@@ -393,22 +391,22 @@ MorphGridFuture::MorphGridData MorphGridFuture::update_morphed_grid(DataGrid<uns
   {
     for (int x = 0; x < data.grid.cols(); ++x)
     {
-      cv::Point2d& p = data.grid(y, x);
+      cv::Point2d &p = data.grid(y, x);
       if (p.x < 0.0)
       {
         p.x = 0.0;
       }
-      if (p.x > edge_image.cols-1)
+      if (p.x > edge_image.cols - 1)
       {
-        p.x = edge_image.cols-1;
+        p.x = edge_image.cols - 1;
       }
       if (p.y < 0.0)
       {
         p.y = 0.0;
       }
-      if (p.y > edge_image.rows-1)
+      if (p.y > edge_image.rows - 1)
       {
-        p.y = edge_image.rows-1;
+        p.y = edge_image.rows - 1;
       }
     }
   }
@@ -421,7 +419,7 @@ MorphGridFuture::PatchData MorphGridFuture::update_patch_data(DataGrid<unsigned 
   PatchData patch_data;
   DataGrid<Vector<cv::Point2d>> edge_grid = extract_edge_grid(grid, edge_image);
   DataGrid<CurveData> curve_grid(grid);
-  for (const Edge& p : selected_edges)
+  for (const Edge &p : selected_edges)
   {
     fit_single_edge(curve_grid, edge_grid, p.p1, p.p2);
   }
@@ -461,7 +459,7 @@ void MorphGridFuture::handle_key_press()
   {
     if (key() == 0x17)
     {
-      m_save_state =true;
+      m_save_state = true;
       m_message = "Save state.";
       return;
     }
@@ -581,9 +579,9 @@ cv::Point MorphGridFuture::get_nearest_grid_point(int p_x, int p_y)
   const cv::Point2d p(p_x, p_y);
   double min_dist = std::numeric_limits<double>::max();
   cv::Point selected_grid_point;
-  for (int y = 1; y < m_grid.rows()-1; ++y)
+  for (int y = 1; y < m_grid.rows() - 1; ++y)
   {
-    for (int x = 1; x < m_grid.cols()-1; ++x)
+    for (int x = 1; x < m_grid.cols() - 1; ++x)
     {
       double dist = cv::norm(p - m_grid(y, x));
       if (dist < min_dist)
@@ -614,8 +612,8 @@ int MorphGridFuture::get_nearest_selected_edge(int p_x, int p_y)
 
   for (int i = 0; i < static_cast<int>(m_selected_edges.size()); ++i)
   {
-    const cv::Point2d& l_1 = m_grid(m_selected_edges[i].p1);
-    const cv::Point2d& l_2 = m_grid(m_selected_edges[i].p2);
+    const cv::Point2d &l_1 = m_grid(m_selected_edges[i].p1);
+    const cv::Point2d &l_2 = m_grid(m_selected_edges[i].p2);
     const double t = project_point_line(p, l_1, l_2);
 
     if (t >= 0.0 && t <= 1.0)
@@ -654,9 +652,9 @@ void MorphGridFuture::deselect_grid_point(int p_x, int p_y, bool shift_pressed)
   if (m_mode == Mode::EDIT_GRID && m_is_grid_point_selected)
   {
     p_x = std::max(p_x, 1);
-    p_x = std::min(p_x, m_image.cols-2);
+    p_x = std::min(p_x, m_image.cols - 2);
     p_y = std::max(p_y, 1);
-    p_y = std::min(p_y, m_image.rows-2);
+    p_y = std::min(p_y, m_image.rows - 2);
     m_grid(m_selected_grid_point) = cv::Point2d(p_x, p_y);
     m_grid.data(m_selected_grid_point) = (shift_pressed ? 0 : 1);
     m_update = true;
@@ -695,8 +693,8 @@ void MorphGridFuture::handle_edge_select(int p_x, int p_y, bool button_l_pressed
     if (button_l_pressed)
     {
       if (m_edge_select_last.x != -1 && m_edge_select_last.y != -1 &&
-        std::abs(m_edge_select_last.x - p.x) <= 1 &&
-        std::abs(m_edge_select_last.y - p.y) <= 1)
+          std::abs(m_edge_select_last.x - p.x) <= 1 &&
+          std::abs(m_edge_select_last.y - p.y) <= 1)
       {
         m_selected_edges.emplace_back(m_edge_select_last, p);
         m_update = true;
@@ -711,13 +709,13 @@ void MorphGridFuture::handle_edge_select(int p_x, int p_y, bool button_l_pressed
   }
 }
 
-cv::Mat get_gaussian_blob(int rows, int cols, double x0, double y0, double sigma_x, double sigma_y=-1.0)
+cv::Mat get_gaussian_blob(int rows, int cols, double x0, double y0, double sigma_x, double sigma_y = -1.0)
 {
   if (sigma_y < 0.0)
   {
     sigma_y = sigma_x;
   }
-  
+
   const double x_spread = 1.0 / (2.0 * sigma_x * sigma_x);
   const double y_spread = 1.0 / (2.0 * sigma_y * sigma_y);
 
@@ -727,14 +725,14 @@ cv::Mat get_gaussian_blob(int rows, int cols, double x0, double y0, double sigma
   for (int i = 0; i < cols; ++i)
   {
     double x = i - x0;
-    gauss_x.push_back(std::exp(-x*x * x_spread));
+    gauss_x.push_back(std::exp(-x * x * x_spread));
   }
 
   gauss_y.reserve(rows);
   for (int i = 0; i < rows; ++i)
   {
     double y = i - y0;
-    gauss_y.push_back(std::exp(-y*y * y_spread));
+    gauss_y.push_back(std::exp(-y * y * y_spread));
   }
 
   cv::Mat kernel = cv::Mat::zeros(rows, cols, CV_32FC1);
@@ -773,7 +771,7 @@ void MorphGridFuture::draw_soft_blob(cv::Mat mask, cv::Point p_1, double target_
 
   if (m_mouse_l_pressed)
   {
-    if (m_mouse_shift_pressed) 
+    if (m_mouse_shift_pressed)
     {
       mask = (-1.0 * target_value_mat.mul(blob)) + mask.mul(1.0 - blob);
     }
@@ -820,15 +818,15 @@ void MorphGridFuture::on_mouse(int event, int x, int y, int flags)
 
     if (m_mode == Mode::EDIT_BILATERAL_EDGES)
     {
-      draw_new_edge(m_mask_bilateral, m_mouse_pos_old, m_mouse_pos, 2.0*m_mouse_tool_size, 2.0*m_mouse_tool_size, event);
+      draw_new_edge(m_mask_bilateral, m_mouse_pos_old, m_mouse_pos, 2.0 * m_mouse_tool_size, 2.0 * m_mouse_tool_size, event);
     }
     else if (m_mode == Mode::EDIT_FILTERED_EDGES)
     {
-      draw_new_edge(m_mask_filtered, m_mouse_pos_old, m_mouse_pos, 2.0*m_mouse_tool_size, 2.0*m_mouse_tool_size, event);
+      draw_new_edge(m_mask_filtered, m_mouse_pos_old, m_mouse_pos, 2.0 * m_mouse_tool_size, 2.0 * m_mouse_tool_size, event);
     }
     else if (m_mode == Mode::EDIT_DRAW_EDGES)
     {
-      draw_new_edge(m_edge_drawn, m_mouse_pos_old, m_mouse_pos, 1.0, 2.0*m_mouse_tool_size, event);
+      draw_new_edge(m_edge_drawn, m_mouse_pos_old, m_mouse_pos, 1.0, 2.0 * m_mouse_tool_size, event);
     }
     else if (m_mode == Mode::EDIT_MAKE_DENSER || m_mode == Mode::EDIT_MAKE_WIDER)
     {
@@ -846,11 +844,11 @@ T interpolate(const cv::Mat_<T> image, cv::Point_<TPoint> p)
 {
   cv::Point p_int(p);
   p -= cv::Point_<TPoint>(p_int);
-  
-  if (p_int.x >= 0 && p_int.x < image.cols-1 && p_int.y >= 0 && p_int.y < image.rows-1)
+
+  if (p_int.x >= 0 && p_int.x < image.cols - 1 && p_int.y >= 0 && p_int.y < image.rows - 1)
   {
-    T f_1 = static_cast<T>((1.0 - p.x) * image.template at<T>(p_int.y, p_int.x) + p.x * image.template at<T>(p_int.y, p_int.x+1));
-    T f_2 = static_cast<T>((1.0 - p.x) * image.template at<T>(p_int.y+1, p_int.x) + p.x * image.template at<T>(p_int.y+1, p_int.x+1));
+    T f_1 = static_cast<T>((1.0 - p.x) * image.template at<T>(p_int.y, p_int.x) + p.x * image.template at<T>(p_int.y, p_int.x + 1));
+    T f_2 = static_cast<T>((1.0 - p.x) * image.template at<T>(p_int.y + 1, p_int.x) + p.x * image.template at<T>(p_int.y + 1, p_int.x + 1));
     return static_cast<T>((1.0 - p.y) * f_1 + p.y * f_2);
   }
 
@@ -859,9 +857,9 @@ T interpolate(const cv::Mat_<T> image, cv::Point_<TPoint> p)
     p_int.x = 0;
   }
 
-  if (p_int.x > image.cols-1)
+  if (p_int.x > image.cols - 1)
   {
-    p_int.x = image.cols-1;
+    p_int.x = image.cols - 1;
   }
 
   if (p_int.y < 0)
@@ -869,9 +867,9 @@ T interpolate(const cv::Mat_<T> image, cv::Point_<TPoint> p)
     p_int.y = 0;
   }
 
-  if (p_int.y > image.rows-1)
+  if (p_int.y > image.rows - 1)
   {
-    p_int.y = image.rows-1;
+    p_int.y = image.rows - 1;
   }
 
   return image.template at<T>(p_int);
@@ -885,19 +883,19 @@ DataGrid<unsigned char> MorphGridFuture::relax_grid(DataGrid<unsigned char> grid
   const float damping = 0.2f;
 
   cv::Mat X = grid.to_mat<float>();
-  cv::Mat V = cv::Mat::zeros(grid.rows(),  grid.cols(), CV_32FC2);
+  cv::Mat V = cv::Mat::zeros(grid.rows(), grid.cols(), CV_32FC2);
 
   for (int i = 0; i < num_iterations; ++i)
   {
     cv::Mat F = cv::Mat::zeros(grid.rows(), grid.cols(), CV_32FC2);
 
-    for (int y = 1; y < grid.rows()-1; ++y)
+    for (int y = 1; y < grid.rows() - 1; ++y)
     {
-      const cv::Vec2f* X_ptr = reinterpret_cast<const cv::Vec2f*>(X.ptr(y));
-      const cv::Vec2f* V_ptr = reinterpret_cast<const cv::Vec2f*>(V.ptr(y));
-      cv::Vec2f* F_ptr = reinterpret_cast<cv::Vec2f*>(F.ptr(y));
-      
-      for (int x = 1; x < grid.cols()-1; ++x)
+      const cv::Vec2f *X_ptr = reinterpret_cast<const cv::Vec2f *>(X.ptr(y));
+      const cv::Vec2f *V_ptr = reinterpret_cast<const cv::Vec2f *>(V.ptr(y));
+      cv::Vec2f *F_ptr = reinterpret_cast<cv::Vec2f *>(F.ptr(y));
+
+      for (int x = 1; x < grid.cols() - 1; ++x)
       {
         if (grid.data(y, x))
         {
@@ -916,7 +914,7 @@ DataGrid<unsigned char> MorphGridFuture::relax_grid(DataGrid<unsigned char> grid
             {
               if (x != 0 || y != 0)
               {
-                const cv::Vec2f& p_other = X.at<cv::Vec2f>(y+del_y, x+del_x);
+                const cv::Vec2f &p_other = X.at<cv::Vec2f>(y + del_y, x + del_x);
                 float spring_constant = std::pow(1.5f, interpolate<float>(density, cv::Point2f(p_other[0], p_other[1])));
                 spring_constant *= del_x * del_x + del_y * del_y;
                 F_ptr[x] += spring_constant * w_2 * (p_other - cv::Vec2f(p));
@@ -932,23 +930,23 @@ DataGrid<unsigned char> MorphGridFuture::relax_grid(DataGrid<unsigned char> grid
     V += d_t * F;
     X += d_t * V;
 
-    for (int y = 1; y < X.rows-1; ++y)
+    for (int y = 1; y < X.rows - 1; ++y)
     {
-      cv::Vec2f* X_ptr = reinterpret_cast<cv::Vec2f*>(X.ptr(y));
-      for (int x = 1; x < X.cols-1; ++x)
+      cv::Vec2f *X_ptr = reinterpret_cast<cv::Vec2f *>(X.ptr(y));
+      for (int x = 1; x < X.cols - 1; ++x)
       {
         X_ptr[x][0] = std::max(X_ptr[x][0], 1.0f);
-        X_ptr[x][0] = std::min(X_ptr[x][0], im_dist.cols-2.0f);
+        X_ptr[x][0] = std::min(X_ptr[x][0], im_dist.cols - 2.0f);
         X_ptr[x][1] = std::max(X_ptr[x][1], 1.0f);
-        X_ptr[x][1] = std::min(X_ptr[x][1], im_dist.rows-2.0f);
+        X_ptr[x][1] = std::min(X_ptr[x][1], im_dist.rows - 2.0f);
       }
     }
   }
 
-  for (int y = 1; y < X.rows-1; ++y)
+  for (int y = 1; y < X.rows - 1; ++y)
   {
-    const cv::Vec2f* X_ptr = reinterpret_cast<const cv::Vec2f*>(X.ptr(y));
-    for (int x = 1; x < X.cols-1; ++x)
+    const cv::Vec2f *X_ptr = reinterpret_cast<const cv::Vec2f *>(X.ptr(y));
+    for (int x = 1; x < X.cols - 1; ++x)
     {
       grid(y, x) = cv::Point2d(X_ptr[x]);
     }
@@ -957,7 +955,7 @@ DataGrid<unsigned char> MorphGridFuture::relax_grid(DataGrid<unsigned char> grid
   return grid;
 }
 
-boost::property_tree::ptree MorphGridFuture::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree MorphGridFuture::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize_enum(tree, "output_image", m_output_image, base_path, path);
@@ -989,7 +987,7 @@ boost::property_tree::ptree MorphGridFuture::save(const boost::filesystem::path&
   return tree;
 }
 
-void MorphGridFuture::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void MorphGridFuture::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize_enum(tree, "output_image", m_output_image, base_path);
   deserialize_enum(tree, "output_edge", m_output_edge, base_path);
@@ -1019,7 +1017,7 @@ void MorphGridFuture::load(const boost::filesystem::path& base_path, const boost
   deserialize(tree, "visibility_mode", m_visibility_mode, base_path);
 }
 
-void MorphGridFuture::load_input_partial(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void MorphGridFuture::load_input_partial(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize_image(tree, "mask_bilateral", m_mask_bilateral, base_path);
   deserialize_image(tree, "mask_filtered", m_mask_filtered, base_path);

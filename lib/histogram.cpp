@@ -44,17 +44,17 @@ Histogram::Histogram(cv::Mat texture, cv::Mat mask, int num_bins)
   build_histogram(data, num_bins);
 }
 
-Histogram::Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, float range_min, float range_max, int num_bins)
+Histogram::Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, float range_min, float range_max, int num_bins)
 {
   build_histogram(data, range_min, range_max, num_bins);
 }
 
-Histogram::Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, int num_bins)
+Histogram::Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, int num_bins)
 {
   build_histogram(data, num_bins);
 }
 
-void Histogram::build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, float range_min, float range_max, int num_bins)
+void Histogram::build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, float range_min, float range_max, int num_bins)
 {
   std::vector<std::vector<cv::Mat>> texture_planes(data.size());
   std::vector<cv::Mat> masks(data.size());
@@ -67,7 +67,7 @@ void Histogram::build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& 
   build_histogram(texture_planes, masks, range_min, range_max, num_bins);
 }
 
-void Histogram::build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, int num_bins)
+void Histogram::build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, int num_bins)
 {
   std::vector<std::vector<cv::Mat>> texture_planes(data.size());
   std::vector<cv::Mat> masks(data.size());
@@ -93,7 +93,7 @@ void Histogram::build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& 
   build_histogram(texture_planes, masks, static_cast<float>(global_min), static_cast<float>(global_max), num_bins);
 }
 
-void Histogram::build_histogram(const std::vector<std::vector<cv::Mat>>& texture_planes, const std::vector<cv::Mat>& masks, float range_min, float range_max, int num_bins)
+void Histogram::build_histogram(const std::vector<std::vector<cv::Mat>> &texture_planes, const std::vector<cv::Mat> &masks, float range_min, float range_max, int num_bins)
 {
   const int num_textures = static_cast<int>(texture_planes.size());
   this->range_min = range_min;
@@ -101,7 +101,7 @@ void Histogram::build_histogram(const std::vector<std::vector<cv::Mat>>& texture
   this->num_bins = num_bins;
   this->num_channels = static_cast<int>(texture_planes.front().size());
   this->histogram.resize(this->num_channels);
-  
+
   for (int c = 0; c < num_channels; ++c)
   {
     cv::Mat hist = cv::Mat();
@@ -132,7 +132,7 @@ cv::Mat Histogram::draw(bool lines) const
   return hist_image;
 }
 
-void Histogram::histogram_equalization_rows(mat<cv::Mat>& matrix, cv::Mat mask)
+void Histogram::histogram_equalization_rows(mat<cv::Mat> &matrix, cv::Mat mask)
 {
   // 16 bit histograms.
   const int num_bins = 1 << 16;
@@ -157,9 +157,9 @@ void Histogram::histogram_equalization_rows(mat<cv::Mat>& matrix, cv::Mat mask)
       cv::Mat response = matrix(i, j);
       for (int row = 0; row < response.rows; ++row)
       {
-        uint16_t* ptr = reinterpret_cast<uint16_t*>(response.ptr(row));
-        unsigned char* ptr_mask = reinterpret_cast<unsigned char*>(mask.ptr(row));
-        std::transform(ptr, ptr+response.cols, ptr_mask, ptr, cdf_equalize);
+        uint16_t *ptr = reinterpret_cast<uint16_t *>(response.ptr(row));
+        unsigned char *ptr_mask = reinterpret_cast<unsigned char *>(mask.ptr(row));
+        std::transform(ptr, ptr + response.cols, ptr_mask, ptr, cdf_equalize);
       }
     }
   }
@@ -179,11 +179,10 @@ void Histogram::linear_normalization(cv::Mat image, cv::Mat mask, double perc_mi
 
   struct LinearNormalizeOperator
   {
-    LinearNormalizeOperator(double range_min_in, double range_max_in, double range_min_out, double range_max_out) :
-      range_min_in(range_min_in),
-      range_max_in(range_max_in),
-      range_min_out(range_min_out),
-      range_max_out(range_max_out)
+    LinearNormalizeOperator(double range_min_in, double range_max_in, double range_min_out, double range_max_out) : range_min_in(range_min_in),
+                                                                                                                    range_max_in(range_max_in),
+                                                                                                                    range_min_out(range_min_out),
+                                                                                                                    range_max_out(range_max_out)
     {
     }
 
@@ -204,12 +203,12 @@ void Histogram::linear_normalization(cv::Mat image, cv::Mat mask, double perc_mi
 
   for (int row = 0; row < image.rows; ++row)
   {
-    uint16_t* ptr = reinterpret_cast<uint16_t*>(image.ptr(row));
-    std::transform(ptr, ptr+image.cols, ptr, normalize_op);
+    uint16_t *ptr = reinterpret_cast<uint16_t *>(image.ptr(row));
+    std::transform(ptr, ptr + image.cols, ptr, normalize_op);
   }
 }
 
-void Histogram::linear_normalization_rows(mat<cv::Mat>& matrix, cv::Mat mask)
+void Histogram::linear_normalization_rows(mat<cv::Mat> &matrix, cv::Mat mask)
 {
   // Set percentile for linear transformation
   const double percentile_min = 0.05;
@@ -235,12 +234,12 @@ void Histogram::linear_normalization_rows(mat<cv::Mat>& matrix, cv::Mat mask)
 
     struct LinearNormalizeOperator
     {
-      LinearNormalizeOperator(double range_min_in, double range_max_in, double range_min_out, double range_max_out) :
-        range_min_in(range_min_in),
-        range_max_in(range_max_in),
-        range_min_out(range_min_out),
-        range_max_out(range_max_out)
-      {}
+      LinearNormalizeOperator(double range_min_in, double range_max_in, double range_min_out, double range_max_out) : range_min_in(range_min_in),
+                                                                                                                      range_max_in(range_max_in),
+                                                                                                                      range_min_out(range_min_out),
+                                                                                                                      range_max_out(range_max_out)
+      {
+      }
 
       uint16_t operator()(uint16_t val_in) const
       {
@@ -263,20 +262,20 @@ void Histogram::linear_normalization_rows(mat<cv::Mat>& matrix, cv::Mat mask)
       cv::Mat response = matrix(i, j);
       for (int row = 0; row < response.rows; ++row)
       {
-        uint16_t* ptr = reinterpret_cast<uint16_t*>(response.ptr(row));
-        std::transform(ptr, ptr+response.cols, ptr, normalize_op);
+        uint16_t *ptr = reinterpret_cast<uint16_t *>(response.ptr(row));
+        std::transform(ptr, ptr + response.cols, ptr, normalize_op);
       }
     }
   }
 }
 
-cv::Mat Histogram::histogram_matching(cv::Mat texture_source, cv::Mat mask_source, const std::vector<cv::Mat>& target)
+cv::Mat Histogram::histogram_matching(cv::Mat texture_source, cv::Mat mask_source, const std::vector<cv::Mat> &target)
 {
   const int num_bins = 1 << 8;
 
   std::vector<std::pair<cv::Mat, cv::Mat>> data_source(1, std::make_pair(texture_source, mask_source));
   std::vector<std::pair<cv::Mat, cv::Mat>> data_target;
-  for (const cv::Mat& t : target)
+  for (const cv::Mat &t : target)
   {
     data_target.emplace_back(t, cv::Mat());
   }
@@ -296,9 +295,9 @@ cv::Mat Histogram::histogram_matching(cv::Mat texture_source, cv::Mat mask_sourc
 
     for (int y = 0; y < texture_in_channel.rows; ++y)
     {
-      const uint16_t* ptr_texture_in = reinterpret_cast<const uint16_t*>(texture_in_channel.ptr(y));
-      uint16_t* ptr_texture_out = reinterpret_cast<uint16_t*>(texture_out_channel.ptr(y));
-      const unsigned char* ptr_mask = mask_source.ptr(y);
+      const uint16_t *ptr_texture_in = reinterpret_cast<const uint16_t *>(texture_in_channel.ptr(y));
+      uint16_t *ptr_texture_out = reinterpret_cast<uint16_t *>(texture_out_channel.ptr(y));
+      const unsigned char *ptr_mask = mask_source.ptr(y);
 
       for (int x = 0; x < texture_in_channel.cols; ++x)
       {
@@ -319,7 +318,7 @@ cv::Mat Histogram::histogram_matching(cv::Mat texture_source, cv::Mat mask_sourc
   return texture_out;
 }
 
-void temp_histogram_matching(std::vector<cv::Mat>& source_planes, cv::Mat mask_source, const std::vector<std::vector<cv::Mat>>& target_planes, int channel, float range_min, float range_max, int num_bins)
+void temp_histogram_matching(std::vector<cv::Mat> &source_planes, cv::Mat mask_source, const std::vector<std::vector<cv::Mat>> &target_planes, int channel, float range_min, float range_max, int num_bins)
 {
 
   double min_val, max_val;
@@ -328,7 +327,7 @@ void temp_histogram_matching(std::vector<cv::Mat>& source_planes, cv::Mat mask_s
 
   std::vector<std::pair<cv::Mat, cv::Mat>> data_source(1, std::make_pair(source_planes[channel], mask_source));
   std::vector<std::pair<cv::Mat, cv::Mat>> data_target;
-  for (const std::vector<cv::Mat>& plane : target_planes)
+  for (const std::vector<cv::Mat> &plane : target_planes)
   {
     data_target.emplace_back(plane[channel], cv::Mat());
   }
@@ -339,8 +338,8 @@ void temp_histogram_matching(std::vector<cv::Mat>& source_planes, cv::Mat mask_s
 
   for (int y = 0; y < source_planes[channel].rows; ++y)
   {
-    uint16_t* ptr_texture = reinterpret_cast<uint16_t*>(source_planes[channel].ptr(y));
-    const unsigned char* ptr_mask = mask_source.ptr(y);
+    uint16_t *ptr_texture = reinterpret_cast<uint16_t *>(source_planes[channel].ptr(y));
+    const unsigned char *ptr_mask = mask_source.ptr(y);
     for (int x = 0; x < source_planes[channel].cols; ++x)
     {
       if (ptr_mask[x])
@@ -356,8 +355,8 @@ void temp_histogram_matching(std::vector<cv::Mat>& source_planes, cv::Mat mask_s
   std::cout << "after: " << min_val << " " << max_val << std::endl;
 }
 
-cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture>& target)
-{  
+cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture> &target)
+{
   cv::Mat texture_source_hsv;
   cv::cvtColor(texture_source, texture_source_hsv, cv::COLOR_BGR2HSV);
 
@@ -365,7 +364,7 @@ cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_s
   cv::split(texture_source_hsv, source_hsv_planes);
 
   std::vector<std::vector<cv::Mat>> target_hsv_planes;
-  for (const Texture& t : target)
+  for (const Texture &t : target)
   {
     cv::Mat texture_target_hsv;
     cv::cvtColor(t.texture, texture_target_hsv, cv::COLOR_BGR2HSV);
@@ -377,7 +376,7 @@ cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_s
   //temp_histogram_matching(source_hsv_planes, mask_source, target_hsv_planes, 0, 0.0f, 360.0f, 360);
   //temp_histogram_matching(source_hsv_planes, mask_source, target_hsv_planes, 1, 0.0f, 1.0f, 255);
   temp_histogram_matching(source_hsv_planes, mask_source, target_hsv_planes, 2, 0.0f, 1.0f, 255);
-  
+
   //source_hsv_planes[0] *= 360.0f;
 
   cv::Mat source_hsv_out;
@@ -389,10 +388,10 @@ cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_s
   return source_bgr_out;
 }
 
-cv::Mat Histogram::histogram_matching_hsv_nn(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture>& target)
+cv::Mat Histogram::histogram_matching_hsv_nn(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture> &target)
 {
   std::vector<cv::Mat> nn_vec;
-  for (const Texture& t : target)
+  for (const Texture &t : target)
   {
     nn_vec.push_back(histogram_matching_hsv(texture_source, mask_source, std::vector<Texture>(1, t)));
   }
@@ -400,15 +399,15 @@ cv::Mat Histogram::histogram_matching_hsv_nn(cv::Mat texture_source, cv::Mat mas
   cv::Mat texture_out = cv::Mat::zeros(texture_source.size(), CV_32FC3);
   cv::Mat dist_mat(texture_source.size(), CV_32FC1, 1000.0f);
 
-  for (const cv::Mat& nn : nn_vec)
+  for (const cv::Mat &nn : nn_vec)
   {
     for (int y = 0; y < texture_out.rows; ++y)
     {
-      const cv::Vec3f* ptr_in = reinterpret_cast<const cv::Vec3f*>(texture_source.ptr(y));
-      const cv::Vec3f* ptr_hist_in = reinterpret_cast<const cv::Vec3f*>(nn.ptr(y));
-      const unsigned char* ptr_mask = reinterpret_cast<const unsigned char*>(mask_source.ptr(y));
-      float* ptr_dist = reinterpret_cast<float*>(dist_mat.ptr(y));
-      cv::Vec3f* ptr_out = reinterpret_cast<cv::Vec3f*>(texture_out.ptr(y));
+      const cv::Vec3f *ptr_in = reinterpret_cast<const cv::Vec3f *>(texture_source.ptr(y));
+      const cv::Vec3f *ptr_hist_in = reinterpret_cast<const cv::Vec3f *>(nn.ptr(y));
+      const unsigned char *ptr_mask = reinterpret_cast<const unsigned char *>(mask_source.ptr(y));
+      float *ptr_dist = reinterpret_cast<float *>(dist_mat.ptr(y));
+      cv::Vec3f *ptr_out = reinterpret_cast<cv::Vec3f *>(texture_out.ptr(y));
       for (int x = 0; x < texture_out.cols; ++x)
       {
         if (ptr_mask[x])

@@ -38,9 +38,9 @@ cv::Point2d BezierCurve::eval(double t) const
 
   for (int i = 1; i <= m_degree; ++i)
   {
-    for (int j = 0; j <= m_degree-i; ++j)
+    for (int j = 0; j <= m_degree - i; ++j)
     {
-      curve[j] = (1.0-t) * curve[j] + t * curve[j+1];
+      curve[j] = (1.0 - t) * curve[j] + t * curve[j + 1];
     }
   }
 
@@ -49,7 +49,7 @@ cv::Point2d BezierCurve::eval(double t) const
 
 double BezierCurve::eval_x(double t) const
 {
-  std::vector<double> curve(m_degree+1);
+  std::vector<double> curve(m_degree + 1);
   for (int i = 0; i <= m_degree; ++i)
   {
     curve[i] = m_control_points[i].x;
@@ -57,9 +57,9 @@ double BezierCurve::eval_x(double t) const
 
   for (int i = 1; i <= m_degree; ++i)
   {
-    for (int j = 0; j <= m_degree-i; ++j)
+    for (int j = 0; j <= m_degree - i; ++j)
     {
-      curve[j] = (1.0-t) * curve[j] + t * curve[j+1];
+      curve[j] = (1.0 - t) * curve[j] + t * curve[j + 1];
     }
   }
 
@@ -68,7 +68,7 @@ double BezierCurve::eval_x(double t) const
 
 double BezierCurve::eval_y(double t) const
 {
-  std::vector<double> curve(m_degree+1);
+  std::vector<double> curve(m_degree + 1);
   for (int i = 0; i <= m_degree; ++i)
   {
     curve[i] = m_control_points[i].y;
@@ -76,19 +76,19 @@ double BezierCurve::eval_y(double t) const
 
   for (int i = 1; i <= m_degree; ++i)
   {
-    for (int j = 0; j <= m_degree-i; ++j)
+    for (int j = 0; j <= m_degree - i; ++j)
     {
-      curve[j] = (1.0-t) * curve[j] + t * curve[j+1];
+      curve[j] = (1.0 - t) * curve[j] + t * curve[j + 1];
     }
   }
 
   return curve[0];
 }
 
-std::vector<BezierCurve> BezierCurve::translated(const std::vector<BezierCurve>& curves, const cv::Point2d& delta)
+std::vector<BezierCurve> BezierCurve::translated(const std::vector<BezierCurve> &curves, const cv::Point2d &delta)
 {
   std::vector<BezierCurve> curves_out(curves.size());
-  std::transform(curves.begin(), curves.end(), curves_out.begin(), [delta](const BezierCurve& c) {return c + delta; });
+  std::transform(curves.begin(), curves.end(), curves_out.begin(), [delta](const BezierCurve &c) { return c + delta; });
   return curves_out;
 }
 
@@ -103,19 +103,19 @@ BezierCurve BezierCurve::transformed(cv::Mat T) const
   return curve;
 }
 
-std::vector<BezierCurve> BezierCurve::transformed(const std::vector<BezierCurve>& curves, cv::Mat transformation_matrix)
+std::vector<BezierCurve> BezierCurve::transformed(const std::vector<BezierCurve> &curves, cv::Mat transformation_matrix)
 {
   std::vector<BezierCurve> curves_transformed(curves.size());
-  std::transform(curves.begin(), curves.end(), curves_transformed.begin(), [transformation_matrix](const BezierCurve& c) {return c.transformed(transformation_matrix); });
+  std::transform(curves.begin(), curves.end(), curves_transformed.begin(), [transformation_matrix](const BezierCurve &c) { return c.transformed(transformation_matrix); });
   return curves_transformed;
 }
 
 BezierCurve BezierCurve::reversed() const
 {
-  std::vector<cv::Point2d> control_points_reversed(m_degree+1);
+  std::vector<cv::Point2d> control_points_reversed(m_degree + 1);
   for (int i = 0; i <= m_degree; ++i)
   {
-    control_points_reversed[m_degree-i] = m_control_points[i];
+    control_points_reversed[m_degree - i] = m_control_points[i];
   }
   return BezierCurve(control_points_reversed);
 }
@@ -135,16 +135,16 @@ std::pair<BezierCurve, BezierCurve> BezierCurve::split_cubic(double t) const
   std::vector<cv::Point2d> d1;
   for (int i = 0; i < 3; ++i)
   {
-    d1.push_back(t * m_control_points[i+1] + (1.0-t) * m_control_points[i]);
+    d1.push_back(t * m_control_points[i + 1] + (1.0 - t) * m_control_points[i]);
   }
 
   std::vector<cv::Point2d> d2;
   for (int i = 0; i < 2; ++i)
   {
-    d2.push_back(t * d1[i+1] + (1.0-t) * d1[i]);
+    d2.push_back(t * d1[i + 1] + (1.0 - t) * d1[i]);
   }
 
-  cv::Point2d d3 = t * d2[1] + (1.0-t) * d2[0];
+  cv::Point2d d3 = t * d2[1] + (1.0 - t) * d2[0];
 
   BezierCurve b1(std::vector<cv::Point2d>({m_control_points[0], d1[0], d2[0], d3}));
   BezierCurve b2(std::vector<cv::Point2d>({d3, d2[1], d1[2], m_control_points[3]}));
@@ -173,9 +173,9 @@ bool BezierCurve::is_collinear() const
   for (int i = 2; i <= m_degree; ++i)
   {
     const double triangle_area =
-      m_control_points[0].x * (m_control_points[1].y - m_control_points[i].y) +
-      m_control_points[1].x * (m_control_points[i].y - m_control_points[0].y) +
-      m_control_points[i].x * (m_control_points[0].y - m_control_points[1].y);
+        m_control_points[0].x * (m_control_points[1].y - m_control_points[i].y) +
+        m_control_points[1].x * (m_control_points[i].y - m_control_points[0].y) +
+        m_control_points[i].x * (m_control_points[0].y - m_control_points[1].y);
 
     if (std::abs(triangle_area) > 1.0e-6)
     {
@@ -202,7 +202,7 @@ BezierCurve BezierCurve::canonical_form_cubic() const
   curve_canonical = curve_canonical.transformed(transformations::shear_x(-curve_canonical.control_point(1).x / curve_canonical.control_point(1).y));
   curve_canonical = curve_canonical.transformed(transformations::scale(1.0 / curve_canonical.control_point(2).x, 1.0 / curve_canonical.control_point(1).y));
   curve_canonical = curve_canonical.transformed(transformations::shear_y(1.0 - curve_canonical.control_point(2).y / curve_canonical.control_point(2).x));
-  
+
   return curve_canonical;
 }
 
@@ -254,7 +254,7 @@ bool BezierCurve::is_simple_curve_cubic(double margin) const
   }
   else if (p.x > 0.0)
   {
-    double loop_curve = 0.5 * (std::sqrt(3.0 * (4.0*p.x - p.x*p.x)) - p.x);
+    double loop_curve = 0.5 * (std::sqrt(3.0 * (4.0 * p.x - p.x * p.x)) - p.x);
     if (p.y < loop_curve)
     {
       return true;
@@ -262,7 +262,7 @@ bool BezierCurve::is_simple_curve_cubic(double margin) const
   }
   else
   {
-    double loop_curve = (-p.x*p.x + 3.0*p.x) / 3.0;
+    double loop_curve = (-p.x * p.x + 3.0 * p.x) / 3.0;
     if (p.y < loop_curve)
     {
       return true;
@@ -276,27 +276,27 @@ cv::Mat BezierCurve::compute_separating_curve_mask(cv::Rect region)
 {
   struct FloodFillData
   {
-    FloodFillData(int p_x, int p_y, unsigned char color) :
-      p_x(p_x),
-      p_y(p_y),
-      color(color)
-    {}
+    FloodFillData(int p_x, int p_y, unsigned char color) : p_x(p_x),
+                                                           p_y(p_y),
+                                                           color(color)
+    {
+    }
 
     int p_x, p_y;
     unsigned char color;
   };
 
   cv::Mat mask = cv::Mat::zeros(region.size(), CV_8UC1);
-  
+
   std::vector<BezierCurve> curves({*this});
 
   const cv::Point2d p_left_1(eval(0.0));
   if (region.contains(p_left_1))
   {
     std::vector<double> dist_vals({std::abs(p_left_1.x - region.tl().x),
-      std::abs(p_left_1.y - region.tl().y),
-      std::abs(p_left_1.x - region.br().x),
-      std::abs(p_left_1.y - region.br().y)});
+                                   std::abs(p_left_1.y - region.tl().y),
+                                   std::abs(p_left_1.x - region.br().x),
+                                   std::abs(p_left_1.y - region.br().y)});
     size_t index_min = std::distance(dist_vals.begin(), std::min_element(dist_vals.begin(), dist_vals.end()));
 
     cv::Point2d p_left_2;
@@ -317,11 +317,10 @@ cv::Mat BezierCurve::compute_separating_curve_mask(cv::Rect region)
       p_left_2 = cv::Point2d(p_left_1.x, region.br().y);
     }
 
-    const std::vector<cv::Point2d> control_points({
-      p_left_2,
-      p_left_2 + (p_left_1 - p_left_2) / 3.0,
-      p_left_2 + (p_left_1 - p_left_2) * 2.0 / 3.0,
-      p_left_1});
+    const std::vector<cv::Point2d> control_points({p_left_2,
+                                                   p_left_2 + (p_left_1 - p_left_2) / 3.0,
+                                                   p_left_2 + (p_left_1 - p_left_2) * 2.0 / 3.0,
+                                                   p_left_1});
 
     curves.emplace(curves.begin(), control_points);
   }
@@ -353,28 +352,27 @@ cv::Mat BezierCurve::compute_separating_curve_mask(cv::Rect region)
       p_right_2 = cv::Point2d(p_right_1.x, region.br().y);
     }
 
-    const std::vector<cv::Point2d> control_points({
-      p_right_1,
-      p_right_1 + (p_right_2 - p_right_1) / 3.0,
-      p_right_1 + (p_right_2 - p_right_1) * 2.0 / 3.0,
-      p_right_2});
+    const std::vector<cv::Point2d> control_points({p_right_1,
+                                                   p_right_1 + (p_right_2 - p_right_1) / 3.0,
+                                                   p_right_1 + (p_right_2 - p_right_1) * 2.0 / 3.0,
+                                                   p_right_2});
     curves.emplace_back(control_points);
   }
 
-  for (BezierCurve& curve : curves)
+  for (BezierCurve &curve : curves)
   {
     curve -= region.tl();
   }
-   
+
   // Compute derivatives.
   std::vector<BezierCurve> curves_deriv;
-  for (const BezierCurve& curve : curves)
+  for (const BezierCurve &curve : curves)
   {
     curves_deriv.push_back(curve.deriv());
   }
 
   // Draw curves onto mask.
-  for (const BezierCurve& curve : curves)
+  for (const BezierCurve &curve : curves)
   {
     curve.draw<unsigned char>(mask, 255);
   }
@@ -382,7 +380,7 @@ cv::Mat BezierCurve::compute_separating_curve_mask(cv::Rect region)
   std::stack<FloodFillData> fill_stack;
   for (size_t i = 0; i < curves.size(); ++i)
   {
-    for (const CurveDrawPoint& d : curves[i].get_draw_points())
+    for (const CurveDrawPoint &d : curves[i].get_draw_points())
     {
       const cv::Vec2d tangent = cv::normalize(cv::Vec2d(curves_deriv[i].eval(d.t)));
       const cv::Vec2d normal(tangent[1], -tangent[0]);
@@ -403,14 +401,14 @@ cv::Mat BezierCurve::compute_separating_curve_mask(cv::Rect region)
 
     if (d.p_x >= 0 && d.p_x < mask.cols && d.p_y >= 0 && d.p_y < mask.rows)
     {
-      unsigned char& val = mask.at<unsigned char>(d.p_y, d.p_x);
+      unsigned char &val = mask.at<unsigned char>(d.p_y, d.p_x);
       if (val == 0)
       {
         val = d.color;
-        fill_stack.emplace(d.p_x-1, d.p_y, d.color);
-        fill_stack.emplace(d.p_x+1, d.p_y, d.color);
-        fill_stack.emplace(d.p_x, d.p_y-1, d.color);
-        fill_stack.emplace(d.p_x, d.p_y+1, d.color);
+        fill_stack.emplace(d.p_x - 1, d.p_y, d.color);
+        fill_stack.emplace(d.p_x + 1, d.p_y, d.color);
+        fill_stack.emplace(d.p_x, d.p_y - 1, d.color);
+        fill_stack.emplace(d.p_x, d.p_y + 1, d.color);
       }
     }
   }
@@ -423,7 +421,7 @@ double BezierCurve::curve_length() const
   double dist = 0.0;
   for (int i = 1; i <= m_degree; ++i)
   {
-    const cv::Point2d diff = m_control_points[i] - m_control_points[i+1];
+    const cv::Point2d diff = m_control_points[i] - m_control_points[i + 1];
     dist += std::sqrt(diff.x * diff.x + diff.y * diff.y);
   }
   return dist;
@@ -511,14 +509,14 @@ double BezierCurve::find_y(double y) const
   return t;
 }
 
-BezierCurve BezierCurve::average(const BezierCurve& b1, const BezierCurve& b2)
+BezierCurve BezierCurve::average(const BezierCurve &b1, const BezierCurve &b2)
 {
   if (b1.m_degree != b2.m_degree)
   {
     throw(std::invalid_argument("Curve degrees differ."));
   }
 
-  std::vector<cv::Point2d> control_points(b1.m_degree+1);
+  std::vector<cv::Point2d> control_points(b1.m_degree + 1);
   for (int i = 0; i <= b1.m_degree; ++i)
   {
     control_points[i] = 0.5 * (b1.m_control_points[i] + b2.m_control_points[i]);
@@ -549,7 +547,7 @@ cv::Rect2d BezierCurve::bounding_box_cubic() const
     t_y.push_back((-root_b[1] + std::sqrt(root_sqrt[1])) / (2.0 * root_a[1]));
     t_y.push_back((-root_b[1] - std::sqrt(root_sqrt[1])) / (2.0 * root_a[1]));
   }
-  
+
   double x1 = std::min(m_control_points[0].x, m_control_points[3].x);
   double x2 = std::max(m_control_points[0].x, m_control_points[3].x);
   double y1 = std::min(m_control_points[0].y, m_control_points[3].y);
@@ -598,7 +596,7 @@ cv::Rect BezierCurve::bounding_box() const
   return cv::boundingRect(points);
 }
 
-std::vector<BezierCurve> BezierCurve::fit(const std::vector<double>& points, int degree, int subpatch_size, double weight_reg, double weight_slope)
+std::vector<BezierCurve> BezierCurve::fit(const std::vector<double> &points, int degree, int subpatch_size, double weight_reg, double weight_slope)
 {
   if (points.empty())
   {
@@ -615,19 +613,19 @@ std::vector<BezierCurve> BezierCurve::fit(const std::vector<double>& points, int
   for (int i = 0; i < num_segments; ++i)
   {
 
-    basis.copyTo(A(cv::Rect(degree*i, (subpatch_size + 1)*i, basis.cols, basis.rows)));
+    basis.copyTo(A(cv::Rect(degree * i, (subpatch_size + 1) * i, basis.cols, basis.rows)));
     if (i > 0)
     {
-      A.at<double>(A.rows - i, degree*i - 1) = -1.0 * weight_reg;
-      A.at<double>(A.rows - i, degree*i) = 2.0 * weight_reg;
-      A.at<double>(A.rows - i, degree*i + 1) = -1.0 * weight_reg;
+      A.at<double>(A.rows - i, degree * i - 1) = -1.0 * weight_reg;
+      A.at<double>(A.rows - i, degree * i) = 2.0 * weight_reg;
+      A.at<double>(A.rows - i, degree * i + 1) = -1.0 * weight_reg;
     }
   }
 
   for (int i = 0; i < degree * num_segments; ++i)
   {
-    A.at<double>(A.rows-num_segments-i, i+1) = -1.0 * weight_slope;
-    A.at<double>(A.rows-num_segments-i, i) = 1.0 * weight_slope;
+    A.at<double>(A.rows - num_segments - i, i + 1) = -1.0 * weight_slope;
+    A.at<double>(A.rows - num_segments - i, i) = 1.0 * weight_slope;
   }
 
   cv::Mat Ainv = pseudo_inverse(A);
@@ -637,7 +635,7 @@ std::vector<BezierCurve> BezierCurve::fit(const std::vector<double>& points, int
   int c = 0;
   for (int i = 0; i < num_segments; ++i)
   {
-    for (auto iter = points.begin() + i*subpatch_size; iter != points.begin() + (i + 1)*subpatch_size + 1; ++iter)
+    for (auto iter = points.begin() + i * subpatch_size; iter != points.begin() + (i + 1) * subpatch_size + 1; ++iter)
     {
       rhs.at<double>(c++, 0) = *iter;
     }
@@ -652,13 +650,13 @@ std::vector<BezierCurve> BezierCurve::fit(const std::vector<double>& points, int
   for (int i = 0; i < num_segments; ++i)
   {
     const std::vector<double> x_vals = linspace(
-      static_cast<double>(i * subpatch_size),
-      static_cast<double>((i+1) * subpatch_size),
-      degree+1, true);
+        static_cast<double>(i * subpatch_size),
+        static_cast<double>((i + 1) * subpatch_size),
+        degree + 1, true);
 
     const std::vector<double> y_vals = std::vector<double>(
-      coeffs.begin<double>() + i*degree,
-      coeffs.begin<double>() + (i+1) * degree + 1);
+        coeffs.begin<double>() + i * degree,
+        coeffs.begin<double>() + (i + 1) * degree + 1);
 
     curves.emplace_back(x_vals, y_vals);
   }
@@ -702,9 +700,9 @@ BezierCurve BezierCurve::deriv(int order) const
     std::vector<cv::Point2d> control_points_deriv(curve.degree());
     for (int i = 0; i < curve.degree(); ++i)
     {
-      control_points_deriv[i] = curve.degree() * (curve.control_point(i+1) - curve.control_point(i));
+      control_points_deriv[i] = curve.degree() * (curve.control_point(i + 1) - curve.control_point(i));
     }
-    
+
     curve = BezierCurve(control_points_deriv);
   }
 
@@ -722,7 +720,7 @@ cv::Vec2d BezierCurve::normal(double t) const
   return cv::Vec2d(tangent_vector[1], -tangent_vector[0]);
 }
 
-static void intersect_cubic(std::vector<std::pair<double, double>>& t_vals, const BezierCurve& b1, const BezierCurve& b2, double t11, double t12, double t21, double t22, double tolerance = 1.0e-3)
+static void intersect_cubic(std::vector<std::pair<double, double>> &t_vals, const BezierCurve &b1, const BezierCurve &b2, double t11, double t12, double t21, double t22, double tolerance = 1.0e-3)
 {
   if (b1.degree() != 3 || b2.degree() != 3)
   {
@@ -763,14 +761,13 @@ static void intersect_cubic(std::vector<std::pair<double, double>>& t_vals, cons
 
 struct ClusterData
 {
-  ClusterData(const std::pair<double, double>& t, const cv::Point2d& p) :
-    t_vals(1, t),
-    centroid(p),
-    num_points(1)
+  ClusterData(const std::pair<double, double> &t, const cv::Point2d &p) : t_vals(1, t),
+                                                                          centroid(p),
+                                                                          num_points(1)
   {
   }
 
-  void insert(const std::pair<double, double>& t, const cv::Point2d& p)
+  void insert(const std::pair<double, double> &t, const cv::Point2d &p)
   {
     t_vals.push_back(t);
     centroid = (num_points * centroid + p) / (num_points + 1);
@@ -782,7 +779,7 @@ struct ClusterData
   int num_points;
 };
 
-static bool intersect_cubic(BezierCurve b1, BezierCurve b2, double& t_result_1, double& t_result_2)
+static bool intersect_cubic(BezierCurve b1, BezierCurve b2, double &t_result_1, double &t_result_2)
 {
   std::vector<std::pair<double, double>> t_vals;
   intersect_cubic(t_vals, b1, b2, 0.0, 1.0, 0.0, 1.0, 1.0e-3);
@@ -791,11 +788,11 @@ static bool intersect_cubic(BezierCurve b1, BezierCurve b2, double& t_result_1, 
   {
     std::vector<ClusterData> clusters;
 
-    for (const std::pair<double, double>& t : t_vals)
+    for (const std::pair<double, double> &t : t_vals)
     {
       bool inserted = false;
       cv::Point2d p = b1.eval(t.first);
-      for (ClusterData& cluster : clusters)
+      for (ClusterData &cluster : clusters)
       {
         if (cv::norm(cluster.centroid - p) < 1.0e-2)
         {
@@ -817,7 +814,7 @@ static bool intersect_cubic(BezierCurve b1, BezierCurve b2, double& t_result_1, 
 
     double t1 = 0.0;
     double t2 = 0.0;
-    for (const std::pair<double, double>& t : clusters[0].t_vals)
+    for (const std::pair<double, double> &t : clusters[0].t_vals)
     {
       t1 += t.first;
       t2 += t.second;
@@ -832,7 +829,7 @@ static bool intersect_cubic(BezierCurve b1, BezierCurve b2, double& t_result_1, 
   return false;
 }
 
-std::pair<double, double> BezierCurve::intersect_curves_cubic(const BezierCurve& b1, const BezierCurve& b2)
+std::pair<double, double> BezierCurve::intersect_curves_cubic(const BezierCurve &b1, const BezierCurve &b2)
 {
   if (b1.degree() != 3 || b2.degree() != 3)
   {
@@ -850,7 +847,7 @@ std::pair<double, double> BezierCurve::intersect_curves_cubic(const BezierCurve&
   }
 }
 
-std::pair<CurveIntersection, CurveIntersection> BezierCurve::intersect_curves_cubic(const std::vector<BezierCurve>& curve_1, bool from_left_1, const std::vector<BezierCurve>& curve_2, bool from_left_2)
+std::pair<CurveIntersection, CurveIntersection> BezierCurve::intersect_curves_cubic(const std::vector<BezierCurve> &curve_1, bool from_left_1, const std::vector<BezierCurve> &curve_2, bool from_left_2)
 {
   const int size_1 = static_cast<int>(curve_1.size());
   const int size_2 = static_cast<int>(curve_2.size());
@@ -866,20 +863,20 @@ std::pair<CurveIntersection, CurveIntersection> BezierCurve::intersect_curves_cu
       {
         if (intersect_cubic(curve_1[i], curve_2[j], t1, t2))
         {
-          return std::pair<CurveIntersection, CurveIntersection>({ i, t1 }, { j, t2 });
+          return std::pair<CurveIntersection, CurveIntersection>({i, t1}, {j, t2});
         }
       }
     }
   }
   else if (!from_left_1 && from_left_2)
   {
-    for (int i = size_1-1; i >= 0; --i)
+    for (int i = size_1 - 1; i >= 0; --i)
     {
       for (int j = 0; j < size_2; ++j)
       {
         if (intersect_cubic(curve_1[i], curve_2[j], t1, t2))
         {
-          return std::pair<CurveIntersection, CurveIntersection>({ i, t1 }, { j, t2 });
+          return std::pair<CurveIntersection, CurveIntersection>({i, t1}, {j, t2});
         }
       }
     }
@@ -888,33 +885,33 @@ std::pair<CurveIntersection, CurveIntersection> BezierCurve::intersect_curves_cu
   {
     for (int i = 0; i < size_1; ++i)
     {
-      for (int j = size_2-1; j >= 0; --j)
+      for (int j = size_2 - 1; j >= 0; --j)
       {
         if (intersect_cubic(curve_1[i], curve_2[j], t1, t2))
         {
-          return std::pair<CurveIntersection, CurveIntersection>({ i, t1 }, { j, t2 });
+          return std::pair<CurveIntersection, CurveIntersection>({i, t1}, {j, t2});
         }
       }
     }
   }
   else
   {
-    for (int i = size_1-1; i >= 0; --i)
+    for (int i = size_1 - 1; i >= 0; --i)
     {
-      for (int j = size_2-1; j >= 0; --j)
+      for (int j = size_2 - 1; j >= 0; --j)
       {
         if (intersect_cubic(curve_1[i], curve_2[j], t1, t2))
         {
-          return std::pair<CurveIntersection, CurveIntersection>({ i, t1 }, { j, t2 });
+          return std::pair<CurveIntersection, CurveIntersection>({i, t1}, {j, t2});
         }
       }
     }
   }
 
-  return std::pair<CurveIntersection, CurveIntersection>({ -1, t1 }, { -1, t2 });
+  return std::pair<CurveIntersection, CurveIntersection>({-1, t1}, {-1, t2});
 }
 
-void BezierCurve::trim_curves_cubic(std::vector<BezierCurve>& curve_1, bool trim_left_1, std::vector<BezierCurve>& curve_2, bool trim_left_2)
+void BezierCurve::trim_curves_cubic(std::vector<BezierCurve> &curve_1, bool trim_left_1, std::vector<BezierCurve> &curve_2, bool trim_left_2)
 {
   std::pair<CurveIntersection, CurveIntersection> crossing = BezierCurve::intersect_curves_cubic(curve_1, !trim_left_1, curve_2, !trim_left_2);
 
@@ -961,11 +958,10 @@ BezierCurve BezierCurve::extend_curve_left() const
   }
 
   const cv::Point2d delta = cv::normalize(cv::Vec2d(m_control_points[1] - m_control_points[0]));
-  const std::vector<cv::Point2d> curve({
-    m_control_points[0] - 48.0 * delta,
-    m_control_points[0] - 32.0 * delta,
-    m_control_points[0] - 16.0 * delta,
-    m_control_points[0]});
+  const std::vector<cv::Point2d> curve({m_control_points[0] - 48.0 * delta,
+                                        m_control_points[0] - 32.0 * delta,
+                                        m_control_points[0] - 16.0 * delta,
+                                        m_control_points[0]});
 
   return BezierCurve(curve);
 }
@@ -980,12 +976,11 @@ BezierCurve BezierCurve::extend_curve_right() const
     return BezierCurve();
   }
 
-  const cv::Point2d delta = cv::normalize(cv::Vec2d(m_control_points[m_degree] - m_control_points[m_degree-1]));
-  const std::vector<cv::Point2d> curve({
-    m_control_points[m_degree],
-    m_control_points[m_degree] + 16.0 * delta,
-    m_control_points[m_degree] + 32.0 * delta,
-    m_control_points[m_degree] + 48.0 * delta});
+  const cv::Point2d delta = cv::normalize(cv::Vec2d(m_control_points[m_degree] - m_control_points[m_degree - 1]));
+  const std::vector<cv::Point2d> curve({m_control_points[m_degree],
+                                        m_control_points[m_degree] + 16.0 * delta,
+                                        m_control_points[m_degree] + 32.0 * delta,
+                                        m_control_points[m_degree] + 48.0 * delta});
 
   return BezierCurve(curve);
 }
@@ -996,11 +991,11 @@ double BezierCurve::max_curvature_norm_approx() const
   {
     generate_draw_points();
   }
-  
+
   BezierCurve dd = deriv(2);
   double max_curvature = 0.0;
-  
-  for (const CurveDrawPoint& p : m_draw_points)
+
+  for (const CurveDrawPoint &p : m_draw_points)
   {
     max_curvature = std::max(max_curvature, cv::norm(cv::Vec2d(dd.eval(p.t)), cv::NORM_L2SQR));
   }
@@ -1018,7 +1013,7 @@ double BezierCurve::max_gradient_norm_approx() const
   BezierCurve dd = deriv(1);
   double max_gradient = 0.0;
 
-  for (const CurveDrawPoint& p : m_draw_points)
+  for (const CurveDrawPoint &p : m_draw_points)
   {
     max_gradient = std::max(max_gradient, cv::norm(cv::Vec2d(dd.eval(p.t)), cv::NORM_L2SQR));
   }
@@ -1026,7 +1021,7 @@ double BezierCurve::max_gradient_norm_approx() const
   return std::sqrt(max_gradient);
 }
 
-double BezierCurve::min_dist_approx(const cv::Point2d& p) const
+double BezierCurve::min_dist_approx(const cv::Point2d &p) const
 {
   double min_dist = std::numeric_limits<double>::max();
 
@@ -1035,7 +1030,7 @@ double BezierCurve::min_dist_approx(const cv::Point2d& p) const
     generate_draw_points();
   }
 
-  for (const CurveDrawPoint& d : m_draw_points)
+  for (const CurveDrawPoint &d : m_draw_points)
   {
     double dist = cv::norm(cv::Vec2d(d.p.x, d.p.y) - cv::Vec2d(p), cv::NORM_L2SQR);
     if (dist < min_dist)
@@ -1051,14 +1046,14 @@ double BezierCurve::min_dist_approx(const cv::Point2d& p) const
 * ComputeLeftTangent, ComputeRightTangent, ComputeCenterTangent :
 * Approximate unit tangents at endpoints and "center" of digitized curve.
 */
-static cv::Vec2d compute_left_tangent(const std::vector<cv::Point2d>& points, int end)
+static cv::Vec2d compute_left_tangent(const std::vector<cv::Point2d> &points, int end)
 {
-  return cv::normalize(cv::Vec2d(points[end+1] - points[end]));
+  return cv::normalize(cv::Vec2d(points[end + 1] - points[end]));
 }
 
-static cv::Vec2d compute_right_tangent(const std::vector<cv::Point2d>& points, int end)
+static cv::Vec2d compute_right_tangent(const std::vector<cv::Point2d> &points, int end)
 {
-  return cv::normalize(cv::Vec2d(points[end-1] - points[end]));
+  return cv::normalize(cv::Vec2d(points[end - 1] - points[end]));
 }
 
 /*
@@ -1071,9 +1066,9 @@ static std::vector<double> chord_length_parameterize(const std::vector<cv::Point
   std::vector<double> u(last - first + 1);
 
   u[0] = 0.0;
-  for (int i = first+1; i <= last; ++i)
+  for (int i = first + 1; i <= last; ++i)
   {
-    u[i-first] = u[i-first-1] + cv::norm(cv::Vec2d(points[i] - points[i-1]), cv::NORM_L2);
+    u[i - first] = u[i - first - 1] + cv::norm(cv::Vec2d(points[i] - points[i - 1]), cv::NORM_L2);
   }
 
   for (size_t i = 1; i < u.size(); ++i)
@@ -1081,7 +1076,7 @@ static std::vector<double> chord_length_parameterize(const std::vector<cv::Point
     u[i] /= u.back();
   }
 
-  return(u);
+  return (u);
 }
 
 /*
@@ -1116,7 +1111,7 @@ static double B3(double u)
 *  Use least-squares method to find Bezier control points for region.
 *
 */
-static BezierCurve generate_bezier(const std::vector<cv::Point2d>& points, int first, int last, const std::vector<double> u_prime, const cv::Vec2d& t_hat_1, const cv::Vec2d& t_hat_2)
+static BezierCurve generate_bezier(const std::vector<cv::Point2d> &points, int first, int last, const std::vector<double> u_prime, const cv::Vec2d &t_hat_1, const cv::Vec2d &t_hat_2)
 {
   const int num_points = last - first + 1;
 
@@ -1124,7 +1119,7 @@ static BezierCurve generate_bezier(const std::vector<cv::Point2d>& points, int f
   std::vector<double[2][2]> A(num_points);
   double C[2][2];
   double X[2];
-  
+
   for (int i = 0; i < num_points; ++i)
   {
     const cv::Vec2d v1 = t_hat_1 * B1(u_prime[i]);
@@ -1149,11 +1144,7 @@ static BezierCurve generate_bezier(const std::vector<cv::Point2d>& points, int f
     C[1][0] = C[0][1];
     C[1][1] += A[i][1][0] * A[i][1][0] + A[i][1][1] * A[i][1][1];
 
-    const cv::Vec2d tmp = points[first+i]
-      - points[first] * B0(u_prime[i])
-      - points[first] * B1(u_prime[i])
-      - points[last] * B2(u_prime[i])
-      - points[last] * B3(u_prime[i]);
+    const cv::Vec2d tmp = points[first + i] - points[first] * B0(u_prime[i]) - points[first] * B1(u_prime[i]) - points[last] * B2(u_prime[i]) - points[last] * B3(u_prime[i]);
 
     X[0] += A[i][0][0] * tmp[0] + A[i][0][1] * tmp[1];
     X[1] += A[i][1][0] * tmp[0] + A[i][1][1] * tmp[1];
@@ -1161,8 +1152,8 @@ static BezierCurve generate_bezier(const std::vector<cv::Point2d>& points, int f
 
   /* Compute the determinants of C and X	*/
   double det_C0_C1 = C[0][0] * C[1][1] - C[1][0] * C[0][1];
-  double det_C0_X  = C[0][0] * X[1]    - C[0][1] * X[0];
-  double det_X_C1  = X[0]    * C[1][1] - X[1]    * C[0][1];
+  double det_C0_X = C[0][0] * X[1] - C[0][1] * X[0];
+  double det_X_C1 = X[0] * C[1][1] - X[1] * C[0][1];
 
   /* Finally, derive alpha values	*/
   if (det_C0_C1 == 0.0)
@@ -1178,7 +1169,7 @@ static BezierCurve generate_bezier(const std::vector<cv::Point2d>& points, int f
   * divide by zero in any subsequent NewtonRaphsonRootFind() call. */
   if (alpha_l < 1.0e-6 || alpha_r < 1.0e-6)
   {
-    double	dist = cv::norm(cv::Vec2d(points[last] - points[first]), cv::NORM_L2) / 3.0;
+    double dist = cv::norm(cv::Vec2d(points[last] - points[first]), cv::NORM_L2) / 3.0;
     curve[0] = points[first];
     curve[1] = points[first] + cv::Point2d(dist * t_hat_1);
     curve[2] = points[last] + cv::Point2d(dist * t_hat_2);
@@ -1202,7 +1193,7 @@ static BezierCurve generate_bezier(const std::vector<cv::Point2d>& points, int f
 *  NewtonRaphsonRootFind :
 *	Use Newton-Raphson iteration to find better root.
 */
-static double newton_raphson_root_find(const BezierCurve& curve, const cv::Point2d& P, double u)
+static double newton_raphson_root_find(const BezierCurve &curve, const cv::Point2d &P, double u)
 {
   /* Compute Q(u)	*/
   const cv::Point2d Q_u = curve.eval(u);
@@ -1211,14 +1202,14 @@ static double newton_raphson_root_find(const BezierCurve& curve, const cv::Point
   BezierCurve Q1(2);
   for (int i = 0; i <= 2; i++)
   {
-    Q1.set_control_point(i, (curve.control_point(i+1) - curve.control_point(i)) * 3.0);
+    Q1.set_control_point(i, (curve.control_point(i + 1) - curve.control_point(i)) * 3.0);
   }
 
   /* Generate control vertices for Q'' */
   BezierCurve Q2(1);
   for (int i = 0; i <= 1; i++)
   {
-    Q2.set_control_point(i, (Q1.control_point(i+1) - Q1.control_point(i)) * 2.0);
+    Q2.set_control_point(i, (Q1.control_point(i + 1) - Q1.control_point(i)) * 2.0);
   }
 
   /* Compute Q'(u) and Q''(u)	*/
@@ -1228,7 +1219,7 @@ static double newton_raphson_root_find(const BezierCurve& curve, const cv::Point
   /* Compute f(u)/f'(u) */
   const double numerator = (Q_u.x - P.x) * (Q1_u.x) + (Q_u.y - P.y) * (Q1_u.y);
   const double denominator = (Q1_u.x) * (Q1_u.x) + (Q1_u.y) * (Q1_u.y) +
-    (Q_u.x - P.x) * (Q2_u.x) + (Q_u.y - P.y) * (Q2_u.y);
+                             (Q_u.x - P.x) * (Q2_u.x) + (Q_u.y - P.y) * (Q2_u.y);
 
   /* u = u - f(u)/f'(u) */
   return u - numerator / denominator;
@@ -1240,14 +1231,14 @@ static double newton_raphson_root_find(const BezierCurve& curve, const cv::Point
 *   a better parameterization.
 *
 */
-static std::vector<double> reparameterize(const std::vector<cv::Point2d>& points, int first, int last, const std::vector<double>& u, const BezierCurve& curve)
+static std::vector<double> reparameterize(const std::vector<cv::Point2d> &points, int first, int last, const std::vector<double> &u, const BezierCurve &curve)
 {
   const int num_points = last - first + 1;
   std::vector<double> u_prime(num_points);
 
   for (int i = first; i <= last; ++i)
   {
-    u_prime[i-first] = newton_raphson_root_find(curve, points[i], u[i-first]);
+    u_prime[i - first] = newton_raphson_root_find(curve, points[i], u[i - first]);
   }
 
   return u_prime;
@@ -1258,13 +1249,13 @@ static std::vector<double> reparameterize(const std::vector<cv::Point2d>& points
 *	Find the maximum squared distance of digitized points
 *	to fitted curve.
 */
-static double compute_max_error(const std::vector<cv::Point2d>& points, int first, int last, const BezierCurve& curve, const std::vector<double>& u)
+static double compute_max_error(const std::vector<cv::Point2d> &points, int first, int last, const BezierCurve &curve, const std::vector<double> &u)
 {
   double max_dist = 0.0;
 
   for (int i = first + 1; i < last; ++i)
   {
-    const cv::Point2d P = curve.eval(u[i-first]);
+    const cv::Point2d P = curve.eval(u[i - first]);
     const double dist = cv::norm(cv::Vec2d(P - points[i]), cv::NORM_L2SQR);
     if (dist > max_dist)
     {
@@ -1275,7 +1266,7 @@ static double compute_max_error(const std::vector<cv::Point2d>& points, int firs
   return max_dist;
 }
 
-BezierCurve fit_cubic(const std::vector<cv::Point2d>& points, int first, int last, const cv::Vec2d& t_hat_1, const cv::Vec2d& t_hat_2)
+BezierCurve fit_cubic(const std::vector<cv::Point2d> &points, int first, int last, const cv::Vec2d &t_hat_1, const cv::Vec2d &t_hat_2)
 {
   BezierCurve curve(3);
   const int num_points = last - first + 1;
@@ -1326,12 +1317,12 @@ BezierCurve BezierCurve::fit_cubic(std::vector<cv::Point2d> points)
   sort_pca(points);
 
   cv::Vec2d t_hat_1 = compute_left_tangent(points, 0);
-  cv::Vec2d t_hat_2 = compute_right_tangent(points, num_points-1);
-  
-  return ::fit_cubic(points, 0, num_points-1, t_hat_1, t_hat_2);
+  cv::Vec2d t_hat_2 = compute_right_tangent(points, num_points - 1);
+
+  return ::fit_cubic(points, 0, num_points - 1, t_hat_1, t_hat_2);
 }
 
-BezierCurve BezierCurve::fit_cubic(const cv::Point2d& p1, const cv::Point2d& p2, const std::vector<cv::Point2d>& points)
+BezierCurve BezierCurve::fit_cubic(const cv::Point2d &p1, const cv::Point2d &p2, const std::vector<cv::Point2d> &points)
 {
   std::vector<cv::Point2d> points_copy;
   points_copy.push_back(p1);
@@ -1341,9 +1332,9 @@ BezierCurve BezierCurve::fit_cubic(const cv::Point2d& p1, const cv::Point2d& p2,
   const int num_points = static_cast<int>(points_copy.size());
 
   cv::Vec2d t_hat_1 = compute_left_tangent(points_copy, 0);
-  cv::Vec2d t_hat_2 = compute_right_tangent(points_copy, num_points-1);
+  cv::Vec2d t_hat_2 = compute_right_tangent(points_copy, num_points - 1);
 
-  return ::fit_cubic(points_copy, 0, num_points-1, t_hat_1, t_hat_2);
+  return ::fit_cubic(points_copy, 0, num_points - 1, t_hat_1, t_hat_2);
 }
 
 void BezierCurve::generate_draw_points() const
@@ -1365,10 +1356,10 @@ void BezierCurve::generate_draw_points() const
     finished = true;
     for (size_t i = 0; i < m_draw_points.size() - 1; ++i)
     {
-      if (!is_8_connected(m_draw_points[i].p, m_draw_points[i+1].p))
+      if (!is_8_connected(m_draw_points[i].p, m_draw_points[i + 1].p))
       {
-        const double t_mid = 0.5 * (m_draw_points[i].t + m_draw_points[i+1].t);
-        m_draw_points.insert(m_draw_points.begin()+i+1, {t_mid, eval(t_mid)});
+        const double t_mid = 0.5 * (m_draw_points[i].t + m_draw_points[i + 1].t);
+        m_draw_points.insert(m_draw_points.begin() + i + 1, {t_mid, eval(t_mid)});
         finished = false;
         break;
       }
@@ -1381,9 +1372,9 @@ void BezierCurve::generate_draw_points() const
     finished = true;
     for (size_t i = 0; i < m_draw_points.size() - 1; ++i)
     {
-      if (m_draw_points[i].p == m_draw_points[i+1].p)
+      if (m_draw_points[i].p == m_draw_points[i + 1].p)
       {
-        m_draw_points.erase(m_draw_points.begin()+i+1);
+        m_draw_points.erase(m_draw_points.begin() + i + 1);
         finished = false;
         break;
       }
@@ -1396,12 +1387,12 @@ double BezierCurve::bernstein_polynomial(int degree, int index, double t)
   return math::n_choose_k(degree, index) * std::pow(1.0 - t, degree - index) * std::pow(t, index);
 }
 
-cv::Mat BezierCurve::bernstein_basis(int degree, const std::vector<double>& t_vals)
+cv::Mat BezierCurve::bernstein_basis(int degree, const std::vector<double> &t_vals)
 {
   cv::Mat basis(static_cast<int>(t_vals.size()), degree + 1, CV_64FC1);
   for (int y = 0; y < basis.rows; ++y)
   {
-    double* ptr = reinterpret_cast<double*>(basis.ptr(y));
+    double *ptr = reinterpret_cast<double *>(basis.ptr(y));
     for (int x = 0; x < basis.cols; ++x)
     {
       ptr[x] = bernstein_polynomial(degree, x, t_vals[y]);
@@ -1416,7 +1407,7 @@ cv::Mat BezierCurve::pseudo_inverse(cv::Mat A)
   cv::Mat At;
   cv::transpose(A, At);
   cv::Mat AtAinv;
-  cv::invert(At*A, AtAinv);
+  cv::invert(At * A, AtAinv);
   return AtAinv * At;
 }
 
@@ -1428,7 +1419,7 @@ void BezierCurve::draw_debug() const
   }
 
   std::vector<cv::Point> points;
-  for (const CurveDrawPoint& p : m_draw_points)
+  for (const CurveDrawPoint &p : m_draw_points)
   {
     points.push_back(p.p);
   }
@@ -1437,28 +1428,26 @@ void BezierCurve::draw_debug() const
   {
     cv::Rect bbox = cv::boundingRect(points);
     cv::Mat image_debug = cv::Mat::zeros(bbox.size(), CV_8UC1);
-    for (const cv::Point& p : points)
+    for (const cv::Point &p : points)
     {
-      image_debug.at<unsigned char>(p-bbox.tl()) = 255;
+      image_debug.at<unsigned char>(p - bbox.tl()) = 255;
     }
     cv::resize(image_debug, image_debug, cv::Size(), 8.0, 8.0, cv::INTER_NEAREST);
     cv::imshow("Image Debug", image_debug);
     cv::waitKey();
   }
-
 }
 
-BezierCurve::BezierCurve() :
-  m_degree(-1)
-{}
-
-BezierCurve::BezierCurve(int degree) :
-  m_degree(degree)
+BezierCurve::BezierCurve() : m_degree(-1)
 {
-  m_control_points.resize(degree+1);
 }
 
-BezierCurve::BezierCurve(const std::vector<double>& control_points_x, const std::vector<double>& control_points_y)
+BezierCurve::BezierCurve(int degree) : m_degree(degree)
+{
+  m_control_points.resize(degree + 1);
+}
+
+BezierCurve::BezierCurve(const std::vector<double> &control_points_x, const std::vector<double> &control_points_y)
 {
   m_degree = static_cast<int>(control_points_x.size()) - 1;
   m_control_points.resize(control_points_x.size());
@@ -1468,15 +1457,14 @@ BezierCurve::BezierCurve(const std::vector<double>& control_points_x, const std:
   }
 }
 
-BezierCurve::BezierCurve(const std::vector<cv::Point2d>& control_points) :
-  m_degree(static_cast<int>(control_points.size())-1),
-  m_control_points(control_points)
-{}
-
-BezierCurve::BezierCurve(const cv::Point2d& p_start, const cv::Point2d& p_end, int degree) :
-  m_degree(degree)
+BezierCurve::BezierCurve(const std::vector<cv::Point2d> &control_points) : m_degree(static_cast<int>(control_points.size()) - 1),
+                                                                           m_control_points(control_points)
 {
-  const cv::Point2d& diff = p_end - p_start;
+}
+
+BezierCurve::BezierCurve(const cv::Point2d &p_start, const cv::Point2d &p_end, int degree) : m_degree(degree)
+{
+  const cv::Point2d &diff = p_end - p_start;
   for (int i = 0; i <= degree; ++i)
   {
     const double t = static_cast<double>(i) / static_cast<double>(degree);
@@ -1484,7 +1472,7 @@ BezierCurve::BezierCurve(const cv::Point2d& p_start, const cv::Point2d& p_end, i
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const BezierCurve& curve)
+std::ostream &operator<<(std::ostream &os, const BezierCurve &curve)
 {
   os << "[";
   for (int i = 0; i <= curve.m_degree; ++i)
@@ -1495,7 +1483,7 @@ std::ostream& operator<<(std::ostream& os, const BezierCurve& curve)
   return os;
 }
 
-boost::property_tree::ptree BezierCurve::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree BezierCurve::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize(tree, "control_points", m_control_points, base_path, path);
@@ -1503,7 +1491,7 @@ boost::property_tree::ptree BezierCurve::save(const boost::filesystem::path& bas
   return tree;
 }
 
-void BezierCurve::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void BezierCurve::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize(tree, "control_points", m_control_points, base_path);
   deserialize(tree, "degree", m_degree, base_path);

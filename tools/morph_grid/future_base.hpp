@@ -28,19 +28,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class FutureBase
 {
 public:
-  FutureBase(const std::string& window_name) :
-    m_window_name(window_name),
-    m_update(true),
-    m_ready(false),
-    m_key(-1),
-    m_key_update(false)
+  FutureBase(const std::string &window_name) : m_window_name(window_name),
+                                               m_update(true),
+                                               m_ready(false),
+                                               m_key(-1),
+                                               m_key_update(false)
   {
     cv::setMouseCallback(m_window_name, &FutureBase::mouse_callback, this);
   }
 
   virtual void loop() = 0;
 
-  void add_trackbar(const std::string& trackbar_name, int* value, int count)
+  void add_trackbar(const std::string &trackbar_name, int *value, int count)
   {
     cv::createTrackbar(trackbar_name, m_window_name, value, count, FutureBase::on_trackbar_change, this);
   }
@@ -64,9 +63,9 @@ public:
 protected:
   virtual void on_mouse(int event, int x, int y, int flags) {}
 
-  static void on_trackbar_change(int, void* ptr)
+  static void on_trackbar_change(int, void *ptr)
   {
-    reinterpret_cast<FutureBase*>(ptr)->m_update = true;
+    reinterpret_cast<FutureBase *>(ptr)->m_update = true;
   }
 
   bool key_update()
@@ -86,9 +85,9 @@ protected:
   bool m_ready;
 
 private:
-  static void mouse_callback(int event, int x, int y, int flags, void* ptr)
+  static void mouse_callback(int event, int x, int y, int flags, void *ptr)
   {
-    reinterpret_cast<FutureBase*>(ptr)->on_mouse(event, x, y, flags);
+    reinterpret_cast<FutureBase *>(ptr)->on_mouse(event, x, y, flags);
   }
 
   bool m_key_update;

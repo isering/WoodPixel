@@ -71,14 +71,14 @@ void flood_fill_separating_curve(cv::Mat mask, BezierCurve curve, T val_curve, T
 
     if (p.x >= 0 && p.x < mask.cols && p.y >= 0 && p.y < mask.rows)
     {
-      T& val = mask.at<T>(p);
+      T &val = mask.at<T>(p);
       if (val == val_mask)
       {
         val = val_left;
-        fill_stack_left.emplace(p.x-1, p.y);
-        fill_stack_left.emplace(p.x+1, p.y);
-        fill_stack_left.emplace(p.x, p.y-1);
-        fill_stack_left.emplace(p.x, p.y+1);
+        fill_stack_left.emplace(p.x - 1, p.y);
+        fill_stack_left.emplace(p.x + 1, p.y);
+        fill_stack_left.emplace(p.x, p.y - 1);
+        fill_stack_left.emplace(p.x, p.y + 1);
       }
     }
   }
@@ -90,14 +90,14 @@ void flood_fill_separating_curve(cv::Mat mask, BezierCurve curve, T val_curve, T
 
     if (p.x >= 0 && p.x < mask.cols && p.y >= 0 && p.y < mask.rows)
     {
-      T& val = mask.at<T>(p);
+      T &val = mask.at<T>(p);
       if (val == val_mask)
       {
         val = val_right;
-        fill_stack_right.emplace(p.x-1, p.y);
-        fill_stack_right.emplace(p.x+1, p.y);
-        fill_stack_right.emplace(p.x, p.y-1);
-        fill_stack_right.emplace(p.x, p.y+1);
+        fill_stack_right.emplace(p.x - 1, p.y);
+        fill_stack_right.emplace(p.x + 1, p.y);
+        fill_stack_right.emplace(p.x, p.y - 1);
+        fill_stack_right.emplace(p.x, p.y + 1);
       }
     }
   }

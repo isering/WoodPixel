@@ -55,12 +55,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace fs = boost::filesystem;
 namespace pt = boost::property_tree;
 
-TreeMatch::TreeMatch(int min_patch_size, int patch_levels, double patch_quality_factor, int filter_resolution, double frequency_octaves, int num_filter_directions) :
-m_patch_quality_factor(patch_quality_factor),
-m_subpatch_size(min_patch_size/4, min_patch_size/4),
-m_filter_bank(filter_resolution, frequency_octaves, num_filter_directions)
+TreeMatch::TreeMatch(int min_patch_size, int patch_levels, double patch_quality_factor, int filter_resolution, double frequency_octaves, int num_filter_directions) : m_patch_quality_factor(patch_quality_factor),
+                                                                                                                                                                      m_subpatch_size(min_patch_size / 4, min_patch_size / 4),
+                                                                                                                                                                      m_filter_bank(filter_resolution, frequency_octaves, num_filter_directions)
 {
-  cv::Point boundary_size(min_patch_size/4, min_patch_size/4);
+  cv::Point boundary_size(min_patch_size / 4, min_patch_size / 4);
   cv::Point current_patch_size(min_patch_size, min_patch_size);
   for (int i = 0; i < patch_levels; ++i)
   {
@@ -69,7 +68,7 @@ m_filter_bank(filter_resolution, frequency_octaves, num_filter_directions)
   }
 }
 
-void TreeMatch::add_target(const boost::filesystem::path& path, double dpi, double scale)
+void TreeMatch::add_target(const boost::filesystem::path &path, double dpi, double scale)
 {
   /*
   * Load target texture
@@ -78,7 +77,7 @@ void TreeMatch::add_target(const boost::filesystem::path& path, double dpi, doub
   m_target_images.push_back(cv::imread(path.string(), cv::IMREAD_COLOR));
 }
 
-cv::Mat TreeMatch::compute_priority_map(const cv::Mat& texture_in)
+cv::Mat TreeMatch::compute_priority_map(const cv::Mat &texture_in)
 {
   cv::Mat texture;
   texture_in.convertTo(texture, CV_32FC3, 1.0 / 65535.0);
@@ -90,7 +89,7 @@ cv::Mat TreeMatch::compute_priority_map(const cv::Mat& texture_in)
   return texture;
 }
 
-void TreeMatch::add_texture(const boost::filesystem::path& path, double dpi, double scale, int num_rotations, const TextureMarker& marker, const std::string id)
+void TreeMatch::add_texture(const boost::filesystem::path &path, double dpi, double scale, int num_rotations, const TextureMarker &marker, const std::string id)
 {
   m_textures.emplace_back();
   m_textures.back().emplace_back(path, dpi, scale, marker, id);
@@ -100,7 +99,7 @@ void TreeMatch::add_texture(const boost::filesystem::path& path, double dpi, dou
   }
 }
 
-void TreeMatch::add_texture(const boost::filesystem::path& path, const boost::filesystem::path& mask, double dpi, double scale, int num_rotations, const TextureMarker& marker, const std::string id)
+void TreeMatch::add_texture(const boost::filesystem::path &path, const boost::filesystem::path &mask, double dpi, double scale, int num_rotations, const TextureMarker &marker, const std::string id)
 {
   if (mask.empty() || !fs::exists(mask) || !fs::is_regular_file(mask))
   {
@@ -129,12 +128,12 @@ void TreeMatch::compute_responses(double weight_intensity, double weight_sobel, 
   }
 
   std::cout << "Compute target responses..." << std::endl;
-  for (Texture& target : m_targets)
+  for (Texture &target : m_targets)
   {
     if (histogram_matching_factor != 0.0)
     {
       std::vector<Texture> textures_histogram;
-      for (const std::vector<Texture>& textures : m_textures)
+      for (const std::vector<Texture> &textures : m_textures)
       {
         textures_histogram.push_back(textures.front());
       }
@@ -150,16 +149,16 @@ void TreeMatch::compute_responses(double weight_intensity, double weight_sobel, 
   std::cout << "done" << std::endl;
 
   int num_textures = 0;
-  for (std::vector<Texture>& textures_rot : m_textures)
+  for (std::vector<Texture> &textures_rot : m_textures)
   {
     num_textures += static_cast<int>(textures_rot.size());
   }
 
   int i = 0;
   std::cout << "Compute " << num_textures << " texture features..." << std::endl;
-  for (std::vector<Texture>& textures_rot : m_textures)
+  for (std::vector<Texture> &textures_rot : m_textures)
   {
-    for (Texture& t : textures_rot)
+    for (Texture &t : textures_rot)
     {
       i++;
       if ((i % 10) == 0)
@@ -178,8 +177,8 @@ void TreeMatch::compute_responses(double weight_intensity, double weight_sobel, 
 static bool is_valid_point(cv::Point p, cv::Mat mask)
 {
   return p.x >= 0 && p.x < mask.cols &&
-    p.y >= 0 && p.y < mask.rows &&
-    mask.at<unsigned char>(p);
+         p.y >= 0 && p.y < mask.rows &&
+         mask.at<unsigned char>(p);
 }
 
 static cv::Mat rotated_rect_mask(cv::Size size, float angle)
@@ -191,12 +190,12 @@ static cv::Mat rotated_rect_mask(cv::Size size, float angle)
   rotated_rect.points(points2f.data());
   std::vector<cv::Point> points(points2f.begin(), points2f.end());
   cv::fillConvexPoly(mask, points, cv::Scalar(1));
-  cv::imshow("Mask", 255*mask);
+  cv::imshow("Mask", 255 * mask);
   cv::waitKey(0);
   return mask;
 }
 
-cv::Mat TreeMatch::fit_single_patch(const boost::filesystem::path& filename)
+cv::Mat TreeMatch::fit_single_patch(const boost::filesystem::path &filename)
 {
   if (m_textures.empty())
   {
@@ -206,14 +205,13 @@ cv::Mat TreeMatch::fit_single_patch(const boost::filesystem::path& filename)
   FeatureEvaluator evaluator(0.5, 0.5, 0.0, m_filter_bank);
   Texture patch(filename, 300.0, 1.0);
   patch.response = evaluator.evaluate(patch.texture, patch.mask());
-  
+
   struct MatchPatchResult
   {
-    MatchPatchResult(int texture_index, int texture_rot) :
-      texture_index(texture_index),
-      texture_rot(texture_rot),
-      cost(std::numeric_limits<double>::max()),
-      texture_pos(-1, -1)
+    MatchPatchResult(int texture_index, int texture_rot) : texture_index(texture_index),
+                                                           texture_rot(texture_rot),
+                                                           cost(std::numeric_limits<double>::max()),
+                                                           texture_pos(-1, -1)
     {
     }
 
@@ -247,7 +245,7 @@ cv::Mat TreeMatch::fit_single_patch(const boost::filesystem::path& filename)
     }
   }
 
-  MatchPatchResult result_min = *std::min_element(results.begin(), results.end(), [](const MatchPatchResult& lhs, const MatchPatchResult& rhs){return lhs.cost < rhs.cost; });
+  MatchPatchResult result_min = *std::min_element(results.begin(), results.end(), [](const MatchPatchResult &lhs, const MatchPatchResult &rhs) { return lhs.cost < rhs.cost; });
 
   if (result_min.cost == std::numeric_limits<double>::max())
   {
@@ -255,7 +253,7 @@ cv::Mat TreeMatch::fit_single_patch(const boost::filesystem::path& filename)
   }
 
   cv::Mat result = m_textures[result_min.texture_index][result_min.texture_rot].texture(cv::Rect(result_min.texture_pos, patch.texture.size()));
-  result.convertTo(result, CV_8UC3, 1.0/255.0);
+  result.convertTo(result, CV_8UC3, 1.0 / 255.0);
 
   return result;
 }
@@ -266,13 +264,13 @@ bool TreeMatch::find_next_patch()
   {
     return false;
   }
-  
+
   const PatchRegion region = m_reconstruction_regions.front();
   m_reconstruction_regions.pop_front();
- 
+
   std::vector<Patch> patches = match_patch(region);
 
-  for (const Patch& patch : patches)
+  for (const Patch &patch : patches)
   {
     if (patch.cost() == std::numeric_limits<double>::max())
     {
@@ -301,7 +299,7 @@ bool TreeMatch::find_next_patch_adaptive()
   /*
    * Hierarchical patch matching.
    */
-  std::deque<AdaptivePatch> queue(1, AdaptivePatch(match_patch(region), static_cast<int>(m_patch_sizes.size()-1)));
+  std::deque<AdaptivePatch> queue(1, AdaptivePatch(match_patch(region), static_cast<int>(m_patch_sizes.size() - 1)));
   mask_patch_resources(queue.front());
 
   while (!queue.empty())
@@ -317,7 +315,7 @@ bool TreeMatch::find_next_patch_adaptive()
     if (patch_coarse.level == 0)
     {
       std::cout << "add_patch_level: 0" << std::endl;
-      for (const Patch& p : patch_coarse.patches)
+      for (const Patch &p : patch_coarse.patches)
       {
         add_patch(p);
       }
@@ -345,7 +343,7 @@ bool TreeMatch::find_next_patch_adaptive()
           int x_fine = patch_coarse.patches[0].anchor_target().x + x * (patch_size_fine.width - m_subpatch_size.width);
           int y_fine = patch_coarse.patches[0].anchor_target().y + y * (patch_size_fine.height - m_subpatch_size.height);
           cv::Rect region_fine(cv::Point(x_fine, y_fine), patch_size_fine);
-          
+
           AdaptivePatch patch_fine(match_patch(PatchRegion(patch_coarse.target_index(), patch_coarse.coordinate(), region_fine)), level_fine);
 
           if (patch_fine.cost() == std::numeric_limits<double>::max())
@@ -369,11 +367,11 @@ bool TreeMatch::find_next_patch_adaptive()
       if (cost_factor < m_patch_quality_factor)
       {
         std::cout << "add_patch_level: " << patch_coarse.level << std::endl;
-        for (const AdaptivePatch& p : patches_fine)
+        for (const AdaptivePatch &p : patches_fine)
         {
           unmask_patch_resources(p);
         }
-        for (const Patch& p : patch_coarse.patches)
+        for (const Patch &p : patch_coarse.patches)
         {
           add_patch(p);
         }
@@ -388,7 +386,7 @@ bool TreeMatch::find_next_patch_adaptive()
   return true;
 }
 
-Patch TreeMatch::match_patch_impl(const PatchRegion& region, cv::Mat mask)
+Patch TreeMatch::match_patch_impl(const PatchRegion &region, cv::Mat mask)
 {
   if (m_textures.empty())
   {
@@ -397,12 +395,12 @@ Patch TreeMatch::match_patch_impl(const PatchRegion& region, cv::Mat mask)
 
   struct MatchPatchResult
   {
-    MatchPatchResult(int texture_index, int texture_rot) :
-      texture_index(texture_index),
-      texture_rot(texture_rot),
-      cost(std::numeric_limits<double>::max()),
-      texture_pos(-1, -1)
-    {}
+    MatchPatchResult(int texture_index, int texture_rot) : texture_index(texture_index),
+                                                           texture_rot(texture_rot),
+                                                           cost(std::numeric_limits<double>::max()),
+                                                           texture_pos(-1, -1)
+    {
+    }
 
     int texture_index;
     int texture_rot;
@@ -411,8 +409,7 @@ Patch TreeMatch::match_patch_impl(const PatchRegion& region, cv::Mat mask)
     cv::Mat error;
   };
 
-  const bool is_rectangular = (mask.empty() || cv::countNonZero(mask) == mask.rows*mask.cols);
- 
+  const bool is_rectangular = (mask.empty() || cv::countNonZero(mask) == mask.rows * mask.cols);
 
   Texture kernel = m_targets[region.target_index()](region.bounding_box());
 
@@ -424,8 +421,8 @@ Patch TreeMatch::match_patch_impl(const PatchRegion& region, cv::Mat mask)
       results.emplace_back(static_cast<int>(i), static_cast<int>(j));
     }
   }
-   
-  #pragma omp parallel for
+
+#pragma omp parallel for
   for (int i = 0; i < static_cast<int>(results.size()); ++i)
   {
     cv::Mat texture_mask;
@@ -447,8 +444,7 @@ Patch TreeMatch::match_patch_impl(const PatchRegion& region, cv::Mat mask)
     }
   }
 
-  MatchPatchResult result_min = *std::min_element(results.begin(), results.end(), [](const MatchPatchResult& lhs, const MatchPatchResult& rhs){return lhs.cost < rhs.cost; });
-
+  MatchPatchResult result_min = *std::min_element(results.begin(), results.end(), [](const MatchPatchResult &lhs, const MatchPatchResult &rhs) { return lhs.cost < rhs.cost; });
 
   if (result_min.cost == std::numeric_limits<double>::max())
   {
@@ -463,18 +459,18 @@ Patch TreeMatch::match_patch_impl(const PatchRegion& region, cv::Mat mask)
   return patch;
 }
 
-
-std::vector<Patch> TreeMatch::match_patch(const PatchRegion& region)
+std::vector<Patch> TreeMatch::match_patch(const PatchRegion &region)
 {
   if (region.has_sub_regions())
   {
     std::vector<Patch> sub_patches;
-    for (const PatchRegion& sub_region : region.sub_regions())
+    for (const PatchRegion &sub_region : region.sub_regions())
     {
       if (!sub_region.valid())
       {
         throw(std::invalid_argument((boost::format("TreeMatch::match_patch encountered invalid subpatch as input: %d %d %d") %
-          sub_region.target_index() % sub_region.coordinate().x % sub_region.coordinate().y).str()));
+                                     sub_region.target_index() % sub_region.coordinate().x % sub_region.coordinate().y)
+                                        .str()));
       }
 
       sub_patches.push_back(match_patch_impl(sub_region, sub_region.mask()));
@@ -482,9 +478,10 @@ std::vector<Patch> TreeMatch::match_patch(const PatchRegion& region)
       if (!sub_patches.back().region_target.valid())
       {
         throw(std::runtime_error((boost::format("TreeMatch::match_patch generated invalid subpatch: %d %d %d") %
-          sub_patches.back().region_target.target_index() %
-          sub_patches.back().region_target.coordinate().x %
-          sub_patches.back().region_target.coordinate().y).str()));
+                                  sub_patches.back().region_target.target_index() %
+                                  sub_patches.back().region_target.coordinate().x %
+                                  sub_patches.back().region_target.coordinate().y)
+                                     .str()));
       }
     }
     return sub_patches;
@@ -509,7 +506,7 @@ std::vector<Patch> TreeMatch::match_patch(const PatchRegion& region)
 
 struct point_less
 {
-  bool operator()(const cv::Point& lhs, const cv::Point& rhs)
+  bool operator()(const cv::Point &lhs, const cv::Point &rhs)
   {
     return lhs.x < rhs.x || (lhs.x == rhs.x && lhs.y < rhs.y);
   }
@@ -541,16 +538,16 @@ static std::vector<cv::Point> update_convex_hull(std::vector<cv::Point> convex_h
   return std::move(convex_hull_new);
 }
 
-bool is_valid_mask(const cv::Mat& mask, cv::Point p_patch, const cv::Mat& mask_target, cv::Point p_target, const cv::Mat& mask_source, cv::Point p_source)
+bool is_valid_mask(const cv::Mat &mask, cv::Point p_patch, const cv::Mat &mask_target, cv::Point p_target, const cv::Mat &mask_source, cv::Point p_source)
 {
   int y_target = p_target.y - p_patch.y;
   int y_source = p_source.y - p_patch.y;
 
   for (int y = 0; y < mask.rows; ++y, ++y_target, ++y_source)
   {
-    const unsigned char* ptr_patch = mask.ptr(y);
-    const unsigned char* ptr_target = mask_target.ptr(y_target);
-    const unsigned char* ptr_source = mask_source.ptr(y_source);
+    const unsigned char *ptr_patch = mask.ptr(y);
+    const unsigned char *ptr_target = mask_target.ptr(y_target);
+    const unsigned char *ptr_source = mask_source.ptr(y_source);
 
     int x_target = p_target.x - p_patch.x;
     int x_source = p_source.x - p_patch.x;
@@ -567,7 +564,7 @@ bool is_valid_mask(const cv::Mat& mask, cv::Point p_patch, const cv::Mat& mask_t
   return true;
 }
 
-float compute_cost(const cv::Mat& mask, cv::Mat& cost_mat, cv::Point p_patch, const FeatureVector& response_target, cv::Point p_target, const FeatureVector& response_source, cv::Point p_source)
+float compute_cost(const cv::Mat &mask, cv::Mat &cost_mat, cv::Point p_patch, const FeatureVector &response_target, cv::Point p_target, const FeatureVector &response_source, cv::Point p_source)
 {
   float cost = 0.0f;
   int num_pixel = 0;
@@ -577,8 +574,8 @@ float compute_cost(const cv::Mat& mask, cv::Mat& cost_mat, cv::Point p_patch, co
 
   for (int y = 0; y < mask.rows; ++y, ++p_target.y, ++p_source.y)
   {
-    const unsigned char* ptr_patch = mask.ptr(y);
-    float* ptr_cost = reinterpret_cast<float*>(cost_mat.ptr(y));
+    const unsigned char *ptr_patch = mask.ptr(y);
+    float *ptr_cost = reinterpret_cast<float *>(cost_mat.ptr(y));
 
     cv::Point p_target_temp = p_target;
     cv::Point p_source_temp = p_source;
@@ -600,7 +597,7 @@ float compute_cost(const cv::Mat& mask, cv::Mat& cost_mat, cv::Point p_patch, co
   return cost / num_pixel;
 }
 
-static std::pair<std::vector<cv::Point>, std::vector<float>> mask_to_vec(const cv::Mat& mask, const cv::Mat& cost_mat, cv::Point p_patch)
+static std::pair<std::vector<cv::Point>, std::vector<float>> mask_to_vec(const cv::Mat &mask, const cv::Mat &cost_mat, cv::Point p_patch)
 {
   std::vector<cv::Point> patch;
   std::vector<float> cost_vec;
@@ -608,8 +605,8 @@ static std::pair<std::vector<cv::Point>, std::vector<float>> mask_to_vec(const c
   cv::Point p_target = -p_patch;
   for (int y = 0; y < mask.rows; ++y, ++p_target.y)
   {
-    const unsigned char* ptr = mask.ptr(y);
-    const float* ptr_cost = reinterpret_cast<const float*>(cost_mat.ptr(y));
+    const unsigned char *ptr = mask.ptr(y);
+    const float *ptr_cost = reinterpret_cast<const float *>(cost_mat.ptr(y));
     cv::Point p_target_temp = p_target;
     for (int x = 0; x < mask.cols; ++x, ++p_target_temp.x)
     {
@@ -629,14 +626,14 @@ cv::Mat TreeMatch::draw(int target_index, bool draw_target) const
   if (draw_target)
   {
     image = m_targets[target_index].texture.clone();
-    image.convertTo(image, CV_8UC3, 1.0/255.0);
+    image.convertTo(image, CV_8UC3, 1.0 / 255.0);
   }
   else
   {
     image = cv::Mat::zeros(m_targets[target_index].texture.size(), CV_8UC3);
   }
 
-  for (const Patch& p : m_patches)
+  for (const Patch &p : m_patches)
   {
     if (p.region_target.target_index() == target_index)
     {
@@ -647,10 +644,10 @@ cv::Mat TreeMatch::draw(int target_index, bool draw_target) const
   return image;
 }
 
-cv::Mat TreeMatch::draw_patch(const Patch& patch) const
+cv::Mat TreeMatch::draw_patch(const Patch &patch) const
 {
   cv::Mat image = m_textures[patch.source_index][patch.source_rot].texture(cv::Rect(patch.anchor_source, patch.size()));
-  image.convertTo(image, CV_8UC3, 1.0/255.0);
+  image.convertTo(image, CV_8UC3, 1.0 / 255.0);
   return image;
 }
 
@@ -670,22 +667,22 @@ static cv::Mat combine_with_mask(cv::Mat mat_1, cv::Mat mask, int type, cv::Mat 
   return mat_1.mul(mask) + mat_2.mul(cv::Scalar::all(1) - mask);
 }
 
-void TreeMatch::mask_patch_resources(const Patch& patch)
+void TreeMatch::mask_patch_resources(const Patch &patch)
 {
   mask_patch_resources(patch, patch.mask());
 }
 
-void TreeMatch::mask_patch_resources(const AdaptivePatch& adaptive_patch)
+void TreeMatch::mask_patch_resources(const AdaptivePatch &adaptive_patch)
 {
-  for (const Patch& p : adaptive_patch.patches)
+  for (const Patch &p : adaptive_patch.patches)
   {
     mask_patch_resources(p);
   }
 }
 
-void TreeMatch::mask_patch_resources(const Patch& patch, const cv::Mat& mask)
+void TreeMatch::mask_patch_resources(const Patch &patch, const cv::Mat &mask)
 {
-  const Texture& texture_source = m_textures[patch.source_index][patch.source_rot];
+  const Texture &texture_source = m_textures[patch.source_index][patch.source_rot];
   cv::Mat mask_texture_new = cv::Mat::ones(texture_source.mask_done.size(), CV_8UC1);
 
   if (mask.empty())
@@ -697,13 +694,13 @@ void TreeMatch::mask_patch_resources(const Patch& patch, const cv::Mat& mask)
 #pragma omp parallel for
     for (int y = 0; y < mask.rows; ++y)
     {
-      unsigned char* ptr_mask_new = reinterpret_cast<unsigned char*>(mask_texture_new.ptr(patch.anchor_source.y+y));
-      const unsigned char* ptr_mask = reinterpret_cast<const unsigned char*>(mask.ptr(y));
+      unsigned char *ptr_mask_new = reinterpret_cast<unsigned char *>(mask_texture_new.ptr(patch.anchor_source.y + y));
+      const unsigned char *ptr_mask = reinterpret_cast<const unsigned char *>(mask.ptr(y));
       for (int x = 0; x < mask.cols; ++x)
       {
         if (ptr_mask[x])
         {
-          ptr_mask_new[patch.anchor_source.x+x] = 0;
+          ptr_mask_new[patch.anchor_source.x + x] = 0;
         }
       }
     }
@@ -719,22 +716,22 @@ void TreeMatch::mask_patch_resources(const Patch& patch, const cv::Mat& mask)
   }
 }
 
-void TreeMatch::unmask_patch_resources(const Patch& patch)
+void TreeMatch::unmask_patch_resources(const Patch &patch)
 {
   unmask_patch_resources(patch, patch.region_target.mask());
 }
 
-void TreeMatch::unmask_patch_resources(const AdaptivePatch& adaptive_patch)
+void TreeMatch::unmask_patch_resources(const AdaptivePatch &adaptive_patch)
 {
-  for (const Patch& p : adaptive_patch.patches)
+  for (const Patch &p : adaptive_patch.patches)
   {
     unmask_patch_resources(p);
   }
 }
 
-void TreeMatch::unmask_patch_resources(const Patch& patch, const cv::Mat& mask)
+void TreeMatch::unmask_patch_resources(const Patch &patch, const cv::Mat &mask)
 {
-  const Texture& texture_source = m_textures[patch.source_index][patch.source_rot];
+  const Texture &texture_source = m_textures[patch.source_index][patch.source_rot];
   cv::Mat mask_texture_new = cv::Mat::ones(texture_source.mask_done.size(), CV_8UC1);
 
   if (mask.empty())
@@ -746,13 +743,13 @@ void TreeMatch::unmask_patch_resources(const Patch& patch, const cv::Mat& mask)
 #pragma omp parallel for
     for (int y = 0; y < mask.rows; ++y)
     {
-      unsigned char* ptr_mask_new = reinterpret_cast<unsigned char*>(mask_texture_new.ptr(patch.anchor_source.y+y));
-      const unsigned char* ptr_mask = reinterpret_cast<const unsigned char*>(mask.ptr(y));
+      unsigned char *ptr_mask_new = reinterpret_cast<unsigned char *>(mask_texture_new.ptr(patch.anchor_source.y + y));
+      const unsigned char *ptr_mask = reinterpret_cast<const unsigned char *>(mask.ptr(y));
       for (int x = 0; x < mask.cols; ++x)
       {
         if (ptr_mask[x])
         {
-          ptr_mask_new[patch.anchor_source.x+x] = 0;
+          ptr_mask_new[patch.anchor_source.x + x] = 0;
         }
       }
     }
@@ -769,7 +766,7 @@ void TreeMatch::unmask_patch_resources(const Patch& patch, const cv::Mat& mask)
   }
 }
 
-void TreeMatch::add_patch(const Patch& patch)
+void TreeMatch::add_patch(const Patch &patch)
 {
   mask_patch_resources(patch);
   m_patches.push_back(patch);
@@ -783,7 +780,7 @@ cv::Mat TreeMatch::draw_matched_target(int target_index, double histogram_matchi
   if (histogram_matching_factor != 0.0)
   {
     std::vector<Texture> textures_histogram;
-    for (const std::vector<Texture>& textures : m_textures)
+    for (const std::vector<Texture> &textures : m_textures)
     {
       textures_histogram.push_back(textures.front());
     }
@@ -800,7 +797,7 @@ cv::Mat TreeMatch::draw_matched_target(int target_index, double histogram_matchi
 cv::Mat TreeMatch::draw_masked_target(int target_index) const
 {
   cv::Mat image = m_targets[target_index].texture.clone();
-  image.convertTo(image, CV_8UC3, 1.0/255.0);
+  image.convertTo(image, CV_8UC3, 1.0 / 255.0);
 
   cv::Mat mask = m_targets[target_index].mask();
   cv::merge(std::vector<cv::Mat>(3, mask), mask);
@@ -811,10 +808,10 @@ cv::Mat TreeMatch::draw_masked_target(int target_index) const
 std::vector<cv::Mat> TreeMatch::draw_masked_textures() const
 {
   std::vector<cv::Mat> textures;
-  for (const std::vector<Texture>& textures_rot : m_textures)
+  for (const std::vector<Texture> &textures_rot : m_textures)
   {
     cv::Mat texture;
-    textures_rot[0].texture.convertTo(texture, CV_8UC3, 1.0/255.0);
+    textures_rot[0].texture.convertTo(texture, CV_8UC3, 1.0 / 255.0);
 
     cv::Mat mask = textures_rot[0].mask();
     mask.setTo(255, mask > 0);
@@ -825,46 +822,46 @@ std::vector<cv::Mat> TreeMatch::draw_masked_textures() const
   return textures;
 }
 
-std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const Patch& patch, cv::Scalar color, double alpha) const
+std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const Patch &patch, cv::Scalar color, double alpha) const
 {
   return draw_masked_textures_patch(std::vector<Patch>(1, patch), color, alpha);
 }
 
-std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const std::vector<Patch>& patches, cv::Scalar color, double alpha) const
+std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const std::vector<Patch> &patches, cv::Scalar color, double alpha) const
 {
   return draw_masked_textures_patch(patches, std::vector<cv::Scalar>(patches.size(), color), std::vector<double>(patches.size(), alpha));
 }
 
-std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const std::vector<Patch>& patches, const std::vector<cv::Scalar>& color, const std::vector<double>& alpha) const
+std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const std::vector<Patch> &patches, const std::vector<cv::Scalar> &color, const std::vector<double> &alpha) const
 {
   // Draw masked textures.
   std::vector<cv::Mat> textures;
-  for (const std::vector<Texture>& textures_rot : m_textures)
+  for (const std::vector<Texture> &textures_rot : m_textures)
   {
     cv::Mat texture;
-    textures_rot[0].texture.convertTo(texture, CV_32FC3, 1.0/65535.0);
+    textures_rot[0].texture.convertTo(texture, CV_32FC3, 1.0 / 65535.0);
     textures.push_back(texture);
   }
 
   for (size_t i = 0; i < patches.size(); ++i)
   {
     // Generate mask from patch.
-    const Texture& texture_patch = m_textures[patches[i].source_index][patches[i].source_rot];
+    const Texture &texture_patch = m_textures[patches[i].source_index][patches[i].source_rot];
     cv::Mat mask_patch = cv::Mat::zeros(texture_patch.mask_done.size(), CV_8UC1);
     mask_patch(cv::Rect(patches[i].anchor_source, patches[i].size())) = 255;
 
     // Compute transformation to unrotated texture.
     cv::Mat transform = AffineTransformation::concat(
-      m_textures[patches[i].source_index][0].transformation_matrix,
-      texture_patch.transformation_matrix_inv);
+        m_textures[patches[i].source_index][0].transformation_matrix,
+        texture_patch.transformation_matrix_inv);
 
     // Warp mask onto unrotated texture.
     cv::Mat mask_rotated;
     cv::warpAffine(mask_patch, mask_rotated, transform, textures[patches[i].source_index].size(), cv::INTER_NEAREST, cv::BORDER_CONSTANT, cv::Scalar(0));
     cv::dilate(mask_rotated, mask_rotated, cv::Mat::ones(3, 3, CV_8UC1));
 
-    cvx::multiplywithMask(textures[patches[i].source_index], cv::Scalar::all(1.0-alpha[i]), textures[patches[i].source_index], mask_rotated);
-    cvx::addWithMask(textures[patches[i].source_index], alpha[i]*color[i], textures[patches[i].source_index], mask_rotated);
+    cvx::multiplywithMask(textures[patches[i].source_index], cv::Scalar::all(1.0 - alpha[i]), textures[patches[i].source_index], mask_rotated);
+    cvx::addWithMask(textures[patches[i].source_index], alpha[i] * color[i], textures[patches[i].source_index], mask_rotated);
   }
 
   for (size_t i = 0; i < textures.size(); ++i)
@@ -875,7 +872,7 @@ std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch(const std::vector<Pat
   return textures;
 }
 
-static void mask_patch(cv::Mat mask, const Patch& p, cv::Mat transform)
+static void mask_patch(cv::Mat mask, const Patch &p, cv::Mat transform)
 {
   const float x1 = static_cast<float>(p.anchor_source.x);
   const float y1 = static_cast<float>(p.anchor_source.y);
@@ -889,28 +886,28 @@ static void mask_patch(cv::Mat mask, const Patch& p, cv::Mat transform)
   cv::fillConvexPoly(mask, points_transformed, 255);
 }
 
-std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch_last(const std::vector<Patch>& patches, cv::Scalar color_1, double alpha_1, cv::Scalar color_2, double alpha_2, double scale) const
+std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch_last(const std::vector<Patch> &patches, cv::Scalar color_1, double alpha_1, cv::Scalar color_2, double alpha_2, double scale) const
 {
   std::vector<cv::Mat> textures, masks;
-  for (const std::vector<Texture>& textures_rot : m_textures)
+  for (const std::vector<Texture> &textures_rot : m_textures)
   {
     cv::Mat texture;
-    textures_rot[0].texture.convertTo(texture, CV_32FC3, 1.0/65535.0);
+    textures_rot[0].texture.convertTo(texture, CV_32FC3, 1.0 / 65535.0);
     cv::resize(texture, texture, cv::Size(), scale, scale);
     textures.push_back(texture);
 
     masks.push_back(cv::Mat::zeros(texture.size(), CV_8UC1));
   }
 
-  for (size_t i = 0; i < patches.size()-1; ++i)
+  for (size_t i = 0; i < patches.size() - 1; ++i)
   {
-    const Patch& p = patches[i];
-    const Texture& texture_patch = m_textures[p.source_index][p.source_rot];
+    const Patch &p = patches[i];
+    const Texture &texture_patch = m_textures[p.source_index][p.source_rot];
 
     // Compute transformation to unrotated texture.
     cv::Mat transform = AffineTransformation::concat(
-      m_textures[p.source_index][0].transformation_matrix,
-      texture_patch.transformation_matrix_inv);
+        m_textures[p.source_index][0].transformation_matrix,
+        texture_patch.transformation_matrix_inv);
     transform = AffineTransformation::concat(AffineTransformation::T_scale(scale, scale), transform);
 
     mask_patch(masks[p.source_index], p, transform);
@@ -918,8 +915,8 @@ std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch_last(const std::vecto
 
   for (size_t i = 0; i < textures.size(); ++i)
   {
-    cvx::multiplywithMask(textures[i], cv::Scalar::all(1.0-alpha_1), textures[i], masks[i]);
-    cvx::addWithMask(textures[i], alpha_1*color_1, textures[i], masks[i]);
+    cvx::multiplywithMask(textures[i], cv::Scalar::all(1.0 - alpha_1), textures[i], masks[i]);
+    cvx::addWithMask(textures[i], alpha_1 * color_1, textures[i], masks[i]);
 
     cv::Mat mask_border;
     cv::erode(masks[i], mask_border, cv::Mat::ones(5, 5, CV_8UC1));
@@ -928,19 +925,19 @@ std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch_last(const std::vecto
   }
 
   // Clear mask
-  for (cv::Mat& mask : masks)
+  for (cv::Mat &mask : masks)
   {
     mask.setTo(0);
   }
 
   // Generate mask from patch.
-  const Patch& p = patches.back();
-  const Texture& texture_patch = m_textures[p.source_index][p.source_rot];
+  const Patch &p = patches.back();
+  const Texture &texture_patch = m_textures[p.source_index][p.source_rot];
 
   // Compute transformation to unrotated texture.
   cv::Mat transform = AffineTransformation::concat(
-    m_textures[p.source_index][0].transformation_matrix,
-    texture_patch.transformation_matrix_inv);
+      m_textures[p.source_index][0].transformation_matrix,
+      texture_patch.transformation_matrix_inv);
   transform = AffineTransformation::concat(AffineTransformation::T_scale(scale, scale), transform);
 
   // Warp mask onto unrotated texture.
@@ -948,8 +945,8 @@ std::vector<cv::Mat> TreeMatch::draw_masked_textures_patch_last(const std::vecto
 
   for (size_t i = 0; i < textures.size(); ++i)
   {
-    cvx::multiplywithMask(textures[i], cv::Scalar::all(1.0-alpha_2), textures[i], masks[i]);
-    cvx::addWithMask(textures[i], alpha_2*color_2, textures[i], masks[i]);
+    cvx::multiplywithMask(textures[i], cv::Scalar::all(1.0 - alpha_2), textures[i], masks[i]);
+    cvx::addWithMask(textures[i], alpha_2 * color_2, textures[i], masks[i]);
 
     cv::Mat mask_border;
     cv::erode(masks[i], mask_border, cv::Mat::ones(5, 5, CV_8UC1));
@@ -969,7 +966,7 @@ void TreeMatch::generate_patches_square(int target_index)
   m_reconstruction_regions.insert(m_reconstruction_regions.end(), patches.begin(), patches.end());
 }
 
-void TreeMatch::generate_patches(int target_index, const Grid& morphed_grid, cv::Mat edge_image)
+void TreeMatch::generate_patches(int target_index, const Grid &morphed_grid, cv::Mat edge_image)
 {
   std::vector<PatchRegion> patches;
 
@@ -986,10 +983,10 @@ void TreeMatch::generate_patches(int target_index, const Grid& morphed_grid, cv:
   m_reconstruction_regions.insert(m_reconstruction_regions.end(), patches.begin(), patches.end());
 }
 
-void TreeMatch::add_patches(int target_index, const std::vector<PatchRegion>& patch_regions, double scale)
+void TreeMatch::add_patches(int target_index, const std::vector<PatchRegion> &patch_regions, double scale)
 {
   m_reconstruction_regions.insert(m_reconstruction_regions.begin(), patch_regions.begin(), patch_regions.end());
-  for (std::deque<PatchRegion>::iterator iter = m_reconstruction_regions.begin(); iter != m_reconstruction_regions.begin()+patch_regions.size(); ++iter)
+  for (std::deque<PatchRegion>::iterator iter = m_reconstruction_regions.begin(); iter != m_reconstruction_regions.begin() + patch_regions.size(); ++iter)
   {
     iter->set_target_index(target_index);
     iter->scale(scale);
@@ -1003,14 +1000,14 @@ void TreeMatch::downsample(int factor)
     return;
   }
 
-  for (Texture& target : m_targets)
+  for (Texture &target : m_targets)
   {
     target.downsample_nn(factor);
   }
 
-  for (std::vector<Texture>& texture_vec : m_textures)
+  for (std::vector<Texture> &texture_vec : m_textures)
   {
-    for (Texture& t : texture_vec)
+    for (Texture &t : texture_vec)
     {
       t.downsample_nn(factor);
       t.transformation_matrix = Texture::compute_transformation_matrix(texture_vec[0].texture, t.angle_rad);
@@ -1019,11 +1016,11 @@ void TreeMatch::downsample(int factor)
   }
 
   std::for_each(
-    m_reconstruction_regions.begin(), m_reconstruction_regions.end(),
-    std::bind(&PatchRegion::scale, std::placeholders::_1, 1.0/factor));
+      m_reconstruction_regions.begin(), m_reconstruction_regions.end(),
+      std::bind(&PatchRegion::scale, std::placeholders::_1, 1.0 / factor));
 }
 
-static int get_index(std::vector<std::string>& filenames, std::string filename)
+static int get_index(std::vector<std::string> &filenames, std::string filename)
 {
   auto iter = std::find(filenames.begin(), filenames.end(), filename);
   if (iter != filenames.end())
@@ -1058,7 +1055,7 @@ void TreeMatch::save(int target_index, boost::filesystem::path path) const
   pt::ptree root;
 
   pt::ptree tree_patches;
-  for (const Patch& patch : m_patches)
+  for (const Patch &patch : m_patches)
   {
     if (patch.region_target.target_index() == target_index)
     {
@@ -1082,9 +1079,9 @@ void TreeMatch::save(int target_index, boost::filesystem::path path) const
 
 void TreeMatch::find_markers(double marker_size_mm, int num_marker)
 {
-  for (std::vector<Texture>& texture : m_textures)
+  for (std::vector<Texture> &texture : m_textures)
   {
-    for (Texture& t : texture)
+    for (Texture &t : texture)
     {
       t.find_markers(marker_size_mm, num_marker);
     }
@@ -1120,10 +1117,10 @@ void TreeMatch::sort_patches_by_saliency()
   double max_saliency;
 
   std::vector<cv::Mat> saliency_maps;
-  for (Texture& target : m_targets)
+  for (Texture &target : m_targets)
   {
     cv::Mat image, saliency_map;
-    target.texture.convertTo(image, CV_8UC3, 1.0/255.0);
+    target.texture.convertTo(image, CV_8UC3, 1.0 / 255.0);
     saliency_alg->computeSaliency(image, saliency_map);
     saliency_maps.push_back(saliency_map);
 
@@ -1131,7 +1128,7 @@ void TreeMatch::sort_patches_by_saliency()
     //cv::waitKey(0);
   }
 
-  for (PatchRegion& region : m_reconstruction_regions)
+  for (PatchRegion &region : m_reconstruction_regions)
   {
     cv::Mat local_saliency = saliency_maps[region.target_index()](region.bounding_box()).clone();
     local_saliency.setTo(0.0f, region.mask() == 0);
@@ -1139,7 +1136,7 @@ void TreeMatch::sort_patches_by_saliency()
     sort_data.push_back({region, max_saliency});
   }
 
-  std::sort(sort_data.begin(), sort_data.end(), [](const SaliencySortData& lhs, const SaliencySortData& rhs){return lhs.score > rhs.score; });
+  std::sort(sort_data.begin(), sort_data.end(), [](const SaliencySortData &lhs, const SaliencySortData &rhs) { return lhs.score > rhs.score; });
 
   for (size_t i = 0; i < m_reconstruction_regions.size(); ++i)
   {
@@ -1149,11 +1146,11 @@ void TreeMatch::sort_patches_by_saliency()
 
 struct SortCenter
 {
-  SortCenter(const std::vector<cv::Point2d>& p_center) :
-    p_center(p_center)
-  {}
+  SortCenter(const std::vector<cv::Point2d> &p_center) : p_center(p_center)
+  {
+  }
 
-  bool operator()(const std::reference_wrapper<PatchRegion>& lhs, const std::reference_wrapper<PatchRegion>& rhs)
+  bool operator()(const std::reference_wrapper<PatchRegion> &lhs, const std::reference_wrapper<PatchRegion> &rhs)
   {
     const double dist_1 = cv::norm(0.5 * cv::Point2d(lhs.get().bounding_box().tl() + lhs.get().bounding_box().br()) - p_center[lhs.get().target_index()]);
     const double dist_2 = cv::norm(0.5 * cv::Point2d(rhs.get().bounding_box().tl() + rhs.get().bounding_box().br()) - p_center[rhs.get().target_index()]);
@@ -1166,7 +1163,7 @@ struct SortCenter
 void TreeMatch::sort_patches_by_center_distance()
 {
   std::vector<cv::Point2d> p_center;
-  for (const Texture& target : m_targets)
+  for (const Texture &target : m_targets)
   {
     p_center.emplace_back(0.5 * target.texture.cols, 0.5 * target.texture.rows);
   }
@@ -1180,16 +1177,16 @@ std::pair<cv::Mat, cv::Mat> TreeMatch::draw_saliency(int target_index) const
   const int num_regions = static_cast<int>(m_reconstruction_regions.size());
 
   cv::Mat color_map(1, 256, CV_8UC1);
-  unsigned char* ptr_color_map_raw = color_map.ptr(0);
-  std::iota(ptr_color_map_raw, ptr_color_map_raw+256, 0);
-  std::reverse(ptr_color_map_raw, ptr_color_map_raw+256);
+  unsigned char *ptr_color_map_raw = color_map.ptr(0);
+  std::iota(ptr_color_map_raw, ptr_color_map_raw + 256, 0);
+  std::reverse(ptr_color_map_raw, ptr_color_map_raw + 256);
   cv::applyColorMap(color_map, color_map, cv::COLORMAP_JET);
-  const cv::Vec3b* ptr_color_map = reinterpret_cast<const cv::Vec3b*>(color_map.ptr(0));
+  const cv::Vec3b *ptr_color_map = reinterpret_cast<const cv::Vec3b *>(color_map.ptr(0));
 
   cv::Mat image = m_target_images[target_index].clone();
   for (size_t i = 0; i < m_reconstruction_regions.size(); ++i)
   {
-    const PatchRegion region = m_reconstruction_regions[i].scaled(1.0/m_targets[target_index].scale);
+    const PatchRegion region = m_reconstruction_regions[i].scaled(1.0 / m_targets[target_index].scale);
 
     const int color_map_index = static_cast<int>((static_cast<double>(i) / m_reconstruction_regions.size()) * 256);
     const cv::Vec3b overlay_color = ptr_color_map[color_map_index];
@@ -1197,23 +1194,23 @@ std::pair<cv::Mat, cv::Mat> TreeMatch::draw_saliency(int target_index) const
 
     for (int y = 0; y < region.size().height; ++y)
     {
-      cv::Vec3b* image_ptr = reinterpret_cast<cv::Vec3b*>(image.ptr(region.bbox_tl().y + y));
-      const unsigned char* mask_ptr = reinterpret_cast<const unsigned char*>(mask.ptr(y));
+      cv::Vec3b *image_ptr = reinterpret_cast<cv::Vec3b *>(image.ptr(region.bbox_tl().y + y));
+      const unsigned char *mask_ptr = reinterpret_cast<const unsigned char *>(mask.ptr(y));
 
       for (int x = 0; x < region.size().width; ++x)
       {
         if (mask_ptr[x] > 0)
         {
-          image_ptr[region.bbox_tl().x+x] = transparency * overlay_color + (1.0 - transparency) * image_ptr[region.bbox_tl().x+x];
+          image_ptr[region.bbox_tl().x + x] = transparency * overlay_color + (1.0 - transparency) * image_ptr[region.bbox_tl().x + x];
         }
       }
-    }    
+    }
   }
 
   return std::make_pair(image, color_map);
 }
 
-TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_textures)
+TreeMatch TreeMatch::load(const boost::filesystem::path &path, bool load_textures)
 {
   pt::ptree root;
   pt::read_json(path.string(), root);
@@ -1258,7 +1255,7 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
 
   try
   {
-    for (const auto& tree_source : root.get_child("source_textures"))
+    for (const auto &tree_source : root.get_child("source_textures"))
     {
       texture_json_t t;
 
@@ -1282,18 +1279,18 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
         {
           t.id = "";
         }
-        
+
         t.path_texture = tree_texture_json.get<fs::path>("texture");
         t.path_mask = tree_texture_json.get<fs::path>("mask");
         t.markers.load(path_texture_json.parent_path(), tree_texture_json);
         t.dpi = tree_texture_json.get<double>("dpi");
         t.scale = tree_source.second.get<double>("scale");
-      
+
         if (!fs::exists(t.path_texture))
         {
           t.path_texture = path_texture_json.parent_path() / t.path_texture;
         }
-        
+
         if (!fs::exists(t.path_mask))
         {
           t.path_mask = path_texture_json.parent_path() / t.path_mask;
@@ -1302,10 +1299,10 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
       else
       {
         t.path_texture = tree_source.second.get<fs::path>("texture");
-        
+
         if (tree_source.second.count("mask"))
         {
-          t.path_mask = tree_source.second.get<fs::path>("mask");  
+          t.path_mask = tree_source.second.get<fs::path>("mask");
         }
 
         if (tree_source.second.count("markers_pixel"))
@@ -1315,12 +1312,12 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
 
         if (tree_source.second.count("id"))
         {
-          t.id = tree_source.second.get<std::string>("id");  
+          t.id = tree_source.second.get<std::string>("id");
         }
 
         t.dpi = tree_source.second.get<double>("dpi");
         t.scale = tree_source.second.get<double>("scale");
-      
+
         if (!fs::exists(t.path_texture))
         {
           t.path_texture = path_json / t.path_texture;
@@ -1337,7 +1334,7 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
 
     num_source_rotations = root.get<int>("num_source_rotations");
 
-    for (const auto& tree_target : root.get_child("targets"))
+    for (const auto &tree_target : root.get_child("targets"))
     {
       target_json_t t;
       t.path = tree_target.second.get<fs::path>("filename");
@@ -1359,13 +1356,13 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
 
         if (!fs::exists(path_patches) || !fs::is_regular_file(path_patches))
         {
-          std::cerr <<  "Could not find patches: " << path_patches << std::endl;
+          std::cerr << "Could not find patches: " << path_patches << std::endl;
           std::exit(EXIT_FAILURE);
         }
 
         pt::ptree tree_patches;
         pt::read_json(path_patches.string(), tree_patches);
-        for (const auto& tree_val : tree_patches.get_child("patches"))
+        for (const auto &tree_val : tree_patches.get_child("patches"))
         {
           PatchRegion p;
           p.load(path_patches.parent_path(), tree_val.second.get_child(""));
@@ -1397,44 +1394,43 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
     }
 
     std::cout << "Settings:" << std::endl;
-    for (const texture_json_t& t : sources_json)
+    for (const texture_json_t &t : sources_json)
     {
       std::cout << "source panel ID: " << t.id << std::endl
-        << "  source_filename: " << t.path_texture << std::endl
-        << "  source_filename_mask: " << t.path_mask << std::endl
-        << "  source_scale: " << t.scale << std::endl
-        << "  source_dpi: " << t.dpi << std::endl
-        << "  num_markers: " << t.markers.markers_pix.size() << std::endl;
+                << "  source_filename: " << t.path_texture << std::endl
+                << "  source_filename_mask: " << t.path_mask << std::endl
+                << "  source_scale: " << t.scale << std::endl
+                << "  source_dpi: " << t.dpi << std::endl
+                << "  num_markers: " << t.markers.markers_pix.size() << std::endl;
     }
 
-    for (const target_json_t& t : targets_json)
+    for (const target_json_t &t : targets_json)
     {
       std::cout << "target_filename: " << t.path << std::endl
-        << "target_scale: " << t.scale << std::endl
-        << "target_dpi: " << t.dpi << std::endl
-        << "target_morphed_grid: " << (t.reconstruction_regions.empty() ? "no" : "yes") << std::endl;
+                << "target_scale: " << t.scale << std::endl
+                << "target_dpi: " << t.dpi << std::endl
+                << "target_morphed_grid: " << (t.reconstruction_regions.empty() ? "no" : "yes") << std::endl;
     }
 
     std::cout << "min_patch_size: " << min_patch_size << std::endl
-      << "patch_levels: " << patch_levels << std::endl
-      << "patch_quality_factor: " << patch_quality_factor << std::endl
-      << "weight_intensity: "  << weight_intensity << std::endl
-      << "weight_sobel: " << weight_sobel << std::endl
-      << "weight_gabor: " << weight_gabor << std::endl
-      << "histogram_matching: " << histogram_matching << std::endl
-      << "filter_resolution: " << filter_resolution << std::endl
-      << "num_filter_directions: " << num_filter_directions << std::endl
-      << "filter_bandwidth_octaves: " << filter_bandwidth_octaves << std::endl;
+              << "patch_levels: " << patch_levels << std::endl
+              << "patch_quality_factor: " << patch_quality_factor << std::endl
+              << "weight_intensity: " << weight_intensity << std::endl
+              << "weight_sobel: " << weight_sobel << std::endl
+              << "weight_gabor: " << weight_gabor << std::endl
+              << "histogram_matching: " << histogram_matching << std::endl
+              << "filter_resolution: " << filter_resolution << std::endl
+              << "num_filter_directions: " << num_filter_directions << std::endl
+              << "filter_bandwidth_octaves: " << filter_bandwidth_octaves << std::endl;
 
     if (root.count("downsample"))
     {
       std::cerr << "******************************************************" << std::endl
-        << "WARNING: downsample is deprecated and will be ignored!" << std::endl
-        << "******************************************************" << std::endl;
+                << "WARNING: downsample is deprecated and will be ignored!" << std::endl
+                << "******************************************************" << std::endl;
     }
-
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     std::exit(EXIT_FAILURE);
@@ -1442,22 +1438,22 @@ TreeMatch TreeMatch::load(const boost::filesystem::path& path, bool load_texture
 
   TreeMatch matcher(min_patch_size, patch_levels, patch_quality_factor, filter_resolution, filter_bandwidth_octaves, num_filter_directions);
 
-  for (const target_json_t& t : targets_json)
+  for (const target_json_t &t : targets_json)
   {
     matcher.add_target(t.path, t.dpi, t.scale);
     if (t.reconstruction_regions.empty())
     {
-      matcher.generate_patches_square(matcher.num_targets()-1);
+      matcher.generate_patches_square(matcher.num_targets() - 1);
     }
     else
     {
-      matcher.add_patches(matcher.num_targets()-1, t.reconstruction_regions, t.scale);
+      matcher.add_patches(matcher.num_targets() - 1, t.reconstruction_regions, t.scale);
     }
   }
 
   if (load_textures)
   {
-    for (const texture_json_t& t : sources_json)
+    for (const texture_json_t &t : sources_json)
     {
       matcher.add_texture(t.path_texture, t.path_mask, t.dpi, t.scale, num_source_rotations, t.markers, t.id);
     }

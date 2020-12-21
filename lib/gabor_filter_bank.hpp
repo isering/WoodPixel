@@ -50,7 +50,7 @@ public:
     return m_gabor_filters.width();
   }
 
-  const mat<GaborFilter>& filters() const
+  const mat<GaborFilter> &filters() const
   {
     return m_gabor_filters;
   }

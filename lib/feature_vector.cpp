@@ -47,13 +47,13 @@ void FeatureVector::render() const
     down = 2621440,
     space = 32
   };
-  
-  int cur_index = 0;  
+
+  int cur_index = 0;
   bool run_visualization = true;
   while (run_visualization)
   {
     cv::Mat im_out;
-    feature_vector[cur_index].convertTo(im_out, CV_8UC1, 1.0/255);
+    feature_vector[cur_index].convertTo(im_out, CV_8UC1, 1.0 / 255);
     cv::imshow("Response", im_out);
     int key = cv::waitKeyEx();
 
@@ -72,7 +72,7 @@ void FeatureVector::render() const
       ++cur_index;
       if (cur_index >= num_channels)
       {
-        cur_index  = 0;
+        cur_index = 0;
       }
       break;
     case space:
@@ -81,7 +81,7 @@ void FeatureVector::render() const
   }
 }
 
-void FeatureVector::save(const boost::filesystem::path& path) const
+void FeatureVector::save(const boost::filesystem::path &path) const
 {
   const int num_channels = static_cast<int>(feature_vector.size());
   cv::Mat image_out;
@@ -103,7 +103,7 @@ void FeatureVector::save(const boost::filesystem::path& path) const
   }
 }
 
-void FeatureVector::render(const std::vector<FeatureVector>& features)
+void FeatureVector::render(const std::vector<FeatureVector> &features)
 {
   const int num_channels = static_cast<int>(features.front().num_channels());
 
@@ -111,7 +111,7 @@ void FeatureVector::render(const std::vector<FeatureVector>& features)
   int rows_out = 0;
   double global_min = std::numeric_limits<double>::max();
   double global_max = -std::numeric_limits<double>::max();
-  for (const FeatureVector& f : features)
+  for (const FeatureVector &f : features)
   {
     cols_out += f[0].cols;
     rows_out = std::max(rows_out, f[0].rows);
@@ -143,7 +143,7 @@ void FeatureVector::render(const std::vector<FeatureVector>& features)
   while (run_visualization)
   {
     std::vector<double> response_min, response_max;
-    for (const FeatureVector& f : features)
+    for (const FeatureVector &f : features)
     {
       double local_min, local_max;
       cv::minMaxLoc(f[cur_index], &local_min, &local_max);
@@ -194,7 +194,7 @@ void FeatureVector::render(const std::vector<FeatureVector>& features)
   }
 }
 
-float FeatureVector::dist(cv::Point p_target, const FeatureVector& rhs, cv::Point p_rhs) const
+float FeatureVector::dist(cv::Point p_target, const FeatureVector &rhs, cv::Point p_rhs) const
 {
   float dist = 0.0f;
   for (size_t i = 0; i < feature_vector.size(); ++i)
@@ -205,7 +205,7 @@ float FeatureVector::dist(cv::Point p_target, const FeatureVector& rhs, cv::Poin
   return std::sqrt(dist);
 }
 
-cv::Mat FeatureVector::dist_sqr_mat(const FeatureVector& rhs) const
+cv::Mat FeatureVector::dist_sqr_mat(const FeatureVector &rhs) const
 {
   if (size() != rhs.size())
   {
@@ -230,7 +230,7 @@ cv::Mat FeatureVector::dist_sqr_mat(const FeatureVector& rhs) const
 FeatureVector FeatureVector::clone() const
 {
   FeatureVector rhs;
-  for (const cv::Mat& feature : feature_vector)
+  for (const cv::Mat &feature : feature_vector)
   {
     rhs.feature_vector.push_back(feature.clone());
   }
@@ -239,8 +239,8 @@ FeatureVector FeatureVector::clone() const
 
 void FeatureVector::downsample_nn(int factor)
 {
-  for (cv::Mat& feature : feature_vector)
+  for (cv::Mat &feature : feature_vector)
   {
-    cv::resize(feature, feature, cv::Size(), 1.0/factor, 1.0/factor, cv::INTER_NEAREST);
+    cv::resize(feature, feature, cv::Size(), 1.0 / factor, 1.0 / factor, cv::INTER_NEAREST);
   }
 }

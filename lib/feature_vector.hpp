@@ -32,18 +32,18 @@ class FeatureVector
 {
 public:
   FeatureVector() = default;
-  FeatureVector(const std::vector<cv::Mat>& feature_vector) :
-    feature_vector(feature_vector)
-  {}
+  FeatureVector(const std::vector<cv::Mat> &feature_vector) : feature_vector(feature_vector)
+  {
+  }
 
   FeatureVector clone() const;
 
   void render() const;
-  static void render(const std::vector<FeatureVector>& features);
+  static void render(const std::vector<FeatureVector> &features);
 
-  void save(const boost::filesystem::path& path) const;
+  void save(const boost::filesystem::path &path) const;
 
-  float dist(cv::Point p, const FeatureVector& rhs, cv::Point p_rhs) const;
+  float dist(cv::Point p, const FeatureVector &rhs, cv::Point p_rhs) const;
 
   int num_channels() const
   {
@@ -75,7 +75,7 @@ public:
     return feature_vector[i];
   }
 
-  FeatureVector operator()(const cv::Rect& region) const
+  FeatureVector operator()(const cv::Rect &region) const
   {
     FeatureVector result;
     for (cv::Mat feature : feature_vector)
@@ -85,7 +85,7 @@ public:
     return result;
   }
 
-  FeatureVector operator()(const cv::Range& row_range, const cv::Range& col_range) const
+  FeatureVector operator()(const cv::Range &row_range, const cv::Range &col_range) const
   {
     FeatureVector result;
     for (cv::Mat feature : feature_vector)
@@ -105,7 +105,7 @@ public:
     }
   }
 
-  cv::Mat dist_sqr_mat(const FeatureVector& rhs) const;
+  cv::Mat dist_sqr_mat(const FeatureVector &rhs) const;
 
   void downsample_nn(int factor);
 

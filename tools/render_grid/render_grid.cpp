@@ -41,19 +41,15 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "Show this help message")
-    ("grid,g", po::value<fs::path>(), "Input JSON containing grid")
-    ("image,i", po::value<fs::path>(), "Input image")
-    ("out,o", po::value<fs::path>(), "Output image");
+  desc.add_options()("help,h", "Show this help message")("grid,g", po::value<fs::path>(), "Input JSON containing grid")("image,i", po::value<fs::path>(), "Input image")("out,o", po::value<fs::path>(), "Output image");
 
   cv::Mat image;
   std::vector<PatchRegion> patches;
 
-  bool has_path_out =  false;
+  bool has_path_out = false;
   fs::path path_out;
 
   try
@@ -85,7 +81,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No input image specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
@@ -124,18 +120,18 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     return -1;
   }
 
   cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
-  for (const PatchRegion& p : patches)
+  for (const PatchRegion &p : patches)
   {
     if (p.has_sub_regions())
     {
-      for (const PatchRegion& sub_region : p.sub_regions())
+      for (const PatchRegion &sub_region : p.sub_regions())
       {
         sub_region.draw_edge_mask(image, cv::Vec3b(227, 178, 93), 0);
       }
@@ -145,7 +141,7 @@ int main(int argc, char* argv[])
       p.draw_edge_mask(image, cv::Vec3b(227, 178, 93), 0);
     }
   }
-  
+
   cv::imshow("Image", image);
   cv::waitKey();
 

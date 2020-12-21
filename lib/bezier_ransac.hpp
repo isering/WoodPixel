@@ -29,7 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "bezier_curve.hpp"
 
-BezierCurve fit_bezier_cubic_ransac(const std::vector<cv::Point2d>& points, cv::Rect region, int num_estimate, int max_iterations);
-BezierCurve fit_bezier_cubic_ransac(const cv::Point2d& p1, const cv::Point2d& p2, std::vector<cv::Point2d> points, int num_estimate, int max_iterations, double* inlier_ratio=0);
+BezierCurve fit_bezier_cubic_ransac(const std::vector<cv::Point2d> &points, cv::Rect region, int num_estimate, int max_iterations);
+BezierCurve fit_bezier_cubic_ransac(const cv::Point2d &p1, const cv::Point2d &p2, std::vector<cv::Point2d> points, int num_estimate, int max_iterations, double *inlier_ratio = 0);
 
 #endif /* TRLIB_BEZIER_RANSAC_HPP_ */

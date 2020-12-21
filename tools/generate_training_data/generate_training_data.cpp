@@ -39,16 +39,12 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   try
   {
     po::options_description desc("Allowed options");
-    desc.add_options()
-      ("help,h", "Show this help message")
-      ("patches,p", po::value<fs::path>(), "Input folder containing patch images")
-      ("json,j", po::value<fs::path>(), "Input JSON file containing texture description")
-      ("out,o", po::value<fs::path>(), "Output directory");
+    desc.add_options()("help,h", "Show this help message")("patches,p", po::value<fs::path>(), "Input folder containing patch images")("json,j", po::value<fs::path>(), "Input JSON file containing texture description")("out,o", po::value<fs::path>(), "Output directory");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
@@ -69,7 +65,7 @@ int main(int argc, char* argv[])
       if (!fs::exists(path_patches) || !fs::is_directory(path_patches))
       {
         std::cerr << "Path to patches is not a directory." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
 
@@ -92,14 +88,14 @@ int main(int argc, char* argv[])
       if (files_patches.empty())
       {
         std::cerr << "No patches loaded." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
     }
     else
     {
       std::cerr << "No patch path specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
@@ -115,7 +111,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No JSON file specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
     }
 
     if (vm.count("out"))
@@ -130,21 +126,21 @@ int main(int argc, char* argv[])
       if (!fs::exists(path_out) || !fs::is_directory(path_out))
       {
         std::cerr << "Unable to create output directory." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
     }
     else
     {
       std::cerr << "No output path specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
     TreeMatch matcher = TreeMatch::load(path_json, true);
 
     std::cout << "Loaded " << files_patches.size() << " patches." << std::endl
-      << "Loaded " << matcher.textures().size() << " textures." << std::endl;
+              << "Loaded " << matcher.textures().size() << " textures." << std::endl;
 
     for (const fs::path file : files_patches)
     {
@@ -152,7 +148,7 @@ int main(int argc, char* argv[])
       cv::imwrite((path_out / file.filename()).string(), patch);
     }
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     return -1;

@@ -40,7 +40,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace fs = boost::filesystem;
 
-void Texture::load_texture(const boost::filesystem::path& filename, double scale)
+void Texture::load_texture(const boost::filesystem::path &filename, double scale)
 {
   std::ifstream file(filename.string(), std::iostream::binary);
   if (!file.good())
@@ -83,31 +83,31 @@ void Texture::load_texture(const boost::filesystem::path& filename, double scale
   cv::resize(texture, texture, cv::Size(), scale, scale);
 }
 
-void Texture::load_mask(const boost::filesystem::path& filename, double scale)
+void Texture::load_mask(const boost::filesystem::path &filename, double scale)
 {
-	mask_done = cv::imread(filename.string(), cv::IMREAD_GRAYSCALE);
+  mask_done = cv::imread(filename.string(), cv::IMREAD_GRAYSCALE);
   if (!mask_done.data)
   {
     throw(std::runtime_error("Unable to load mask: " + filename.string()));
   }
-	for (auto iter = mask_done.begin<unsigned char>(); iter != mask_done.end<unsigned char>(); ++iter)
-	{
-		*iter = *iter > 0 ? 255 : 0;
-	}
-	cv::resize(mask_done, mask_done, cv::Size(), scale, scale, cv::INTER_NEAREST);
+  for (auto iter = mask_done.begin<unsigned char>(); iter != mask_done.end<unsigned char>(); ++iter)
+  {
+    *iter = *iter > 0 ? 255 : 0;
+  }
+  cv::resize(mask_done, mask_done, cv::Size(), scale, scale, cv::INTER_NEAREST);
 }
 
-static cv::Rect2f compute_rotated_rect(const cv::Mat& texture, float angle_rad)
+static cv::Rect2f compute_rotated_rect(const cv::Mat &texture, float angle_rad)
 {
   const float angle_deg = 180.0f * angle_rad / boost::math::constants::pi<float>();
-  return cv::RotatedRect(cv::Point2f(), texture.size(), angle_deg).boundingRect2f();  
+  return cv::RotatedRect(cv::Point2f(), texture.size(), angle_deg).boundingRect2f();
 }
 
-cv::Mat Texture::compute_transformation_matrix(const cv::Mat& texture, double angle_rad)
+cv::Mat Texture::compute_transformation_matrix(const cv::Mat &texture, double angle_rad)
 {
   const cv::Rect2f rotated_rect = compute_rotated_rect(texture, static_cast<float>(angle_rad));
   const double angle_deg = 180.0 * angle_rad / boost::math::constants::pi<double>();
-  const cv::Point2f texture_center(0.5f*(texture.cols-1), 0.5f*(texture.rows-1));
+  const cv::Point2f texture_center(0.5f * (texture.cols - 1), 0.5f * (texture.rows - 1));
 
   cv::Mat transformation_matrix = cv::getRotationMatrix2D(texture_center, angle_deg, 1.0);
   transformation_matrix.at<double>(0, 2) += 0.5 * rotated_rect.width - 0.5 * texture.cols;
@@ -131,7 +131,7 @@ Texture Texture::rotate(double angle_rad) const
   cv::warpAffine(mask_done, texture_rotated.mask_done, texture_rotated.transformation_matrix, rotated_rect.size(), cv::INTER_NEAREST);
   cv::warpAffine(mask_rotation, texture_rotated.mask_rotation, texture_rotated.transformation_matrix, rotated_rect.size(), cv::INTER_NEAREST);
 
-  for (const cv::Point2d& p : marker.markers_pix)
+  for (const cv::Point2d &p : marker.markers_pix)
   {
     const cv::Point2d p_transformed = AffineTransformation::transform(texture_rotated.transformation_matrix, p);
     texture_rotated.marker.markers_pix.push_back(p);
@@ -142,15 +142,15 @@ Texture Texture::rotate(double angle_rad) const
   return texture_rotated;
 }
 
-void Texture::mask_patch(std::vector<Texture>& rotated_textures, int index, cv::Point anchor, const std::vector<cv::Point>& patch)
+void Texture::mask_patch(std::vector<Texture> &rotated_textures, int index, cv::Point anchor, const std::vector<cv::Point> &patch)
 {
   cv::Mat mask(rotated_textures[index].mask_done.size(), CV_8UC1, cv::Scalar(255));
-  for (const cv::Point& p : patch)
+  for (const cv::Point &p : patch)
   {
     mask.at<unsigned char>(anchor + p) = 0;
   }
 
-  for (Texture& texture : rotated_textures)
+  for (Texture &texture : rotated_textures)
   {
     cv::Mat transform_patch = AffineTransformation::concat(texture.transformation_matrix, rotated_textures[index].transformation_matrix_inv);
     cv::Mat mask_rotated;
@@ -160,10 +160,10 @@ void Texture::mask_patch(std::vector<Texture>& rotated_textures, int index, cv::
   }
 }
 
-Texture Texture::operator()(const cv::Range& row_range, const cv::Range& col_range)
+Texture Texture::operator()(const cv::Range &row_range, const cv::Range &col_range)
 {
   Texture texture_out;
-  
+
   texture_out.texture = texture(row_range, col_range);
   texture_out.mask_done = mask_done(row_range, col_range);
   texture_out.mask_rotation = mask_rotation(row_range, col_range);
@@ -177,7 +177,7 @@ Texture Texture::operator()(const cv::Range& row_range, const cv::Range& col_ran
   return texture_out;
 }
 
-Texture Texture::operator()(const cv::Rect& rect)
+Texture Texture::operator()(const cv::Rect &rect)
 {
   return (*this)(cv::Range(rect.y, rect.y + rect.height), cv::Range(rect.x, rect.x + rect.width));
 }
@@ -239,7 +239,7 @@ cv::Mat Texture::template_match_gpu(const Texture& kernel) const
 }
 */
 
-cv::Mat Texture::template_match(const Texture& kernel) const
+cv::Mat Texture::template_match(const Texture &kernel) const
 {
   cv::Mat response_float, kernel_response_float;
 
@@ -251,7 +251,7 @@ cv::Mat Texture::template_match(const Texture& kernel) const
 
   for (int i = 0; i < response.num_channels(); ++i)
   {
-    response[i].convertTo(response_float, CV_32FC1, 1.0/65535.0);
+    response[i].convertTo(response_float, CV_32FC1, 1.0 / 65535.0);
     kernel.response[i].convertTo(kernel_response_float, CV_32FC1, 1.0 / 65535.0);
     cv::matchTemplate(response_float, kernel_response_float, match, cv::TM_SQDIFF);
     match_sum += match;
@@ -260,9 +260,9 @@ cv::Mat Texture::template_match(const Texture& kernel) const
   return match_sum;
 }
 
-cv::Mat Texture::template_match(const Texture& kernel, cv::Mat mask) const
+cv::Mat Texture::template_match(const Texture &kernel, cv::Mat mask) const
 {
-  cv::Mat response_float,  kernel_response_float;
+  cv::Mat response_float, kernel_response_float;
 
   const int rows_out = response.rows() - kernel.response.rows() + 1;
   const int cols_out = response.cols() - kernel.response.cols() + 1;
@@ -275,7 +275,7 @@ cv::Mat Texture::template_match(const Texture& kernel, cv::Mat mask) const
 
   for (int i = 0; i < response.num_channels(); ++i)
   {
-    response[i].convertTo(response_float, CV_32FC1, 1.0/65535.0);
+    response[i].convertTo(response_float, CV_32FC1, 1.0 / 65535.0);
     kernel.response[i].convertTo(kernel_response_float, CV_32FC1, 1.0 / 65535.0);
     cv::matchTemplate(response_float, kernel_response_float, match, cv::TM_SQDIFF, mask_float);
     match_sum += match;
@@ -313,7 +313,7 @@ void Texture::downsample_nn(int factor)
 std::vector<cv::Vec3f> Texture::find_markers(double marker_size_mm, int num_markers)
 {
   std::vector<cv::Vec3f> markers;
-  
+
   cv::Mat texture_8bit, texture_gray;
   texture.convertTo(texture_8bit, CV_8UC1, 1.0 / 255.0);
   cv::cvtColor(texture_8bit, texture_gray, cv::COLOR_BGR2GRAY);
@@ -327,10 +327,10 @@ std::vector<cv::Vec3f> Texture::find_markers(double marker_size_mm, int num_mark
 TextureRegion Texture::get_regions(cv::Rect region, cv::Mat edge_image)
 {
   std::vector<cv::Point2d> edge_points;
-  for (int y = region.y; y < region.y+region.height; ++y)
+  for (int y = region.y; y < region.y + region.height; ++y)
   {
-    const unsigned char* ptr = reinterpret_cast<const unsigned char*>(edge_image.ptr(y));
-    for (int x = region.x; x < region.x+region.width; ++x)
+    const unsigned char *ptr = reinterpret_cast<const unsigned char *>(edge_image.ptr(y));
+    for (int x = region.x; x < region.x + region.width; ++x)
     {
       if (ptr[x])
       {
@@ -373,7 +373,7 @@ TextureRegion Texture::get_regions(cv::Rect region, cv::Mat edge_image)
   return region_out;
 }
 
-cv::Vec3b Texture::interpolate_texture(const cv::Point2f& p) const
+cv::Vec3b Texture::interpolate_texture(const cv::Point2f &p) const
 {
   const int x = static_cast<int>(p.x);
   const int y = static_cast<int>(p.y);
@@ -391,7 +391,7 @@ cv::Vec3b Texture::interpolate_texture(const cv::Point2f& p) const
   return cv::Vec3b(255.0f * c);
 }
 
-boost::property_tree::ptree Texture::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree Texture::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize_image(tree, "texture", texture, base_path, path);
@@ -408,7 +408,7 @@ boost::property_tree::ptree Texture::save(const boost::filesystem::path& base_pa
   return tree;
 }
 
-void Texture::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void Texture::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize_image(tree, "texture", texture, base_path);
   deserialize_image(tree, "mask", mask_done, base_path);

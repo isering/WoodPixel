@@ -31,14 +31,14 @@ template <typename T>
 class Vector : public std::vector<T>, public Serializable
 {
 public:
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override
   {
     boost::property_tree::ptree tree;
     serialize(tree, "data", this->begin(), this->end(), base_path, path);
     return tree;
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override
   {
     std::vector<T> data;
     deserialize(tree, "data", data, base_path);

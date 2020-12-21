@@ -35,7 +35,7 @@ public:
   TextureMarker scaled(double scale) const
   {
     TextureMarker marker_return = *this;
-    for (cv::Point2d& p : marker_return.markers_pix)
+    for (cv::Point2d &p : marker_return.markers_pix)
     {
       p *= scale;
     }
@@ -44,8 +44,8 @@ public:
 
   std::vector<cv::Point2d> markers_pix;
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 };
 
 #endif /* TRLIB_TEXTURE_MARKER_HPP_ */

@@ -32,10 +32,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class Serializable
 {
 public:
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) = 0;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const = 0;
-  
-  static boost::filesystem::path get_unique_path(const boost::filesystem::path& base_path, const boost::filesystem::path& path, const std::string& extension)
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) = 0;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const = 0;
+
+  static boost::filesystem::path get_unique_path(const boost::filesystem::path &base_path, const boost::filesystem::path &path, const std::string &extension)
   {
     if (!boost::filesystem::exists(base_path / path))
     {
@@ -59,8 +59,8 @@ public:
   /*
   * std::vector of Serializable
   */
-  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const std::vector<T>& vec, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const std::vector<T> &vec, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_vec;
     for (typename std::vector<T>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
@@ -70,23 +70,22 @@ public:
     tree.add_child(key, tree_vec);
   }
 
-  template <typename Iter, typename std::enable_if<std::is_base_of<Serializable, typename Iter::value_type>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, Iter begin, Iter end, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename Iter, typename std::enable_if<std::is_base_of<Serializable, typename Iter::value_type>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, Iter begin, Iter end, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_vec;
     for (Iter iter = begin; iter != end; ++iter)
     {
       tree_vec.push_back(std::make_pair("", iter->save(base_path, path)));
-
     }
     tree.add_child(key, tree_vec);
   }
 
-  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, std::vector<T>& vec, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, std::vector<T> &vec, const boost::filesystem::path &base_path)
   {
     vec.clear();
-    for (const auto& tree_val : tree.get_child(key))
+    for (const auto &tree_val : tree.get_child(key))
     {
       T val;
       deserialize(tree_val.second, "", val, base_path);
@@ -97,8 +96,8 @@ public:
   /*
   * std::vector of cv::Point
   */
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const std::vector<cv::Point_<T>>& vec, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const std::vector<cv::Point_<T>> &vec, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_vec;
     for (typename std::vector<cv::Point_<T>>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
@@ -111,11 +110,11 @@ public:
     tree.add_child(key, tree_vec);
   }
 
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, std::vector<cv::Point_<T>>& vec, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, std::vector<cv::Point_<T>> &vec, const boost::filesystem::path &base_path)
   {
     vec.clear();
-    for (const auto& val : tree.get_child(key))
+    for (const auto &val : tree.get_child(key))
     {
       vec.emplace_back(val.second.get<T>("x"), val.second.get<T>("y"));
     }
@@ -124,8 +123,8 @@ public:
   /*
   * std::vector of Generic
   */
-  template <typename Iter, typename std::enable_if<!std::is_base_of<Serializable, typename Iter::value_type>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, Iter begin, Iter end, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename Iter, typename std::enable_if<!std::is_base_of<Serializable, typename Iter::value_type>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, Iter begin, Iter end, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_vec;
     for (Iter iter = begin; iter != end; ++iter)
@@ -137,11 +136,11 @@ public:
     tree.add_child(key, tree_vec);
   }
 
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, std::vector<T>& vec, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, std::vector<T> &vec, const boost::filesystem::path &base_path)
   {
     vec.clear();
-    for (const auto& val : tree.get_child(key))
+    for (const auto &val : tree.get_child(key))
     {
       vec.push_back(val.second.get_value<T>());
     }
@@ -150,14 +149,14 @@ public:
   /*
    * Serializable
    */
-  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const T& child, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const T &child, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     tree.add_child(key, child.save(base_path, path));
   }
 
-  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, T& child, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, T &child, const boost::filesystem::path &base_path)
   {
     child.load(base_path, tree.get_child(key));
   }
@@ -165,8 +164,8 @@ public:
   /*
    * cv::Point
    */
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const cv::Point_<T>& p, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const cv::Point_<T> &p, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_point;
     serialize(tree_point, "x", p.x, base_path, path);
@@ -174,8 +173,8 @@ public:
     tree.add_child(key, tree_point);
   }
 
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, cv::Point_<T>& p, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, cv::Point_<T> &p, const boost::filesystem::path &base_path)
   {
     const boost::property_tree::ptree tree_point = tree.get_child(key);
     deserialize(tree_point, "x", p.x, base_path);
@@ -185,8 +184,8 @@ public:
   /*
    * cv::Rect
    */
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const cv::Rect_<T>& rect, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const cv::Rect_<T> &rect, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_rect;
     serialize(tree_rect, "x", rect.x, base_path, path);
@@ -196,8 +195,8 @@ public:
     tree.add_child(key, tree_rect);
   }
 
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, cv::Rect_<T>& rect, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, cv::Rect_<T> &rect, const boost::filesystem::path &base_path)
   {
     const boost::property_tree::ptree tree_rect = tree.get_child(key);
     deserialize(tree_rect, "x", rect.x, base_path);
@@ -209,8 +208,8 @@ public:
   /*
    * cv::Size
    */
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const cv::Size_<T>& size, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const cv::Size_<T> &size, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_size;
     serialize(tree_size, "width", size.width, base_path, path);
@@ -218,8 +217,8 @@ public:
     tree.add_child(key, tree_size);
   }
 
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, cv::Size_<T>& size, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, cv::Size_<T> &size, const boost::filesystem::path &base_path)
   {
     const boost::property_tree::ptree tree_size = tree.get_child(key);
     deserialize(tree_size, "width", size.width, base_path);
@@ -229,14 +228,14 @@ public:
   /*
    * Generic
    */
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void serialize(boost::property_tree::ptree& tree, const std::string& key, const T& val, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void serialize(boost::property_tree::ptree &tree, const std::string &key, const T &val, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     tree.add(key, val);
   }
 
-  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type* = nullptr>
-  static void deserialize(const boost::property_tree::ptree& tree, const std::string& key, T& val, const boost::filesystem::path& base_path)
+  template <typename T, typename std::enable_if<!std::is_base_of<Serializable, T>::value>::type * = nullptr>
+  static void deserialize(const boost::property_tree::ptree &tree, const std::string &key, T &val, const boost::filesystem::path &base_path)
   {
     val = tree.get<T>(key);
   }
@@ -245,13 +244,13 @@ public:
    * Enums
    */
   template <typename T>
-  static void serialize_enum(boost::property_tree::ptree& tree, const std::string& key, const T& val, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  static void serialize_enum(boost::property_tree::ptree &tree, const std::string &key, const T &val, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     tree.add(key, static_cast<int>(val));
   }
 
   template <typename T>
-  static void deserialize_enum(const boost::property_tree::ptree& tree, const std::string& key, T& val, const boost::filesystem::path& base_path)
+  static void deserialize_enum(const boost::property_tree::ptree &tree, const std::string &key, T &val, const boost::filesystem::path &base_path)
   {
     val = static_cast<T>(tree.get<int>(key));
   }
@@ -259,7 +258,7 @@ public:
   /*
    * cv::Mat as image
    */
-  static void serialize_image(boost::property_tree::ptree& tree, const std::string& key, const cv::Mat& mat, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  static void serialize_image(boost::property_tree::ptree &tree, const std::string &key, const cv::Mat &mat, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     if (mat.empty())
     {
@@ -273,13 +272,13 @@ public:
     }
   }
 
-  static void serialize_image_path(boost::property_tree::ptree& tree, const std::string& key, const boost::filesystem::path& path_image, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  static void serialize_image_path(boost::property_tree::ptree &tree, const std::string &key, const boost::filesystem::path &path_image, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     cv::Mat image = cv::imread(path_image.string(), cv::IMREAD_ANYCOLOR | cv::IMREAD_ANYDEPTH);
     serialize_image(tree, key, image, base_path, path);
   }
 
-  static void deserialize_image(const boost::property_tree::ptree& tree, const std::string& key, cv::Mat& mat, const boost::filesystem::path& base_path)
+  static void deserialize_image(const boost::property_tree::ptree &tree, const std::string &key, cv::Mat &mat, const boost::filesystem::path &base_path)
   {
     std::string filename;
     deserialize(tree, key, filename, base_path);
@@ -297,7 +296,7 @@ public:
    * cv::Mat 
   */
   template <typename T>
-  static void serialize_mat(boost::property_tree::ptree& tree, const std::string& key, const cv::Mat& mat, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
+  static void serialize_mat(boost::property_tree::ptree &tree, const std::string &key, const cv::Mat &mat, const boost::filesystem::path &base_path, const boost::filesystem::path &path)
   {
     boost::property_tree::ptree tree_mat;
     serialize(tree_mat, "rows", mat.rows, base_path, path);
@@ -308,25 +307,25 @@ public:
   }
 
   template <typename T>
-  static void deserialize_mat(const boost::property_tree::ptree& tree, const std::string& key, cv::Mat& mat, const boost::filesystem::path& base_path)
+  static void deserialize_mat(const boost::property_tree::ptree &tree, const std::string &key, cv::Mat &mat, const boost::filesystem::path &base_path)
   {
     std::vector<T> data;
     int channels, rows;
-    
+
     const boost::property_tree::ptree tree_mat = tree.get_child(key);
     deserialize(tree_mat, "mat", data, base_path);
     deserialize(tree_mat, "channels", channels, base_path);
     deserialize(tree_mat, "rows", rows, base_path);
-    
+
     mat = cv::Mat_<T>(data, true);
     mat = mat.reshape(channels, rows);
   }
 
   template <typename T>
-  static std::vector<T> deserialize_vec(const boost::property_tree::ptree& tree, const std::string& key, const boost::filesystem::path& base_path)
+  static std::vector<T> deserialize_vec(const boost::property_tree::ptree &tree, const std::string &key, const boost::filesystem::path &base_path)
   {
     std::vector<T> vec;
-    for (const auto& tree_patch : tree.get_child(key))
+    for (const auto &tree_patch : tree.get_child(key))
     {
       vec.emplace_back();
       vec.back().load(base_path, tree_patch.second);

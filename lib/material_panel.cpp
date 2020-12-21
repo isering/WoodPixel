@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "material_panel.hpp"
 
-boost::property_tree::ptree MaterialPanel::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree MaterialPanel::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize(tree, "id", id, base_path, path);
@@ -34,7 +34,7 @@ boost::property_tree::ptree MaterialPanel::save(const boost::filesystem::path& b
   return tree;
 }
 
-void MaterialPanel::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void MaterialPanel::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize(tree, "id", id, base_path);
   deserialize(tree, "markers_table_mm", markers_table_mm, base_path);

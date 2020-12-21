@@ -27,24 +27,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <opencv2/opencv.hpp>
 
-class HersheyFont 
+class HersheyFont
 {
 public:
-  HersheyFont(cv::Point2f pos, const std::string &str, double rotation_deg, double scale, double stretch_x = 1.0):
-    pos(pos),
-    str(str),
-    rotation_deg(rotation_deg),
-    scale(scale),
-    stretch_x(stretch_x)
-   {}
+  HersheyFont(cv::Point2f pos, const std::string &str, double rotation_deg, double scale, double stretch_x = 1.0) : pos(pos),
+                                                                                                                    str(str),
+                                                                                                                    rotation_deg(rotation_deg),
+                                                                                                                    scale(scale),
+                                                                                                                    stretch_x(stretch_x)
+  {
+  }
 
-  void serialize_ps(std::ostream& os) const;
-  void serialize_svg(std::ostream& os, double svg_precision) const;
+  void serialize_ps(std::ostream &os) const;
+  void serialize_svg(std::ostream &os, double svg_precision) const;
 
 private:
   static int char_width(const char c);
   static cv::Point2i get_vertex(int char_index, int vertex_index);
-  static std::vector<std::pair<cv::Point2i, bool>>  get_char_path(const char c);
+  static std::vector<std::pair<cv::Point2i, bool>> get_char_path(const char c);
 
   cv::Point2f pos;
   std::string str;

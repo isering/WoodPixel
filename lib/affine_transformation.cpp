@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "affine_transformation.hpp"
 
-cv::Mat AffineTransformation::concat(const cv::Mat& lhs, const cv::Mat& rhs)
+cv::Mat AffineTransformation::concat(const cv::Mat &lhs, const cv::Mat &rhs)
 {
   cv::Mat result(2, 3, lhs.type());
 
@@ -54,7 +54,7 @@ cv::Mat AffineTransformation::concat(std::initializer_list<cv::Mat> mat_list)
   return M;
 }
 
-cv::Mat AffineTransformation::fit(const std::vector<cv::Point2d>& points_from, const std::vector<cv::Point2d>& points_to)
+cv::Mat AffineTransformation::fit(const std::vector<cv::Point2d> &points_from, const std::vector<cv::Point2d> &points_to)
 {
   const std::vector<cv::Point2f> points_from_float(points_from.begin(), points_from.end());
   const std::vector<cv::Point2f> points_to_float(points_to.begin(), points_to.end());

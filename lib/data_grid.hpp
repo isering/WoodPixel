@@ -30,62 +30,57 @@ template <class T>
 class DataGrid : public Grid
 {
 public:
-  DataGrid<T>() :
-    Grid()
+  DataGrid<T>() : Grid()
   {
   }
 
-  DataGrid<T>(int rows, int cols) :
-    Grid(rows, cols)
+  DataGrid<T>(int rows, int cols) : Grid(rows, cols)
   {
-    m_grid_data.resize(rows*cols);
+    m_grid_data.resize(rows * cols);
   }
 
-  DataGrid<T>(const Grid& grid) :
-    Grid(grid)
+  DataGrid<T>(const Grid &grid) : Grid(grid)
   {
-    m_grid_data.resize(rows()*cols());
+    m_grid_data.resize(rows() * cols());
   }
 
-  DataGrid<T>(int rows, int cols, const T& val) :
-    Grid(rows, cols)
+  DataGrid<T>(int rows, int cols, const T &val) : Grid(rows, cols)
   {
-    m_grid_data.resize(rows*cols, val);
+    m_grid_data.resize(rows * cols, val);
   }
 
-  DataGrid<T>(const Grid& grid, const T& val) :
-    Grid(grid)
+  DataGrid<T>(const Grid &grid, const T &val) : Grid(grid)
   {
-    m_grid_data.resize(rows()*cols(), val);
+    m_grid_data.resize(rows() * cols(), val);
   }
 
-  T& data(int row, int col)
+  T &data(int row, int col)
   {
-    return m_grid_data[row*cols()+col];
+    return m_grid_data[row * cols() + col];
   }
 
-  const T& data(int row, int col) const
+  const T &data(int row, int col) const
   {
-    return m_grid_data[row*cols()+col];
+    return m_grid_data[row * cols() + col];
   }
 
-  T& data(const cv::Point& p)
+  T &data(const cv::Point &p)
   {
-    return m_grid_data[p.y*cols()+p.x];
+    return m_grid_data[p.y * cols() + p.x];
   }
 
-  const T& data(const cv::Point& p) const
+  const T &data(const cv::Point &p) const
   {
-    return m_grid_data[p.y*cols()+p.x];
+    return m_grid_data[p.y * cols() + p.x];
   }
 
   virtual void resize(int rows, int cols)
   {
     Grid::resize(rows, cols);
-    m_grid_data.resize(rows*cols);
+    m_grid_data.resize(rows * cols);
   }
 
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override
   {
     boost::property_tree::ptree tree;
     tree.add_child("grid", Grid::save(base_path, path));
@@ -93,7 +88,7 @@ public:
     return tree;
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override
   {
     Grid::load(base_path, tree.get_child("grid"));
     deserialize(tree, "grid_data", m_grid_data, base_path);

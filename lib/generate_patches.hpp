@@ -33,9 +33,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "serializable.hpp"
 #include "vector.hpp"
 
-std::vector<PatchRegion> generate_patches(int target_index, const Grid& morphed_grid, cv::Mat edge_image);
+std::vector<PatchRegion> generate_patches(int target_index, const Grid &morphed_grid, cv::Mat edge_image);
 
-std::vector<PatchRegion> generate_patches_square(int target_index, const cv::Size& image_size, const cv::Size& patch_size, const cv::Size& filter_kernel_size);
+std::vector<PatchRegion> generate_patches_square(int target_index, const cv::Size &image_size, const cv::Size &patch_size, const cv::Size &filter_kernel_size);
 
 /*
  * Low level stuff.
@@ -47,14 +47,13 @@ public:
   BezierCurve curve_vert;
   BezierCurve curve_diag;
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 };
 
-DataGrid<Vector<cv::Point2d>> extract_edge_grid(const Grid& grid, cv::Mat edge_mat);
-void fit_single_edge(DataGrid<CurveData>& curve_grid, DataGrid<Vector<cv::Point2d>>& edge_grid, cv::Point p_1, cv::Point p_2);
-void fill_smooth_curves(DataGrid<CurveData>& curve_grid);
-std::vector<PatchRegion> generate_patches_from_curve_grid(int target_index, const DataGrid<CurveData>& curve_grid);
-
+DataGrid<Vector<cv::Point2d>> extract_edge_grid(const Grid &grid, cv::Mat edge_mat);
+void fit_single_edge(DataGrid<CurveData> &curve_grid, DataGrid<Vector<cv::Point2d>> &edge_grid, cv::Point p_1, cv::Point p_2);
+void fill_smooth_curves(DataGrid<CurveData> &curve_grid);
+std::vector<PatchRegion> generate_patches_from_curve_grid(int target_index, const DataGrid<CurveData> &curve_grid);
 
 #endif /* TRLIB_PATCH_GENERATOR_HPP_ */

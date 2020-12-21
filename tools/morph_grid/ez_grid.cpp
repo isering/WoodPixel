@@ -33,10 +33,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace fs = boost::filesystem;
 namespace pt = boost::property_tree;
 
-EZGrid::EZGrid(cv::Mat image, cv::Mat image_filtered, int grid_size, const boost::filesystem::path& path_out) :
-  m_window_name("ezGrid 0.1"),
-  m_gui_name("Parameters"),
-  m_path_out(path_out)
+EZGrid::EZGrid(cv::Mat image, cv::Mat image_filtered, int grid_size, const boost::filesystem::path &path_out) : m_window_name("ezGrid 0.1"),
+                                                                                                                m_gui_name("Parameters"),
+                                                                                                                m_path_out(path_out)
 {
   cv::namedWindow(m_window_name, cv::WINDOW_AUTOSIZE);
   cv::namedWindow(m_gui_name, cv::WINDOW_AUTOSIZE);
@@ -114,11 +113,11 @@ void EZGrid::run()
     cv::Mat image_out = m_morph_grid_future->draw();
     cv::imshow(m_window_name, image_out);
 
-    remaining = std::max(static_cast<int>(16.0f-t.duration().count()), 1);
+    remaining = std::max(static_cast<int>(16.0f - t.duration().count()), 1);
   } while (key != ' ');
 }
 
-void EZGrid::load_partial_state(const boost::filesystem::path& path)
+void EZGrid::load_partial_state(const boost::filesystem::path &path)
 {
   const boost::filesystem::path base_path = path.parent_path();
 
@@ -133,7 +132,7 @@ void EZGrid::load_partial_state(const boost::filesystem::path& path)
   deserialize(tree_grid, "window_name", m_window_name, base_path);
 }
 
-void EZGrid::load_full_state(const boost::filesystem::path& path)
+void EZGrid::load_full_state(const boost::filesystem::path &path)
 {
   pt::ptree tree;
   pt::read_json(path.string(), tree);
@@ -147,7 +146,7 @@ void EZGrid::save()
 
   pt::ptree root;
   pt::ptree tree_patches;
-  for (const PatchRegion& p : patches)
+  for (const PatchRegion &p : patches)
   {
     tree_patches.push_back(std::make_pair("", p.save(m_path_out.parent_path(), "patches")));
   }
@@ -157,7 +156,7 @@ void EZGrid::save()
   pt::write_json(m_path_out.string(), root);
 }
 
-boost::property_tree::ptree EZGrid::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree EZGrid::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize(tree, "bilateral_filter", *m_bilateral_filter_future, base_path, path);
@@ -168,8 +167,8 @@ boost::property_tree::ptree EZGrid::save(const boost::filesystem::path& base_pat
   return tree;
 }
 
-void EZGrid::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
-{ 
+void EZGrid::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
+{
   deserialize(tree, "bilateral_filter", *m_bilateral_filter_future, base_path);
   deserialize(tree, "canny_bilateral", *m_canny_bilateral_future, base_path);
   deserialize(tree, "canny_filtered", *m_canny_filtered_future, base_path);

@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "bezier_curve.hpp"
 
 template <typename T>
-void BezierCurve::draw(cv::Mat image, const T& color, const cv::Point& offset) const
+void BezierCurve::draw(cv::Mat image, const T &color, const cv::Point &offset) const
 {
   if (m_control_points.empty())
   {
@@ -39,7 +39,7 @@ void BezierCurve::draw(cv::Mat image, const T& color, const cv::Point& offset) c
   }
 
   // Draw points onto image.
-  for (const CurveDrawPoint& d : m_draw_points)
+  for (const CurveDrawPoint &d : m_draw_points)
   {
     const cv::Point p = d.p - offset;
     if (p.x >= 0 && p.x < image.cols &&
@@ -51,9 +51,9 @@ void BezierCurve::draw(cv::Mat image, const T& color, const cv::Point& offset) c
 }
 
 template <typename T>
-void BezierCurve::operator+=(const cv::Point_<T>& p)
+void BezierCurve::operator+=(const cv::Point_<T> &p)
 {
-  for (cv::Point2d& c : m_control_points)
+  for (cv::Point2d &c : m_control_points)
   {
     c += static_cast<cv::Point2d>(p);
   }
@@ -61,9 +61,9 @@ void BezierCurve::operator+=(const cv::Point_<T>& p)
 }
 
 template <typename T>
-void BezierCurve::operator-=(const cv::Point_<T>& p)
+void BezierCurve::operator-=(const cv::Point_<T> &p)
 {
-  for (cv::Point2d& c : m_control_points)
+  for (cv::Point2d &c : m_control_points)
   {
     c -= static_cast<cv::Point2d>(p);
   }
@@ -71,9 +71,9 @@ void BezierCurve::operator-=(const cv::Point_<T>& p)
 }
 
 template <typename T>
-void BezierCurve::operator*=(const T& scalar)
+void BezierCurve::operator*=(const T &scalar)
 {
-  for (cv::Point2d& c : m_control_points)
+  for (cv::Point2d &c : m_control_points)
   {
     c *= static_cast<double>(scalar);
   }
@@ -81,9 +81,9 @@ void BezierCurve::operator*=(const T& scalar)
 }
 
 template <typename T>
-void BezierCurve::operator/=(const T& scalar)
+void BezierCurve::operator/=(const T &scalar)
 {
-  for (cv::Point2d& c : m_control_points)
+  for (cv::Point2d &c : m_control_points)
   {
     c /= static_cast<double>(scalar);
   }
@@ -91,7 +91,7 @@ void BezierCurve::operator/=(const T& scalar)
 }
 
 template <typename T>
-BezierCurve operator+(const BezierCurve& curve, const cv::Point_<T>& p)
+BezierCurve operator+(const BezierCurve &curve, const cv::Point_<T> &p)
 {
   BezierCurve curve_out(curve);
   curve_out += p;
@@ -99,7 +99,7 @@ BezierCurve operator+(const BezierCurve& curve, const cv::Point_<T>& p)
 }
 
 template <typename T>
-BezierCurve operator+(const cv::Point_<T>& p, const BezierCurve& curve)
+BezierCurve operator+(const cv::Point_<T> &p, const BezierCurve &curve)
 {
   BezierCurve curve_out(curve);
   curve_out += p;
@@ -107,7 +107,7 @@ BezierCurve operator+(const cv::Point_<T>& p, const BezierCurve& curve)
 }
 
 template <typename T>
-BezierCurve operator-(const BezierCurve& curve, const cv::Point_<T>& p)
+BezierCurve operator-(const BezierCurve &curve, const cv::Point_<T> &p)
 {
   BezierCurve curve_out(curve);
   curve_out -= p;
@@ -115,7 +115,7 @@ BezierCurve operator-(const BezierCurve& curve, const cv::Point_<T>& p)
 }
 
 template <typename T>
-BezierCurve operator-(const cv::Point_<T>& p, const BezierCurve& curve)
+BezierCurve operator-(const cv::Point_<T> &p, const BezierCurve &curve)
 {
   BezierCurve curve_out(curve);
   curve_out *= -1.0;
@@ -124,7 +124,7 @@ BezierCurve operator-(const cv::Point_<T>& p, const BezierCurve& curve)
 }
 
 template <typename T>
-BezierCurve operator*(const BezierCurve& curve, const T& scalar)
+BezierCurve operator*(const BezierCurve &curve, const T &scalar)
 {
   BezierCurve curve_out(curve);
   curve_out *= scalar;
@@ -132,7 +132,7 @@ BezierCurve operator*(const BezierCurve& curve, const T& scalar)
 }
 
 template <typename T>
-BezierCurve operator*(const T& scalar, const BezierCurve& curve)
+BezierCurve operator*(const T &scalar, const BezierCurve &curve)
 {
   BezierCurve curve_out(curve);
   curve_out *= scalar;
@@ -140,7 +140,7 @@ BezierCurve operator*(const T& scalar, const BezierCurve& curve)
 }
 
 template <typename T>
-BezierCurve operator/(const BezierCurve& curve, const T& scalar)
+BezierCurve operator/(const BezierCurve &curve, const T &scalar)
 {
   BezierCurve curve_out(curve);
   curve_out /= scalar;

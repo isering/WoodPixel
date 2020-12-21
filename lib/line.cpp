@@ -26,14 +26,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "line.hpp"
 
-double project_point_line(const cv::Point2d& p, const cv::Point2d& line_1, const cv::Point2d& line_2)
+double project_point_line(const cv::Point2d &p, const cv::Point2d &line_1, const cv::Point2d &line_2)
 {
   const cv::Point2d s = line_2 - line_1;
   return s.dot(p - line_1) / s.dot(s);
 }
 
-double dist_point_line(const cv::Point2d& p, const cv::Point2d& line_1, const cv::Point2d& line_2)
+double dist_point_line(const cv::Point2d &p, const cv::Point2d &line_1, const cv::Point2d &line_2)
 {
   const cv::Point2d d = line_2 - line_1;
-  return std::abs(d.y*p.x - d.x*p.y + line_2.x*line_1.y - line_2.y*line_1.x) / cv::norm(d);
+  return std::abs(d.y * p.x - d.x * p.y + line_2.x * line_1.y - line_2.y * line_1.x) / cv::norm(d);
 }

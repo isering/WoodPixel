@@ -38,14 +38,14 @@ const double svg_precision = 10000.0;
 class SVGLine : public SaverPrimitive
 {
 public:
-  SVGLine(cv::Point2f p_start, cv::Point2f p_end, const std::string& stroke = "str0", const std::string& fill = "fil0") :
-    p_start(p_start),
-    p_end(p_end),
-	stroke(stroke),
-	fill(fill)
-  {}
+  SVGLine(cv::Point2f p_start, cv::Point2f p_end, const std::string &stroke = "str0", const std::string &fill = "fil0") : p_start(p_start),
+                                                                                                                          p_end(p_end),
+                                                                                                                          stroke(stroke),
+                                                                                                                          fill(fill)
+  {
+  }
 
-  virtual void serialize(std::ostream& os) const override
+  virtual void serialize(std::ostream &os) const override
   {
     const int x_start = static_cast<int>(svg_precision * p_start.x);
     const int y_start = static_cast<int>(svg_precision * p_start.y);
@@ -70,16 +70,16 @@ public:
 class SVGPolygon : public SaverPrimitive
 {
 public:
-	SVGPolygon(const std::vector<cv::Point2f>& points, const std::string& stroke = "str0", const std::string& fill = "fil0") :
-		points(points),
-		stroke(stroke),
-		fill(fill)
-	{}
+  SVGPolygon(const std::vector<cv::Point2f> &points, const std::string &stroke = "str0", const std::string &fill = "fil0") : points(points),
+                                                                                                                             stroke(stroke),
+                                                                                                                             fill(fill)
+  {
+  }
 
-  virtual void serialize(std::ostream& os) const override
+  virtual void serialize(std::ostream &os) const override
   {
     os << "<polyline class=\"" << fill << " " << stroke << "\" points=\"";
-    for (const cv::Point2f& p : points)
+    for (const cv::Point2f &p : points)
     {
       const int x = static_cast<int>(svg_precision * p.x);
       const int y = static_cast<int>(svg_precision * p.y);
@@ -95,7 +95,7 @@ public:
     const std::vector<cv::Point2f> points_transformed = AffineTransformation::transform(T, points);
     return std::make_shared<SVGPolygon>(points_transformed, stroke, fill);
   }
-  
+
   std::vector<cv::Point2f> points;
   std::string stroke;
   std::string fill;
@@ -104,13 +104,13 @@ public:
 class SVGText : public SaverPrimitive
 {
 public:
-  SVGText(const cv::Point2f& pos, const std::string& text, double rotation_rad) :
-    pos(pos),
-    text(text),
-    rotation_deg(180.0 * rotation_rad / boost::math::double_constants::pi)
-  {}
+  SVGText(const cv::Point2f &pos, const std::string &text, double rotation_rad) : pos(pos),
+                                                                                  text(text),
+                                                                                  rotation_deg(180.0 * rotation_rad / boost::math::double_constants::pi)
+  {
+  }
 
-  virtual void serialize(std::ostream& os) const override
+  virtual void serialize(std::ostream &os) const override
   {
     HersheyFont font(pos, text, rotation_deg, 4.5, 0.8);
     font.serialize_svg(os, svg_precision);
@@ -131,18 +131,18 @@ public:
 class SVGBezier : public SaverPrimitive
 {
 public:
-  SVGBezier(const std::vector<BezierCurve>& curve, const std::string& stroke = "str0", const std::string& fill = "fil0") :
-    curve(curve),
-    stroke(stroke),
-    fill(fill)
-  {}
+  SVGBezier(const std::vector<BezierCurve> &curve, const std::string &stroke = "str0", const std::string &fill = "fil0") : curve(curve),
+                                                                                                                           stroke(stroke),
+                                                                                                                           fill(fill)
+  {
+  }
 
-  virtual void serialize(std::ostream& os) const override
+  virtual void serialize(std::ostream &os) const override
   {
     const int x_front = static_cast<int>(svg_precision * curve[0].control_point(0).x);
     const int y_front = static_cast<int>(svg_precision * curve[0].control_point(0).y);
     os << "<path class=\"" << fill << " " << stroke << "\" d=\"M " << x_front << " " << y_front;
-    for (const BezierCurve& c : curve)
+    for (const BezierCurve &c : curve)
     {
       os << " C ";
       for (int i = 1; i < c.degree(); ++i)
@@ -172,14 +172,14 @@ public:
 class SVGCircle : public SaverPrimitive
 {
 public:
-  SVGCircle(cv::Point2f center, double radius, const std::string& stroke = "str0", const std::string& fill = "fil0") :
-    center(center),
-    radius(radius),
-    stroke(stroke),
-    fill(fill)
-  {}
+  SVGCircle(cv::Point2f center, double radius, const std::string &stroke = "str0", const std::string &fill = "fil0") : center(center),
+                                                                                                                       radius(radius),
+                                                                                                                       stroke(stroke),
+                                                                                                                       fill(fill)
+  {
+  }
 
-  virtual void serialize(std::ostream& os) const override
+  virtual void serialize(std::ostream &os) const override
   {
     const int x = static_cast<int>(svg_precision * center.x);
     const int y = static_cast<int>(svg_precision * center.y);
@@ -202,13 +202,11 @@ public:
 class SVGSaver : public VectorGraphicsSaver
 {
 public:
-  SVGSaver(const Texture& texture, const std::string &output_name = "") :
-    VectorGraphicsSaver(texture, output_name)
+  SVGSaver(const Texture &texture, const std::string &output_name = "") : VectorGraphicsSaver(texture, output_name)
   {
   }
 
-  SVGSaver(const std::string &output_name) :
-    VectorGraphicsSaver(output_name)
+  SVGSaver(const std::string &output_name) : VectorGraphicsSaver(output_name)
   {
   }
 
@@ -217,32 +215,32 @@ public:
     m_primitives.push_back(std::make_shared<SVGLine>(p_start, p_end));
   }
 
-  virtual void add_polygon(const std::vector<cv::Point2f>& points) override
+  virtual void add_polygon(const std::vector<cv::Point2f> &points) override
   {
     m_primitives.push_back(std::make_shared<SVGPolygon>(points, "str0", "fil0"));
   }
 
-  virtual void add_text(const cv::Point2f& pos, const std::string& text, double rotation_rad) override
+  virtual void add_text(const cv::Point2f &pos, const std::string &text, double rotation_rad) override
   {
     m_text.push_back(std::make_shared<SVGText>(pos, text, rotation_rad));
   }
 
-  virtual void add_bezier(const std::vector<BezierCurve>& curve) override
+  virtual void add_bezier(const std::vector<BezierCurve> &curve) override
   {
     m_primitives.push_back(std::make_shared<SVGBezier>(curve));
   }
 
-  virtual void add_circle(const cv::Point2f& center, double radius) override
+  virtual void add_circle(const cv::Point2f &center, double radius) override
   {
     m_primitives.push_back(std::make_shared<SVGCircle>(center, radius, "str1", "fil0"));
   }
 
-  virtual void add_debug_circle(const cv::Point2f& center, double radius) override
+  virtual void add_debug_circle(const cv::Point2f &center, double radius) override
   {
     m_debug_primitives.push_back(std::make_shared<SVGCircle>(center, radius, "str1", "fil0"));
   }
 
-  virtual void add_debug_polygon(const std::vector<cv::Point2f>& points)
+  virtual void add_debug_polygon(const std::vector<cv::Point2f> &points)
   {
     m_primitives.push_back(std::make_shared<SVGPolygon>(points, "str1", "fil0"));
   }
@@ -252,10 +250,10 @@ public:
     return ".svg";
   }
 
-  virtual void save(const boost::filesystem::path& filename, const cv::Size2d& table_dimensions_mm) const override;
+  virtual void save(const boost::filesystem::path &filename, const cv::Size2d &table_dimensions_mm) const override;
 
 private:
-  void write_header(std::ostream& out, double size_x_mm, double size_y_mm) const;
-  void write_footer(std::ostream& out) const;
+  void write_header(std::ostream &out, double size_x_mm, double size_y_mm) const;
+  void write_footer(std::ostream &out) const;
 };
 #endif /* TRLIB_SVG_SAVER_HPP_ */

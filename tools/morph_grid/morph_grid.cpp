@@ -44,7 +44,7 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-static cv::Mat load_image(const po::variables_map& vm, const std::string& key, int imread_flags=1)
+static cv::Mat load_image(const po::variables_map &vm, const std::string &key, int imread_flags = 1)
 {
   fs::path path_image;
   if (vm.count(key))
@@ -66,102 +66,95 @@ static cv::Mat load_image(const po::variables_map& vm, const std::string& key, i
   return cv::imread(path_image.string(), imread_flags);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   /*try
   {*/
-    po::options_description desc("Allowed options");
-    desc.add_options()
-      ("help,h", "Show this help message")
-      ("image,i", po::value<fs::path>(), "Input image")
-      ("filtered,f", po::value<fs::path>(), "Filtered input image")
-      ("size,s", po::value<int>(), "Number of pixels per grid cell")
-      ("out,o", po::value<fs::path>(), "Output JSON file")
-      ("load_full_state", po::value<fs::path>(), "Load full state using json file")
-      ("load_partial_state", po::value<fs::path>(), "Load partial state using json file (edges, masks)");
+  po::options_description desc("Allowed options");
+  desc.add_options()("help,h", "Show this help message")("image,i", po::value<fs::path>(), "Input image")("filtered,f", po::value<fs::path>(), "Filtered input image")("size,s", po::value<int>(), "Number of pixels per grid cell")("out,o", po::value<fs::path>(), "Output JSON file")("load_full_state", po::value<fs::path>(), "Load full state using json file")("load_partial_state", po::value<fs::path>(), "Load partial state using json file (edges, masks)");
 
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
-    po::notify(vm);
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
+  po::notify(vm);
 
-    if (vm.count("help"))
+  if (vm.count("help"))
+  {
+    std::cout << desc << std::endl;
+    return 0;
+  }
+
+  cv::Mat image = load_image(vm, "image");
+  cv::Mat image_filtered = load_image(vm, "filtered", cv::IMREAD_GRAYSCALE);
+
+  fs::path path_partial_state;
+  if (vm.count("load_partial_state"))
+  {
+    path_partial_state = vm["load_partial_state"].as<fs::path>();
+
+    if (!fs::exists(path_partial_state) || !fs::is_regular_file(path_partial_state))
     {
-      std::cout << desc << std::endl;
-      return 0;
-    }
-
-    cv::Mat image = load_image(vm, "image");
-    cv::Mat image_filtered = load_image(vm, "filtered", cv::IMREAD_GRAYSCALE);
-
-    fs::path path_partial_state;
-    if (vm.count("load_partial_state"))
-    {
-      path_partial_state = vm["load_partial_state"].as<fs::path>();
-
-      if (!fs::exists(path_partial_state) || !fs::is_regular_file(path_partial_state))
-      {
-        std::cerr << "Partial state JSON path does not exist or is no regular file." << std::endl
-          << desc << std::endl;
-        return -1;
-      }
-    }
-
-    fs::path path_full_state;
-    if (vm.count("load_full_state"))
-    {
-      path_full_state = vm["load_full_state"].as<fs::path>();
-
-      if (!fs::exists(path_full_state) || !fs::is_regular_file(path_full_state))
-      {
-        std::cerr << "Full state JSON path does not exist or is no regular file." << std::endl
-          << desc << std::endl;
-        return -1;
-      }
-    }
-
-    fs::path path_out, path_out_parent;
-    if (vm.count("out"))
-    {
-      path_out = vm["out"].as<fs::path>();
-      path_out_parent = path_out.parent_path();
-      if (fs::exists(path_out) && fs::is_directory(path_out))
-      {
-        std::cerr << "Output path exists but is a directory." << std::endl;
-        return -1;
-      }
-    }
-    else
-    {
-      std::cerr << "No output path specified." << std::endl
-        << desc << std::endl;
-    }
-
-    int grid_size;
-    if (vm.count("size"))
-    {
-      grid_size = vm["size"].as<int>();
-    }
-    else
-    {
-      std::cerr << "No grid cell size specified." << std::endl;
+      std::cerr << "Partial state JSON path does not exist or is no regular file." << std::endl
+                << desc << std::endl;
       return -1;
     }
+  }
 
-    EZGrid ez_grid(image, image_filtered, grid_size, path_out);
+  fs::path path_full_state;
+  if (vm.count("load_full_state"))
+  {
+    path_full_state = vm["load_full_state"].as<fs::path>();
 
-    if (fs::exists(path_partial_state))
+    if (!fs::exists(path_full_state) || !fs::is_regular_file(path_full_state))
     {
-      ez_grid.load_partial_state(path_partial_state);
+      std::cerr << "Full state JSON path does not exist or is no regular file." << std::endl
+                << desc << std::endl;
+      return -1;
     }
+  }
 
-    if (fs::exists(path_full_state))
+  fs::path path_out, path_out_parent;
+  if (vm.count("out"))
+  {
+    path_out = vm["out"].as<fs::path>();
+    path_out_parent = path_out.parent_path();
+    if (fs::exists(path_out) && fs::is_directory(path_out))
     {
-      std::cout << "Load full state" << std::endl;
-      ez_grid.load_full_state(path_full_state);
+      std::cerr << "Output path exists but is a directory." << std::endl;
+      return -1;
     }
+  }
+  else
+  {
+    std::cerr << "No output path specified." << std::endl
+              << desc << std::endl;
+  }
 
-    ez_grid.run();
-    ez_grid.save();
+  int grid_size;
+  if (vm.count("size"))
+  {
+    grid_size = vm["size"].as<int>();
+  }
+  else
+  {
+    std::cerr << "No grid cell size specified." << std::endl;
+    return -1;
+  }
+
+  EZGrid ez_grid(image, image_filtered, grid_size, path_out);
+
+  if (fs::exists(path_partial_state))
+  {
+    ez_grid.load_partial_state(path_partial_state);
+  }
+
+  if (fs::exists(path_full_state))
+  {
+    std::cout << "Load full state" << std::endl;
+    ez_grid.load_full_state(path_full_state);
+  }
+
+  ez_grid.run();
+  ez_grid.save();
   /*}
   catch (std::exception& e)
   {

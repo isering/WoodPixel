@@ -32,7 +32,7 @@ std::vector<T> linspace(T a, T b, int N, bool include_last)
 
   int i;
   T x;
-  for (i=0, x=a; i<N; ++i, x+=h)
+  for (i = 0, x = a; i < N; ++i, x += h)
   {
     vector_linspace[i] = x;
   }

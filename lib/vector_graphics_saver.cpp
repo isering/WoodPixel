@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "vector_graphics_saver.hpp"
 
-std::ostream& operator<<(std::ostream& os, const SaverPrimitive& primitive)
+std::ostream &operator<<(std::ostream &os, const SaverPrimitive &primitive)
 {
   primitive.serialize(os);
   return os;

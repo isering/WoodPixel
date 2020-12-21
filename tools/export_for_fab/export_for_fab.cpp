@@ -36,38 +36,32 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "material_panel.hpp"
 #include "svg_saver.hpp"
 
-
 namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-cv::Rect get_roi(const cv::Point& p, const cv::Size& image_size, const cv::Size& roi_size)
+cv::Rect get_roi(const cv::Point &p, const cv::Size &image_size, const cv::Size &roi_size)
 {
   cv::Point p_tl = p - cv::Point(roi_size);
   cv::Point p_br = p + cv::Point(roi_size);
 
   p_tl.x = std::max(p_tl.x, 0);
-  p_tl.x = std::min(p_tl.x, image_size.width-1);
+  p_tl.x = std::min(p_tl.x, image_size.width - 1);
   p_tl.y = std::max(p_tl.y, 0);
-  p_tl.y = std::min(p_tl.y, image_size.height-1);
+  p_tl.y = std::min(p_tl.y, image_size.height - 1);
 
   p_br.x = std::max(p_br.x, 0);
-  p_br.x = std::min(p_br.x, image_size.width-1);
+  p_br.x = std::min(p_br.x, image_size.width - 1);
   p_br.y = std::max(p_br.y, 0);
-  p_br.y = std::min(p_br.y, image_size.height-1);
+  p_br.y = std::min(p_br.y, image_size.height - 1);
 
   return cv::Rect(p_tl, p_br);
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "Show this help message")
-    ("table_layout,t", po::value<fs::path>(), "Input JSON file with material panels on table (table.json)")
-    ("verify_markers,v", "Visually verify marker positions in source textures")
-    ("out,o", po::value<fs::path>(), "Output path")
-    ("cut_pattern,c", po::value<std::vector<fs::path> >()->composing(), "Input JSON file(s) with cut pattern(s) (result.json)");
+  desc.add_options()("help,h", "Show this help message")("table_layout,t", po::value<fs::path>(), "Input JSON file with material panels on table (table.json)")("verify_markers,v", "Visually verify marker positions in source textures")("out,o", po::value<fs::path>(), "Output path")("cut_pattern,c", po::value<std::vector<fs::path>>()->composing(), "Input JSON file(s) with cut pattern(s) (result.json)");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
@@ -105,7 +99,7 @@ int main(int argc, char* argv[])
         if (!fs::exists(path_cut_pattern) || !fs::is_regular_file(path_cut_pattern))
         {
           std::cerr << "Input JSON path " << path_cut_pattern << "does not exist or is no regular file." << std::endl
-            << desc << std::endl;
+                    << desc << std::endl;
           return -1;
         }
       }
@@ -113,7 +107,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No cut_pattern JSON specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
@@ -124,14 +118,14 @@ int main(int argc, char* argv[])
       if (!fs::exists(path_table_layout) || !fs::is_regular_file(path_table_layout))
       {
         std::cerr << "Input JSON path does not exist or is no regular file." << std::endl
-          << desc << std::endl;
+                  << desc << std::endl;
         return -1;
       }
     }
     else
     {
       std::cerr << "No table_layout JSON specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
@@ -147,7 +141,7 @@ int main(int argc, char* argv[])
     else
     {
       std::cerr << "No output path specified." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
     }
 
     pt::ptree tree_cut_pattern;
@@ -169,24 +163,24 @@ int main(int argc, char* argv[])
     /*
      * Check that all patches for validity.
      */
-    for (const Patch& patch : patches)
+    for (const Patch &patch : patches)
     {
       if (!patch.region_target.valid())
       {
         std::cerr << "Loaded invalid patch." << std::endl
-          << "target_index: " << patch.region_target.target_index() << std::endl
-          << "coordinate: " << patch.region_target.coordinate() << std::endl
-          << "Quitting..." << std::endl;
+                  << "target_index: " << patch.region_target.target_index() << std::endl
+                  << "coordinate: " << patch.region_target.coordinate() << std::endl
+                  << "Quitting..." << std::endl;
         return -1;
       }
     }
 
     std::cout << "Patches loaded: " << patches.size() << std::endl
-      << "Textures loaded: " << textures.size() << std::endl;
+              << "Textures loaded: " << textures.size() << std::endl;
 
     if (verify_markers)
     {
-      for (const Texture& texture : textures)
+      for (const Texture &texture : textures)
       {
         fs::path path_texture = texture.filename;
         if (!fs::exists(path_texture))
@@ -220,7 +214,7 @@ int main(int argc, char* argv[])
     CutSaver::add_sources_bezier_svg(svg_saver, path_out.parent_path(), textures, patches, material_panels);
     CutSaver::save(svg_saver, path_out.parent_path(), path_out.filename().string(), table_dimensions_mm);
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     return -1;

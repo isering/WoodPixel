@@ -57,7 +57,7 @@ static std::vector<cv::Scalar> get_colors(int num_colors)
   return colors;
 }
 
-cv::Mat draw_bars(const std::vector<cv::Mat>& hist)
+cv::Mat draw_bars(const std::vector<cv::Mat> &hist)
 {
   const int num_colors = static_cast<int>(hist.size());
   const int num_bins = hist.front().rows;
@@ -66,7 +66,7 @@ cv::Mat draw_bars(const std::vector<cv::Mat>& hist)
 
   double local_max;
   double global_max = 0.0;
-  for (const cv::Mat& mat : hist)
+  for (const cv::Mat &mat : hist)
   {
     cv::minMaxLoc(mat, 0, &local_max);
     global_max = std::max(global_max, local_max);
@@ -83,16 +83,16 @@ cv::Mat draw_bars(const std::vector<cv::Mat>& hist)
     {
       const int x1 = (num_colors * x + color) * bin_w;
       const int x2 = x1 + bin_w - 1;
-      const int y = static_cast<int>((hist_image.rows-1) * (1.0 - (hist[color].at<float>(x, 0) / global_max)));
+      const int y = static_cast<int>((hist_image.rows - 1) * (1.0 - (hist[color].at<float>(x, 0) / global_max)));
 
-      cv::rectangle(hist_image, cv::Point(x1, image_h-1), cv::Point(x2, y), colors[color], -1);
+      cv::rectangle(hist_image, cv::Point(x1, image_h - 1), cv::Point(x2, y), colors[color], -1);
     }
   }
 
   return hist_image;
 }
 
-cv::Mat draw_lines(const std::vector<cv::Mat>& hist)
+cv::Mat draw_lines(const std::vector<cv::Mat> &hist)
 {
   const int num_colors = static_cast<int>(hist.size());
   const int num_bins = hist.front().rows;
@@ -101,7 +101,7 @@ cv::Mat draw_lines(const std::vector<cv::Mat>& hist)
 
   double local_max;
   double global_max = 0.0;
-  for (const cv::Mat& mat : hist)
+  for (const cv::Mat &mat : hist)
   {
     cv::minMaxLoc(mat, 0, &local_max);
     global_max = std::max(global_max, local_max);
@@ -112,10 +112,10 @@ cv::Mat draw_lines(const std::vector<cv::Mat>& hist)
   cv::Mat hist_image(image_h, bin_w * num_bins, CV_8UC3, cv::Scalar(255, 255, 255));
   for (int color = 0; color < num_colors; ++color)
   {
-    cv::Point p_last(0, static_cast<int>((hist_image.rows-1) * (1.0 - (hist[color].at<float>(0, 0) / global_max))));
+    cv::Point p_last(0, static_cast<int>((hist_image.rows - 1) * (1.0 - (hist[color].at<float>(0, 0) / global_max))));
     for (int x = 1; x < num_bins; ++x)
     {
-      cv::Point p(x * bin_w, static_cast<int>((hist_image.rows-1) * (1.0 - (hist[color].at<float>(x, 0) / global_max))));
+      cv::Point p(x * bin_w, static_cast<int>((hist_image.rows - 1) * (1.0 - (hist[color].at<float>(x, 0) / global_max))));
       cv::line(hist_image, p_last, p, colors[color], 2);
       p_last = p;
     }

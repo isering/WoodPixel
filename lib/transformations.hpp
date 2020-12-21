@@ -28,9 +28,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace transformations
 {
 
-cv::Mat scale(double scale_x, double scale_y);
-cv::Mat shear_x(double shear);
-cv::Mat shear_y(double shear);
+    cv::Mat scale(double scale_x, double scale_y);
+    cv::Mat shear_x(double shear);
+    cv::Mat shear_y(double shear);
 
-}
+} // namespace transformations
 #endif /* TRLIB_TRANSFORMATIONS_HPP_ */

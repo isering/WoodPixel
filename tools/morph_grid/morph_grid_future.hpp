@@ -37,31 +37,30 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class MorphGridFuture : public FutureBase, public Serializable
 {
 public:
-  MorphGridFuture(const std::string& window_name, cv::Mat image, int grid_size) :
-    FutureBase(window_name),
-    m_image(image),
-    m_output_image(OutputImage::BILATERAL),
-    m_output_edge(OutputEdge::EDGE_DRAW),
-    m_mode(Mode::EDIT_GRID),
-    m_mouse_pos(-1, -1),
-    m_mouse_tool_size(15.0),
-    m_mouse_l_pressed(false),
-    m_mouse_shift_pressed(false),
-    m_grid_size(grid_size),
-    m_is_grid_point_selected(false),
-    m_edge_select_last(-1, -1),
-    m_is_grid_updated(false),
-    m_update_patches(false),
-    m_draw_grid(true),
-    m_visibility_mode(false),
-    m_save_state(false)
+  MorphGridFuture(const std::string &window_name, cv::Mat image, int grid_size) : FutureBase(window_name),
+                                                                                  m_image(image),
+                                                                                  m_output_image(OutputImage::BILATERAL),
+                                                                                  m_output_edge(OutputEdge::EDGE_DRAW),
+                                                                                  m_mode(Mode::EDIT_GRID),
+                                                                                  m_mouse_pos(-1, -1),
+                                                                                  m_mouse_tool_size(15.0),
+                                                                                  m_mouse_l_pressed(false),
+                                                                                  m_mouse_shift_pressed(false),
+                                                                                  m_grid_size(grid_size),
+                                                                                  m_is_grid_point_selected(false),
+                                                                                  m_edge_select_last(-1, -1),
+                                                                                  m_is_grid_updated(false),
+                                                                                  m_update_patches(false),
+                                                                                  m_draw_grid(true),
+                                                                                  m_visibility_mode(false),
+                                                                                  m_save_state(false)
   {
     if (m_image.channels() == 1)
     {
       cv::cvtColor(m_image, m_image, cv::COLOR_GRAY2BGR);
     }
 
-    m_grid = DataGrid<unsigned char>(image.rows/grid_size+1, image.cols/grid_size+1, 1);
+    m_grid = DataGrid<unsigned char>(image.rows / grid_size + 1, image.cols / grid_size + 1, 1);
     m_grid.scale(grid_size);
     m_edge_bilateral = cv::Mat::zeros(image.size(), CV_8UC1);
     m_edge_filtered = cv::Mat::zeros(image.size(), CV_8UC1);
@@ -168,12 +167,12 @@ public:
 
   void handle_edge_select(int p_x, int p_y, bool button_l_pressed, bool delete_modifier);
 
-  const DataGrid<unsigned char>& grid() const
+  const DataGrid<unsigned char> &grid() const
   {
     return m_grid;
   }
 
-  const std::vector<PatchRegion>& patches() const
+  const std::vector<PatchRegion> &patches() const
   {
     return m_patches;
   }
@@ -185,9 +184,9 @@ public:
     return save_state_last;
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual void load_input_partial(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree);
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual void load_input_partial(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree);
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 
 protected:
   virtual void on_mouse(int event, int x, int y, int flags) override;

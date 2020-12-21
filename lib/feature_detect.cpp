@@ -51,7 +51,7 @@ std::vector<cv::Point2f> feature_detect(cv::Mat texture, int max_corners, double
   return corners;
 }
 
-void draw_features(const std::string& window_name, cv::Mat texture, const std::vector<cv::Point2f>& features)
+void draw_features(const std::string &window_name, cv::Mat texture, const std::vector<cv::Point2f> &features)
 {
   std::vector<cv::KeyPoint> key_points;
   for (cv::Point2f p : features)
@@ -67,11 +67,11 @@ void draw_features(const std::string& window_name, cv::Mat texture, const std::v
   cv::waitKey(1);
 }
 
-cv::Mat features_to_binary_image(const std::vector<cv::Point2f>& features, int height, int width)
+cv::Mat features_to_binary_image(const std::vector<cv::Point2f> &features, int height, int width)
 {
   cv::Mat binary_image = cv::Mat::zeros(height, width, CV_32FC1);
 
-  for (const cv::Point2f& p : features)
+  for (const cv::Point2f &p : features)
   {
     cv::circle(binary_image, static_cast<cv::Point>(p), 5, 1.0, -1);
   }

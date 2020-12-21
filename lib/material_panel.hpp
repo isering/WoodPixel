@@ -35,8 +35,8 @@ public:
   std::string id;
   std::vector<cv::Point2d> markers_table_mm;
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 };
 
 #endif /* TRLIB_MATERIAL_PANEL_HPP_ */

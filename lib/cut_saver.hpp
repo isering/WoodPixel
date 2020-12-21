@@ -38,53 +38,53 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace CutSaver
 {
   template <typename SaverT>
-  void save(const std::vector<SaverT>& saver, const boost::filesystem::path& base_path, const std::string& base_filename, const cv::Size2d& table_dimensions_mm);
+  void save(const std::vector<SaverT> &saver, const boost::filesystem::path &base_path, const std::string &base_filename, const cv::Size2d &table_dimensions_mm);
 
   template <typename SaverT>
-  void add_sources_bezier(std::vector<SaverT>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel);
-  void add_sources_bezier_svg(std::vector<SVGSaver>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel);
-  void add_sources_bezier_eps(std::vector<EPSSaver>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel);
+  void add_sources_bezier(std::vector<SaverT> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel);
+  void add_sources_bezier_svg(std::vector<SVGSaver> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel);
+  void add_sources_bezier_eps(std::vector<EPSSaver> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel);
 
   template <typename SaverT>
-  void add_sources_bezier(std::vector<SaverT>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<Patch>& patches, const std::vector<MaterialPanel>& material_panel);
-  void add_sources_bezier_svg(std::vector<SVGSaver>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<Patch>& patches, const std::vector<MaterialPanel>& material_panel);
-  void add_sources_bezier_eps(std::vector<EPSSaver>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<Patch>& patches, const std::vector<MaterialPanel>& material_panel);
+  void add_sources_bezier(std::vector<SaverT> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<Patch> &patches, const std::vector<MaterialPanel> &material_panel);
+  void add_sources_bezier_svg(std::vector<SVGSaver> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<Patch> &patches, const std::vector<MaterialPanel> &material_panel);
+  void add_sources_bezier_eps(std::vector<EPSSaver> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<Patch> &patches, const std::vector<MaterialPanel> &material_panel);
 
   template <typename SaverT>
-  void save_sources_bezier(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel, const cv::Size2d& table_dimensions_mm);
-  void save_sources_bezier_svg(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel, const cv::Size2d& table_dimensions_mm);
-  void save_sources_bezier_eps(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const std::vector<MaterialPanel>& material_panel, const cv::Size2d& table_dimensions_mm);
+  void save_sources_bezier(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel, const cv::Size2d &table_dimensions_mm);
+  void save_sources_bezier_svg(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel, const cv::Size2d &table_dimensions_mm);
+  void save_sources_bezier_eps(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const std::vector<MaterialPanel> &material_panel, const cv::Size2d &table_dimensions_mm);
 
   template <typename SaverT>
-  void add_target_bezier(std::vector<SaverT>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches);
-  void add_target_bezier_svg(std::vector<SVGSaver>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches);
-  void add_target_bezier_eps(std::vector<EPSSaver>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches);
+  void add_target_bezier(std::vector<SaverT> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches);
+  void add_target_bezier_svg(std::vector<SVGSaver> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches);
+  void add_target_bezier_eps(std::vector<EPSSaver> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches);
 
   template <typename SaverT>
-  void save_target_bezier(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-  void save_target_bezier_svg(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-  void save_target_bezier_eps(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
+  void save_target_bezier(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+  void save_target_bezier_svg(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+  void save_target_bezier_eps(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
 
   template <typename SaverT>
-  void add_sources_rect(std::vector<SaverT>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches);
-  void add_sources_rect_svg(std::vector<SVGSaver>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches);
-  void add_sources_rect_eps(std::vector<EPSSaver>& saver, const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches);
+  void add_sources_rect(std::vector<SaverT> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches);
+  void add_sources_rect_svg(std::vector<SVGSaver> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches);
+  void add_sources_rect_eps(std::vector<EPSSaver> &saver, const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches);
 
   template <typename SaverT>
-  void save_sources_rect(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-  void save_sources_rect_svg(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-  void save_sources_rect_eps(const boost::filesystem::path& path, const std::vector<Texture>& textures, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
+  void save_sources_rect(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+  void save_sources_rect_svg(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+  void save_sources_rect_eps(const boost::filesystem::path &path, const std::vector<Texture> &textures, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
 
   template <typename SaverT>
-  void add_target_rect(std::vector<SaverT>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches);
-  void add_target_rect_svg(std::vector<SVGSaver>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches);
-  void add_target_rect_eps(std::vector<EPSSaver>& saver, const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches);
+  void add_target_rect(std::vector<SaverT> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches);
+  void add_target_rect_svg(std::vector<SVGSaver> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches);
+  void add_target_rect_eps(std::vector<EPSSaver> &saver, const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches);
 
   template <typename SaverT>
-  void save_target_rect(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-  void save_target_rect_svg(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-  void save_target_rect_eps(const boost::filesystem::path& path, const Texture& texture, const std::vector<MergePatch>& patches, const cv::Size2d& table_dimensions_mm);
-};
+  void save_target_rect(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+  void save_target_rect_svg(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+  void save_target_rect_eps(const boost::filesystem::path &path, const Texture &texture, const std::vector<MergePatch> &patches, const cv::Size2d &table_dimensions_mm);
+}; // namespace CutSaver
 
 #include "cut_saver_impl.hpp"
 

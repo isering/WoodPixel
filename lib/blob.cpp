@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "blob.hpp"
 
-Blob Blob::detect(cv::Mat image, const cv::Point& p_start, unsigned char color_fill)
+Blob Blob::detect(cv::Mat image, const cv::Point &p_start, unsigned char color_fill)
 {
   Blob blob;
   unsigned char color_start = image.at<unsigned char>(p_start);
@@ -37,30 +37,30 @@ Blob Blob::detect(cv::Mat image, const cv::Point& p_start, unsigned char color_f
     const cv::Point p = queue.front();
     queue.pop_front();
 
-    unsigned char& color = image.at<unsigned char>(p);
+    unsigned char &color = image.at<unsigned char>(p);
 
     if (color == color_start)
     {
-     blob. m_points.push_back(p);
+      blob.m_points.push_back(p);
 
       if (p.x > 0)
       {
-        queue.emplace_back(p.x-1, p.y);
+        queue.emplace_back(p.x - 1, p.y);
       }
 
-      if (p.x < image.cols-1)
+      if (p.x < image.cols - 1)
       {
-        queue.emplace_back(p.x+1, p.y);
+        queue.emplace_back(p.x + 1, p.y);
       }
 
       if (p.y > 0)
       {
-        queue.emplace_back(p.x, p.y-1);
+        queue.emplace_back(p.x, p.y - 1);
       }
 
-      if (p.y < image.rows-1)
+      if (p.y < image.rows - 1)
       {
-        queue.emplace_back(p.x, p.y+1);
+        queue.emplace_back(p.x, p.y + 1);
       }
 
       color = color_fill;
@@ -77,7 +77,7 @@ std::vector<Blob> Blob::detect(cv::Mat image, unsigned char fg)
   std::vector<Blob> blobs;
   for (int y = 0; y < blob_image.rows; ++y)
   {
-    const unsigned char* ptr = blob_image.ptr(y);
+    const unsigned char *ptr = blob_image.ptr(y);
     for (int x = 0; x < blob_image.cols; ++x)
     {
       if (ptr[x] != fg)
@@ -94,7 +94,7 @@ std::vector<BezierCurve> Blob::contours(cv::Size size) const
 {
   cv::Mat mask = cv::Mat::zeros(size, CV_8UC1);
 
-  for (const cv::Point& p : m_points)
+  for (const cv::Point &p : m_points)
   {
     mask.at<unsigned char>(p) = 255;
   }
@@ -103,11 +103,11 @@ std::vector<BezierCurve> Blob::contours(cv::Size size) const
   cv::findContours(mask, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
   std::vector<BezierCurve> curves;
-  for (const std::vector<cv::Point>& contour : contours)
+  for (const std::vector<cv::Point> &contour : contours)
   {
     for (size_t i = 1; i < contours.size(); ++i)
     {
-      curves.emplace_back(contour[i-1], contour[i], 3);
+      curves.emplace_back(contour[i - 1], contour[i], 3);
     }
     if (contour.size() > 1)
     {
@@ -121,7 +121,7 @@ std::vector<BezierCurve> Blob::contours(cv::Size size) const
 void Blob::draw_contour(cv::Mat mask) const
 {
   cv::Mat mask_temp = cv::Mat::zeros(mask.size(), CV_8UC1);
-  for (const cv::Point& p : m_points)
+  for (const cv::Point &p : m_points)
   {
     mask_temp.at<unsigned char>(p) = 255;
   }
@@ -129,11 +129,11 @@ void Blob::draw_contour(cv::Mat mask) const
   std::vector<std::vector<cv::Point>> contours;
   cv::findContours(mask_temp, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
-  for (const std::vector<cv::Point>& contour : contours)
+  for (const std::vector<cv::Point> &contour : contours)
   {
-    for (const cv::Point& p : contour)
+    for (const cv::Point &p : contour)
     {
-      mask.at<unsigned char>(p) =  255;
+      mask.at<unsigned char>(p) = 255;
     }
   }
 }

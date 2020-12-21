@@ -30,12 +30,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 struct CumulativeDistributionFunction
 {
-  CumulativeDistributionFunction(const Histogram& histogram);
-  CumulativeDistributionFunction(const std::vector<cv::Mat>& cdf, float range_min, float range_max, int num_bins);
-  CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, int num_bins);
-  CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, float range_min, float range_max, int num_bins);
+  CumulativeDistributionFunction(const Histogram &histogram);
+  CumulativeDistributionFunction(const std::vector<cv::Mat> &cdf, float range_min, float range_max, int num_bins);
+  CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, int num_bins);
+  CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, float range_min, float range_max, int num_bins);
 
-  void from_histogram(const Histogram& histogram);
+  void from_histogram(const Histogram &histogram);
 
   std::vector<cv::Mat> cdf;
   float range_min, range_max;
@@ -64,11 +64,11 @@ struct CumulativeDistributionFunction
       return T();
     }
   }
-  
+
   double get_percentile(int channel, double perc)
   {
     int index = 0;
-    float* ptr = reinterpret_cast<float*>(cdf[channel].data);
+    float *ptr = reinterpret_cast<float *>(cdf[channel].data);
     while (index < num_bins && ptr[index] < perc)
     {
       ++index;

@@ -29,22 +29,22 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "texture.hpp"
 
 class Histogram
-{ 
+{
 public:
   Histogram(cv::Mat texture, cv::Mat mask, int num_bins);
   Histogram(cv::Mat texture, cv::Mat mask, float range_min, float range_max, int num_bins);
-  Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, int num_bins);
-  Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, float range_min, float range_max, int num_bins);
+  Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, int num_bins);
+  Histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, float range_min, float range_max, int num_bins);
 
   cv::Mat draw(bool lines) const;
 
-  static void linear_normalization(cv::Mat image, cv::Mat mask, double perc_min=0.05, double perc_max=0.95);
-  static void linear_normalization_rows(mat<cv::Mat>& matrix, cv::Mat mask);
-  static cv::Mat histogram_matching(cv::Mat texture_source, cv::Mat mask_source, const std::vector<cv::Mat>& target);
-  static cv::Mat histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture>& target);
-  static cv::Mat histogram_matching_hsv_nn(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture>& target);
+  static void linear_normalization(cv::Mat image, cv::Mat mask, double perc_min = 0.05, double perc_max = 0.95);
+  static void linear_normalization_rows(mat<cv::Mat> &matrix, cv::Mat mask);
+  static cv::Mat histogram_matching(cv::Mat texture_source, cv::Mat mask_source, const std::vector<cv::Mat> &target);
+  static cv::Mat histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture> &target);
+  static cv::Mat histogram_matching_hsv_nn(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture> &target);
 
-  static void histogram_equalization_rows(mat<cv::Mat>& matrix, cv::Mat mask);
+  static void histogram_equalization_rows(mat<cv::Mat> &matrix, cv::Mat mask);
 
   std::vector<cv::Mat> histogram;
   float range_min, range_max;
@@ -52,9 +52,9 @@ public:
   int num_channels;
 
 private:
-  void build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, int num_bins);
-  void build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, float range_min, float range_max, int num_bins);
-  void build_histogram(const std::vector<std::vector<cv::Mat>>& texture_planes, const std::vector<cv::Mat>& masks, float range_min, float range_max, int num_bins);
+  void build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, int num_bins);
+  void build_histogram(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, float range_min, float range_max, int num_bins);
+  void build_histogram(const std::vector<std::vector<cv::Mat>> &texture_planes, const std::vector<cv::Mat> &masks, float range_min, float range_max, int num_bins);
 };
 
 #endif /* TRLIB_HISTOGRAM_HPP_ */

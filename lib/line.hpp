@@ -25,7 +25,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <opencv2/opencv.hpp>
 
-double project_point_line(const cv::Point2d& p, const cv::Point2d& line_1, const cv::Point2d& line_2);
-double dist_point_line(const cv::Point2d& p, const cv::Point2d& line_1, const cv::Point2d& line_2);
+double project_point_line(const cv::Point2d &p, const cv::Point2d &line_1, const cv::Point2d &line_2);
+double dist_point_line(const cv::Point2d &p, const cv::Point2d &line_1, const cv::Point2d &line_2);
 
 #endif /* TRLIB_LINE_HPP_ */

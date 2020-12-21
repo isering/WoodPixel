@@ -31,35 +31,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class HoughCircleDetect
 {
 public:
-  HoughCircleDetect(double scale) :
-    m_scale(scale)
-  {}
+  HoughCircleDetect(double scale) : m_scale(scale)
+  {
+  }
 
-	std::vector<cv::Vec3f> compute(const cv::Mat& image, double param_1, double param_2, double dpi, double circle_size_mm);
-  std::future<std::vector<cv::Vec3f>> compute_background(const cv::Mat& image, double param_1, double param_2,  double dpi, double circle_size_mm);
-  std::vector<cv::Vec3f> compute_interactive(const std::vector<cv::Vec3f>& segmentation_data_in, const cv::Mat& image, const cv::Mat& image_background, double dpi, double circle_size_mm, std::string window_name);
+  std::vector<cv::Vec3f> compute(const cv::Mat &image, double param_1, double param_2, double dpi, double circle_size_mm);
+  std::future<std::vector<cv::Vec3f>> compute_background(const cv::Mat &image, double param_1, double param_2, double dpi, double circle_size_mm);
+  std::vector<cv::Vec3f> compute_interactive(const std::vector<cv::Vec3f> &segmentation_data_in, const cv::Mat &image, const cv::Mat &image_background, double dpi, double circle_size_mm, std::string window_name);
 
-  static void draw_to_file(const std::string& fname, const cv::Mat& im, const std::vector<cv::Vec3f>& seg);
+  static void draw_to_file(const std::string &fname, const cv::Mat &im, const std::vector<cv::Vec3f> &seg);
 
 private:
-	void draw();
-	
-	static void on_mouse(int event, int x, int y, int, void* ptr);
+  void draw();
+
+  static void on_mouse(int event, int x, int y, int, void *ptr);
 
   std::future<std::vector<cv::Vec3f>> m_future;
 
   std::vector<cv::Vec3f> m_data, m_data_in;
 
-	cv::Mat m_image_background;
-	std::string m_window_name;
+  cv::Mat m_image_background;
+  std::string m_window_name;
 
-	int m_param_1, m_param_2;
-	int m_param_old_1, m_param_old_2;
+  int m_param_1, m_param_2;
+  int m_param_old_1, m_param_old_2;
 
   double m_scale;
 
-	static double raw_to_param_1(int val);
-	static double raw_to_param_2(int val);
+  static double raw_to_param_1(int val);
+  static double raw_to_param_2(int val);
 };
 
 #endif /* TRLIB_HOUGH_CIRCLE_DETECT_HPP_ */

@@ -27,14 +27,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <boost/chrono.hpp>
 
-template < class ratio=boost::ratio<1LL, 1LL> >
+template <class ratio = boost::ratio<1LL, 1LL>>
 class Timer
 {
 public:
-	Timer() :
-		m_time_start(boost::chrono::process_real_cpu_clock::now()),
-		m_time_stop(m_time_start),
-		m_running(true) {}
+	Timer() : m_time_start(boost::chrono::process_real_cpu_clock::now()),
+			  m_time_stop(m_time_start),
+			  m_running(true) {}
 
 	~Timer() {}
 
@@ -46,10 +45,13 @@ public:
 
 	void stop()
 	{
-		if (m_running) {
+		if (m_running)
+		{
 			m_time_stop = boost::chrono::process_real_cpu_clock::now();
 			m_running = false;
-		} else {
+		}
+		else
+		{
 			m_time_stop = m_time_start;
 		}
 	}
@@ -59,10 +61,10 @@ public:
 		return (m_running ? boost::chrono::process_real_cpu_clock::now() : m_time_stop) - m_time_start;
 	}
 
-	friend std::ostream& operator<<(std::ostream& str, const Timer& rhs)
+	friend std::ostream &operator<<(std::ostream &str, const Timer &rhs)
 	{
 		boost::chrono::duration<float, ratio> duration = (rhs.m_running ? boost::chrono::process_real_cpu_clock::now() : rhs.m_time_stop) - rhs.m_time_start;
-		return str << boost::chrono::duration_short <<  duration;
+		return str << boost::chrono::duration_short << duration;
 	}
 
 private:

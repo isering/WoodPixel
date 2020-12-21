@@ -41,7 +41,7 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 namespace pt = boost::property_tree;
 
-fs::path get_unique_path(const fs::path& base_path)
+fs::path get_unique_path(const fs::path &base_path)
 {
   fs::path path_unique;
   int i = 0;
@@ -54,11 +54,11 @@ fs::path get_unique_path(const fs::path& base_path)
   return path_unique;
 }
 
-std::vector<Patch> load_patches(const std::vector<fs::path>& paths_patches)
+std::vector<Patch> load_patches(const std::vector<fs::path> &paths_patches)
 {
   std::vector<Patch> patches_all;
 
-  for (const fs::path& p : paths_patches)
+  for (const fs::path &p : paths_patches)
   {
     pt::ptree root;
     pt::read_json(p.string(), root);
@@ -70,16 +70,10 @@ std::vector<Patch> load_patches(const std::vector<fs::path>& paths_patches)
   return patches_all;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
   po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help,h", "Show this help message")
-    ("in,i", po::value<fs::path>(), "Input JSON file")
-    ("out,o", po::value<fs::path>(), "Output directory")
-    ("vis,v", "Visualization")
-    ("steps,s", po::value<fs::path>(), "Intermediate output directory")
-    ("patches,p", po::value<std::vector<fs::path>>(), "Old patches for visualization");
+  desc.add_options()("help,h", "Show this help message")("in,i", po::value<fs::path>(), "Input JSON file")("out,o", po::value<fs::path>(), "Output directory")("vis,v", "Visualization")("steps,s", po::value<fs::path>(), "Intermediate output directory")("patches,p", po::value<std::vector<fs::path>>(), "Old patches for visualization");
 
   po::variables_map vm;
   po::store(po::parse_command_line(argc, argv, desc, po::command_line_style::unix_style), vm);
@@ -104,7 +98,7 @@ int main(int argc, char* argv[])
   else
   {
     std::cerr << "No input JSON file specified." << std::endl
-      << desc << std::endl;
+              << desc << std::endl;
     return -1;
   }
 
@@ -121,7 +115,7 @@ int main(int argc, char* argv[])
     if (!fs::exists(path_out) || !fs::is_directory(path_out))
     {
       std::cerr << "Unable to create output directory." << std::endl
-        << desc << std::endl;
+                << desc << std::endl;
       return -1;
     }
 
@@ -166,7 +160,7 @@ int main(int argc, char* argv[])
   if (vm.count("patches"))
   {
     paths_patches = vm["patches"].as<std::vector<fs::path>>();
-    for (const fs::path& p : paths_patches)
+    for (const fs::path &p : paths_patches)
     {
       if (!fs::exists(p) || !fs::is_regular_file(p))
       {
@@ -180,12 +174,11 @@ int main(int argc, char* argv[])
 
   TreeMatch matcher = TreeMatch::load(path_in, true);
 
-
   for (int i = 0; i < matcher.num_targets(); ++i)
   {
-    std::cout << "Target " << i << " approx. size in mm: " 
-      << matcher.targets()[i].texture.size().width * 25.4 / matcher.textures()[0][0].dpi << " x " 
-      << matcher.targets()[i].texture.size().height * 25.4 / matcher.textures()[0][0].dpi << std::endl;
+    std::cout << "Target " << i << " approx. size in mm: "
+              << matcher.targets()[i].texture.size().width * 25.4 / matcher.textures()[0][0].dpi << " x "
+              << matcher.targets()[i].texture.size().height * 25.4 / matcher.textures()[0][0].dpi << std::endl;
   }
 
   /*
@@ -238,10 +231,10 @@ int main(int argc, char* argv[])
         patches_temp.insert(patches_temp.end(), matcher.patches().begin(), matcher.patches().end());
 
         std::vector<cv::Mat> masked_textures = matcher.draw_masked_textures_patch_last(
-          patches_temp,
-          cv::Scalar::all(0.0), 0.5,
-          cv::Scalar(0.0, 1.0, 0.0), 0.5,
-          1.0);
+            patches_temp,
+            cv::Scalar::all(0.0), 0.5,
+            cv::Scalar(0.0, 1.0, 0.0), 0.5,
+            1.0);
         for (size_t i = 0; i < masked_textures.size(); ++i)
         {
           cv::Mat masked_texture_scaled;
@@ -282,12 +275,11 @@ int main(int argc, char* argv[])
 
     fs::copy_file(path_in, path_out / path_in.filename());
   }
-  catch (std::exception& e)
+  catch (std::exception &e)
   {
     std::cerr << e.what() << std::endl;
     return -1;
   }
-
 
   return 0;
 }

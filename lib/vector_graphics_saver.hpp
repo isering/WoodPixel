@@ -34,45 +34,45 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class SaverPrimitive
 {
 public:
-  virtual void serialize(std::ostream& os) const = 0;
+  virtual void serialize(std::ostream &os) const = 0;
   virtual std::shared_ptr<SaverPrimitive> transformed(cv::Mat T) const = 0;
 };
 
-std::ostream& operator<<(std::ostream& os, const SaverPrimitive& primitive);
+std::ostream &operator<<(std::ostream &os, const SaverPrimitive &primitive);
 
 class VectorGraphicsSaver
 {
 public:
-  VectorGraphicsSaver(const Texture& texture, const std::string &output_name = "") :
-    rows(static_cast<int>(texture.texture.rows)),
-    cols(static_cast<int>(texture.texture.cols)),
-    dpi(texture.dpi),
-    marker(texture.marker),
-    output_name(output_name)
-  {}
-  VectorGraphicsSaver(const std::string &output_name) :
-    rows(-1),
-    cols(-1),
-    dpi(-1),
-    output_name(output_name)
-  {}
+  VectorGraphicsSaver(const Texture &texture, const std::string &output_name = "") : rows(static_cast<int>(texture.texture.rows)),
+                                                                                     cols(static_cast<int>(texture.texture.cols)),
+                                                                                     dpi(texture.dpi),
+                                                                                     marker(texture.marker),
+                                                                                     output_name(output_name)
+  {
+  }
+  VectorGraphicsSaver(const std::string &output_name) : rows(-1),
+                                                        cols(-1),
+                                                        dpi(-1),
+                                                        output_name(output_name)
+  {
+  }
 
   virtual void add_line(cv::Point2f p_start, cv::Point2f p_end) = 0;
-  virtual void add_polygon(const std::vector<cv::Point2f>& points) = 0;
-  virtual void add_text(const cv::Point2f& pos, const std::string& text, double rotation_rad) = 0;
-  virtual void add_bezier(const std::vector<BezierCurve>& curve) = 0;
-  virtual void add_circle(const cv::Point2f& center, double radius) = 0;
+  virtual void add_polygon(const std::vector<cv::Point2f> &points) = 0;
+  virtual void add_text(const cv::Point2f &pos, const std::string &text, double rotation_rad) = 0;
+  virtual void add_bezier(const std::vector<BezierCurve> &curve) = 0;
+  virtual void add_circle(const cv::Point2f &center, double radius) = 0;
 
-  virtual void add_debug_circle(const cv::Point2f& center, double radius)
+  virtual void add_debug_circle(const cv::Point2f &center, double radius)
   {
     add_circle(center, radius);
   }
 
-  virtual void save(const boost::filesystem::path& filename, const cv::Size2d& table_dimensions_mm) const = 0;
+  virtual void save(const boost::filesystem::path &filename, const cv::Size2d &table_dimensions_mm) const = 0;
 
   virtual std::string extension() const = 0;
-  
-  std::string get_output_name() const 
+
+  std::string get_output_name() const
   {
     return output_name;
   }

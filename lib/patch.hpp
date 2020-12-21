@@ -36,14 +36,13 @@ class Patch : public Serializable
 {
 public:
   Patch() = default;
-  Patch(const PatchRegion& region_target, const cv::Point& anchor_source, const cv::Mat& transformation_source, int source_index, int source_rot, const cv::Mat& error, double cost) :
-    region_target(region_target),
-    anchor_source(anchor_source),
-    transformation_source(transformation_source.clone()),
-    source_index(source_index),
-    source_rot(source_rot),
-    error(error.clone()),
-    m_cost(cost)
+  Patch(const PatchRegion &region_target, const cv::Point &anchor_source, const cv::Mat &transformation_source, int source_index, int source_rot, const cv::Mat &error, double cost) : region_target(region_target),
+                                                                                                                                                                                       anchor_source(anchor_source),
+                                                                                                                                                                                       transformation_source(transformation_source.clone()),
+                                                                                                                                                                                       source_index(source_index),
+                                                                                                                                                                                       source_rot(source_rot),
+                                                                                                                                                                                       error(error.clone()),
+                                                                                                                                                                                       m_cost(cost)
   {
     cv::invertAffineTransform(transformation_source, transformation_source_inv);
   }
@@ -65,7 +64,7 @@ public:
 
   Patch scaled(double scale) const;
 
-  void draw(cv::Mat image, double image_scale, const Texture& texture, double texture_scale) const;
+  void draw(cv::Mat image, double image_scale, const Texture &texture, double texture_scale) const;
   void draw_edge_mask(cv::Mat image, double image_scale) const;
 
   cv::Mat mask() const
@@ -73,7 +72,7 @@ public:
     return region_target.mask();
   }
 
-  static cv::Rect bounding_box(const std::vector<Patch>& patches, double scale);
+  static cv::Rect bounding_box(const std::vector<Patch> &patches, double scale);
 
   PatchRegion region_target;
 
@@ -84,18 +83,17 @@ public:
   int source_rot;
 
   cv::Mat error;
-  
+
   virtual double cost() const
   {
     return m_cost;
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 
 protected:
   double m_cost;
 };
-
 
 #endif /* TRLIB_PATCH_HPP_ */

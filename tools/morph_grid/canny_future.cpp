@@ -26,7 +26,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "canny_future.hpp"
 
-boost::property_tree::ptree CannyFuture::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree CannyFuture::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize_image(tree, "image", m_image, base_path, path);
@@ -36,7 +36,7 @@ boost::property_tree::ptree CannyFuture::save(const boost::filesystem::path& bas
   return tree;
 }
 
-void CannyFuture::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void CannyFuture::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize_image(tree, "image", m_image, base_path);
   deserialize_image(tree, "edge_image", m_edge_image, base_path);

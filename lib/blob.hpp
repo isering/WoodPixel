@@ -32,14 +32,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class Blob
 {
 public:
-  static Blob detect(cv::Mat image, const cv::Point& p_start, unsigned char color_fill);
+  static Blob detect(cv::Mat image, const cv::Point &p_start, unsigned char color_fill);
   static std::vector<Blob> detect(cv::Mat image, unsigned char fg);
 
   std::vector<BezierCurve> contours(cv::Size size) const;
 
   void draw_contour(cv::Mat mask) const;
 
-  const std::vector<cv::Point>& points() const
+  const std::vector<cv::Point> &points() const
   {
     return m_points;
   }

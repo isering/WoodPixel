@@ -68,7 +68,7 @@ FeatureVector FeatureEvaluator::evaluate(cv::Mat texture, cv::Mat mask) const
   return FeatureVector(response_vec);
 }
 
-FeatureVector FeatureEvaluator::evaluate_with_histogram_matching(cv::Mat texture, const std::vector<Texture>& texture_target, cv::Mat mask, double dampening_factor) const
+FeatureVector FeatureEvaluator::evaluate_with_histogram_matching(cv::Mat texture, const std::vector<Texture> &texture_target, cv::Mat mask, double dampening_factor) const
 {
   mat<cv::Mat> gabor_response;
   if (m_weight_gabor > 0.0)
@@ -80,7 +80,7 @@ FeatureVector FeatureEvaluator::evaluate_with_histogram_matching(cv::Mat texture
   cv::cvtColor(texture, texture_gray, cv::COLOR_BGR2GRAY);
 
   cv::Mat texture_float;
-  texture_gray.convertTo(texture_float, CV_32FC1, 1.0/65535.0);
+  texture_gray.convertTo(texture_float, CV_32FC1, 1.0 / 65535.0);
 
   cv::Mat texture_sobel_x, texture_sobel_y, texture_sobel_mag;
   cv::Sobel(texture_float, texture_sobel_x, CV_32F, 1, 0);
@@ -88,7 +88,7 @@ FeatureVector FeatureEvaluator::evaluate_with_histogram_matching(cv::Mat texture
   cv::magnitude(texture_sobel_x, texture_sobel_y, texture_sobel_mag);
   texture_sobel_mag *= 0.25;
   texture_sobel_mag.convertTo(texture_sobel_mag, CV_16UC1, 65535.0);
-  
+
   std::vector<cv::Mat> textures_target_gray(texture_target.size());
   for (size_t i = 0; i < texture_target.size(); ++i)
   {
@@ -131,21 +131,20 @@ FeatureVector FeatureEvaluator::evaluate_with_histogram_matching(cv::Mat texture
   return FeatureVector(response_vec);
 }
 
-HistogramVector FeatureEvaluator::compute_feature_histogram(const FeatureVector& feature_vec, const cv::Size& patch_size) const
+HistogramVector FeatureEvaluator::compute_feature_histogram(const FeatureVector &feature_vec, const cv::Size &patch_size) const
 {
   cv::Mat feature_float;
   std::vector<cv::Mat> histogram_vec(feature_vec.num_channels());
 
   for (int i = 0; i < feature_vec.num_channels(); ++i)
   {
-    feature_vec[i].convertTo(feature_float, CV_32FC1, 1.0/65535.0);
+    feature_vec[i].convertTo(feature_float, CV_32FC1, 1.0 / 65535.0);
     cv::blur(feature_float, histogram_vec[i], patch_size, cv::Point(0, 0));
     //cv::dilate(feature_vec[i], histogram_vec[i], cv::Mat::ones(patch_size, CV_8UC1), cv::Point(0, 0));
 
     //cv::imshow("Before", feature_vec[i]);
     //cv::imshow("After", histogram_vec[i]);
     //cv::waitKey();
-
 
     histogram_vec[i] = histogram_vec[i](cv::Range(0, histogram_vec[i].rows - patch_size.height + 1),
                                         cv::Range(0, histogram_vec[i].cols - patch_size.width + 1));

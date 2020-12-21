@@ -26,31 +26,31 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "cumulative_distribution_function.hpp"
 
-CumulativeDistributionFunction::CumulativeDistributionFunction(const Histogram& histogram)
+CumulativeDistributionFunction::CumulativeDistributionFunction(const Histogram &histogram)
 {
   from_histogram(histogram);
 }
 
-CumulativeDistributionFunction::CumulativeDistributionFunction(const std::vector<cv::Mat>& cdf, float range_min, float range_max, int num_bins) :
-  cdf(cdf),
-  range_min(range_min),
-  range_max(range_max),
-  num_bins(num_bins)
-{}
+CumulativeDistributionFunction::CumulativeDistributionFunction(const std::vector<cv::Mat> &cdf, float range_min, float range_max, int num_bins) : cdf(cdf),
+                                                                                                                                                  range_min(range_min),
+                                                                                                                                                  range_max(range_max),
+                                                                                                                                                  num_bins(num_bins)
+{
+}
 
-CumulativeDistributionFunction::CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, int num_bins)
+CumulativeDistributionFunction::CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, int num_bins)
 {
   Histogram hist(data, num_bins);
   from_histogram(hist);
 }
 
-CumulativeDistributionFunction::CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>>& data, float range_min, float range_max, int num_bins)
+CumulativeDistributionFunction::CumulativeDistributionFunction(const std::vector<std::pair<cv::Mat, cv::Mat>> &data, float range_min, float range_max, int num_bins)
 {
   Histogram hist(data, range_min, range_max, num_bins);
   from_histogram(hist);
 }
 
-void CumulativeDistributionFunction::from_histogram(const Histogram& histogram)
+void CumulativeDistributionFunction::from_histogram(const Histogram &histogram)
 {
   this->cdf = histogram.histogram;
   this->range_min = histogram.range_min;
@@ -60,14 +60,14 @@ void CumulativeDistributionFunction::from_histogram(const Histogram& histogram)
   // Compute CDF for  histogram equalization.
   for (cv::Mat cdf_channel : cdf)
   {
-    float* ptr = reinterpret_cast<float*>(cdf_channel.data);
+    float *ptr = reinterpret_cast<float *>(cdf_channel.data);
     for (int i = 1; i < cdf_channel.rows; ++i)
     {
-      ptr[i] += ptr[i-1];
+      ptr[i] += ptr[i - 1];
     }
 
     // Normalize CDF.
-    cdf_channel /= ptr[cdf_channel.rows-1];
+    cdf_channel /= ptr[cdf_channel.rows - 1];
   }
 }
 
@@ -78,21 +78,21 @@ CumulativeDistributionFunction CumulativeDistributionFunction::inverse() const
   for (cv::Mat cdf_channel : cdf)
   {
     cv::Mat cdf_inverse_channel(cdf_channel.size(), CV_32FC1);
-    const float* ptr_cdf = reinterpret_cast<const float*>(cdf_channel.ptr());
-    float* ptr_cdf_inverse = reinterpret_cast<float*>(cdf_inverse_channel.ptr());
+    const float *ptr_cdf = reinterpret_cast<const float *>(cdf_channel.ptr());
+    float *ptr_cdf_inverse = reinterpret_cast<float *>(cdf_inverse_channel.ptr());
 
     int c = 0;
     for (int i = 0; i < num_bins; ++i)
     {
-      float x = static_cast<float>(i+1) / num_bins;
+      float x = static_cast<float>(i + 1) / num_bins;
       while (c < num_bins && ptr_cdf[c] < x)
       {
         ++c;
       }
-      ptr_cdf_inverse[i] = static_cast<float>(c+1) / num_bins;
+      ptr_cdf_inverse[i] = static_cast<float>(c + 1) / num_bins;
     }
     cdf_inverse.push_back(cdf_inverse_channel);
   }
-  
+
   return CumulativeDistributionFunction(cdf_inverse, 0.0f, 1.0f, num_bins);
 }

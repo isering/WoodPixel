@@ -33,19 +33,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class FeatureEvaluator
 {
 public:
-  FeatureEvaluator(double weight_intensity, double weight_sobel, double weight_gabor, const GaborFilterBank& filter_bank) :
-    m_weight_intensity(weight_intensity),
-    m_weight_sobel(weight_sobel),
-    m_weight_gabor(weight_gabor),
-    m_filter_bank(filter_bank)
+  FeatureEvaluator(double weight_intensity, double weight_sobel, double weight_gabor, const GaborFilterBank &filter_bank) : m_weight_intensity(weight_intensity),
+                                                                                                                            m_weight_sobel(weight_sobel),
+                                                                                                                            m_weight_gabor(weight_gabor),
+                                                                                                                            m_filter_bank(filter_bank)
   {
     m_num_channels = filter_bank.num_directions() * filter_bank.num_frequencies() + 3;
   }
 
-  FeatureVector evaluate(cv::Mat texture, cv::Mat mask=cv::Mat()) const;
-  FeatureVector evaluate_with_histogram_matching(cv::Mat texture, const std::vector<Texture>& texture_target, cv::Mat mask, double dampening_factor) const;
+  FeatureVector evaluate(cv::Mat texture, cv::Mat mask = cv::Mat()) const;
+  FeatureVector evaluate_with_histogram_matching(cv::Mat texture, const std::vector<Texture> &texture_target, cv::Mat mask, double dampening_factor) const;
 
-  HistogramVector compute_feature_histogram(const FeatureVector& feature_vec, const cv::Size& patch_size) const;
+  HistogramVector compute_feature_histogram(const FeatureVector &feature_vec, const cv::Size &patch_size) const;
 
   cv::Size max_filter_size() const
   {
@@ -65,7 +64,7 @@ public:
 
 private:
   double m_weight_intensity, m_weight_sobel, m_weight_gabor;
-  const GaborFilterBank& m_filter_bank;
+  const GaborFilterBank &m_filter_bank;
   int m_num_channels;
 };
 

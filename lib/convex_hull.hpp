@@ -31,19 +31,19 @@ class ConvexHull
 {
 public:
   ConvexHull() = default;
-  ConvexHull(const ConvexHull&) = default;
-  ConvexHull(const std::vector<cv::Point>& points);
+  ConvexHull(const ConvexHull &) = default;
+  ConvexHull(const std::vector<cv::Point> &points);
 
-  const std::vector<cv::Point>& convex_hull() const
+  const std::vector<cv::Point> &convex_hull() const
   {
     return m_convex_hull;
   }
 
-  void fill(cv::Mat& mask) const;
+  void fill(cv::Mat &mask) const;
   std::vector<cv::Point> fill_convex_hull() const;
 
   void add_point(cv::Point p);
-  void from_points(const std::vector<cv::Point>& points);
+  void from_points(const std::vector<cv::Point> &points);
 
 private:
   std::vector<cv::Point> m_convex_hull;

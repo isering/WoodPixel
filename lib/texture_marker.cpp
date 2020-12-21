@@ -26,14 +26,14 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "texture_marker.hpp"
 
-boost::property_tree::ptree TextureMarker::save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const
+boost::property_tree::ptree TextureMarker::save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const
 {
   boost::property_tree::ptree tree;
   serialize(tree, "markers_pixel", markers_pix, base_path, path);
   return tree;
 }
 
-void TextureMarker::load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree)
+void TextureMarker::load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree)
 {
   deserialize(tree, "markers_pixel", markers_pix, base_path);
 }

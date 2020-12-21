@@ -25,35 +25,35 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "patch_region.hpp"
 
-template<typename T>
-void PatchRegion::draw(cv::Mat image, const T& color, double scale) const
+template <typename T>
+void PatchRegion::draw(cv::Mat image, const T &color, double scale) const
 {
   if (has_sub_regions())
   {
-    for (const PatchRegion& sub_region : m_sub_regions)
+    for (const PatchRegion &sub_region : m_sub_regions)
     {
       sub_region.draw(image, color, scale);
     }
   }
   else
   {
-    for (const BezierCurve& c : m_curves_top)
+    for (const BezierCurve &c : m_curves_top)
     {
       c.scaled(scale).draw<T>(image, color);
     }
-    for (const BezierCurve& c : m_curves_bot)
+    for (const BezierCurve &c : m_curves_bot)
     {
       c.scaled(scale).draw<T>(image, color);
     }
-    for (const BezierCurve& c : m_curves_left)
+    for (const BezierCurve &c : m_curves_left)
     {
       c.scaled(scale).draw<T>(image, color);
     }
-    for (const BezierCurve& c : m_curves_right)
+    for (const BezierCurve &c : m_curves_right)
     {
       c.scaled(scale).draw<T>(image, color);
     }
-    for (const BezierCurve& c : m_curves_diag)
+    for (const BezierCurve &c : m_curves_diag)
     {
       c.scaled(scale).draw<T>(image, color);
     }
@@ -61,14 +61,14 @@ void PatchRegion::draw(cv::Mat image, const T& color, double scale) const
 }
 
 template <typename T>
-void PatchRegion::draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::Point offset) const
+void PatchRegion::draw_edge_mask(cv::Mat image, const T &color, int dilate, cv::Point offset) const
 {
   cv::Mat mask = cv::Mat::zeros(image.size(), CV_8UC1);
 
-  for (const BezierCurve& curve : m_curves_top)
+  for (const BezierCurve &curve : m_curves_top)
   {
-    const std::vector<CurveDrawPoint> curve_points = (curve-offset).get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    const std::vector<CurveDrawPoint> curve_points = (curve - offset).get_draw_points();
+    for (const CurveDrawPoint &c : curve_points)
     {
       if (c.p.x >= 0 && c.p.x < image.cols && c.p.y >= 0 && c.p.y < image.rows)
       {
@@ -76,10 +76,10 @@ void PatchRegion::draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::
       }
     }
   }
-  for (const BezierCurve& curve : m_curves_bot)
+  for (const BezierCurve &curve : m_curves_bot)
   {
-    const std::vector<CurveDrawPoint> curve_points = (curve-offset).get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    const std::vector<CurveDrawPoint> curve_points = (curve - offset).get_draw_points();
+    for (const CurveDrawPoint &c : curve_points)
     {
       if (c.p.x >= 0 && c.p.x < image.cols && c.p.y >= 0 && c.p.y < image.rows)
       {
@@ -87,10 +87,10 @@ void PatchRegion::draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::
       }
     }
   }
-  for (const BezierCurve& curve : m_curves_left)
+  for (const BezierCurve &curve : m_curves_left)
   {
-    const std::vector<CurveDrawPoint> curve_points = (curve-offset).get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    const std::vector<CurveDrawPoint> curve_points = (curve - offset).get_draw_points();
+    for (const CurveDrawPoint &c : curve_points)
     {
       if (c.p.x >= 0 && c.p.x < image.cols && c.p.y >= 0 && c.p.y < image.rows)
       {
@@ -98,10 +98,10 @@ void PatchRegion::draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::
       }
     }
   }
-  for (const BezierCurve& curve : m_curves_right)
+  for (const BezierCurve &curve : m_curves_right)
   {
-    const std::vector<CurveDrawPoint> curve_points = (curve-offset).get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    const std::vector<CurveDrawPoint> curve_points = (curve - offset).get_draw_points();
+    for (const CurveDrawPoint &c : curve_points)
     {
       if (c.p.x >= 0 && c.p.x < image.cols && c.p.y >= 0 && c.p.y < image.rows)
       {
@@ -109,10 +109,10 @@ void PatchRegion::draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::
       }
     }
   }
-  for (const BezierCurve& curve : m_curves_diag)
+  for (const BezierCurve &curve : m_curves_diag)
   {
-    const std::vector<CurveDrawPoint> curve_points = (curve-offset).get_draw_points();
-    for (const CurveDrawPoint& c : curve_points)
+    const std::vector<CurveDrawPoint> curve_points = (curve - offset).get_draw_points();
+    for (const CurveDrawPoint &c : curve_points)
     {
       if (c.p.x >= 0 && c.p.x < image.cols && c.p.y >= 0 && c.p.y < image.rows)
       {
@@ -130,14 +130,14 @@ void PatchRegion::draw_edge_mask(cv::Mat image, const T& color, int dilate, cv::
 }
 
 template <typename T, typename Iter>
-void PatchRegion::draw(cv::Mat image, const T& color, double scale, Iter begin, Iter end)
+void PatchRegion::draw(cv::Mat image, const T &color, double scale, Iter begin, Iter end)
 {
   for (Iter iter = begin; iter != end; ++iter)
   {
     if (iter->has_sub_regions())
     {
-      for (const PatchRegion& p : iter->sub_regions())
-      {        
+      for (const PatchRegion &p : iter->sub_regions())
+      {
         p.draw(image, color, scale);
       }
     }

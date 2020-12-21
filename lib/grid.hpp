@@ -29,49 +29,50 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "patch_region.hpp"
 #include "serializable.hpp"
 
-template <typename T> class DataGrid;
+template <typename T>
+class DataGrid;
 
 class Grid : public Serializable
 {
 public:
-  Grid() :
-    m_rows(0),
-    m_cols(0)
-  {}
+  Grid() : m_rows(0),
+           m_cols(0)
+  {
+  }
 
   Grid(int rows, int cols)
   {
     resize(rows, cols);
   }
 
-  Grid(const std::string& morphed_grid_filename)
+  Grid(const std::string &morphed_grid_filename)
   {
     load_morphed_grid(morphed_grid_filename);
   }
 
   virtual void resize(int rows, int cols);
 
-  cv::Point2d& operator()(int row, int col)
+  cv::Point2d &operator()(int row, int col)
   {
-    return m_grid_points[row*m_cols+col];
+    return m_grid_points[row * m_cols + col];
   }
 
-  const cv::Point2d& operator()(int row, int col) const
+  const cv::Point2d &operator()(int row, int col) const
   {
-    return m_grid_points[row*m_cols+col];
+    return m_grid_points[row * m_cols + col];
   }
 
-  cv::Point2d& operator()(const cv::Point& p)
+  cv::Point2d &operator()(const cv::Point &p)
   {
-    return m_grid_points[p.y*m_cols+p.x];
+    return m_grid_points[p.y * m_cols + p.x];
   }
 
-  const cv::Point2d& operator()(const cv::Point& p) const
+  const cv::Point2d &operator()(const cv::Point &p) const
   {
-    return m_grid_points[p.y*m_cols+p.x];
+    return m_grid_points[p.y * m_cols + p.x];
   }
 
-  DataGrid<PatchRegion> generate_patches(const cv::Mat& edge_image);
+  DataGrid<PatchRegion> generate_patches(const cv::Mat &edge_image);
 
   bool empty() const
   {
@@ -90,9 +91,9 @@ public:
 
   void scale(double factor);
 
-  bool load_morphed_grid(const std::string& morphed_grid_filename);
+  bool load_morphed_grid(const std::string &morphed_grid_filename);
 
-  template <typename T> 
+  template <typename T>
   cv::Mat_<cv::Vec<T, 2>> to_mat() const
   {
     cv::Mat_<cv::Vec<T, 2>> mat(m_rows, m_cols);
@@ -100,7 +101,7 @@ public:
     int c = 0;
     for (int y = 0; y < m_rows; ++y)
     {
-      cv::Vec<T, 2>* ptr = reinterpret_cast<cv::Vec<T, 2>*>(mat.ptr(y));
+      cv::Vec<T, 2> *ptr = reinterpret_cast<cv::Vec<T, 2> *>(mat.ptr(y));
       for (int x = 0; x < m_cols; ++x)
       {
         ptr[x][0] = static_cast<T>(m_grid_points[c].x);
@@ -119,7 +120,7 @@ public:
     int c = 0;
     for (int y = 0; y < mat.rows; ++y)
     {
-      const cv::Vec<T, 2>* ptr = reinterpret_cast<const cv::Vec<T, 2>*>(mat.ptr(y));
+      const cv::Vec<T, 2> *ptr = reinterpret_cast<const cv::Vec<T, 2> *>(mat.ptr(y));
       for (int x = 0; x < mat.cols; ++x)
       {
         grid.m_grid_points[c++] = cv::Point2d(ptr[x]);
@@ -129,8 +130,8 @@ public:
     return grid;
   }
 
-  virtual void load(const boost::filesystem::path& base_path, const boost::property_tree::ptree& tree) override;
-  virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override;
+  virtual void load(const boost::filesystem::path &base_path, const boost::property_tree::ptree &tree) override;
+  virtual boost::property_tree::ptree save(const boost::filesystem::path &base_path, const boost::filesystem::path &path) const override;
 
 private:
   std::vector<cv::Point2d> m_grid_points;

@@ -34,7 +34,7 @@ public:
   virtual boost::property_tree::ptree save(const boost::filesystem::path& base_path, const boost::filesystem::path& path) const override
   {
     boost::property_tree::ptree tree;
-    serialize(tree, "data", begin(), end(), base_path, path);
+    serialize(tree, "data", this->begin(), this->end(), base_path, path);
     return tree;
   }
 
@@ -42,8 +42,8 @@ public:
   {
     std::vector<T> data;
     deserialize(tree, "data", data, base_path);
-    swap(data);
+    this->swap(data);
   }
 };
 
-#endif TRLIB_VECTOR_HPP_
+#endif /* TRLIB_VECTOR_HPP_ */

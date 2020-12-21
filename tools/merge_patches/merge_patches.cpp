@@ -54,7 +54,7 @@ static cv::Vec3b hsv_to_bgr(int hue, int saturation, int value)
 {
   cv::Mat hsv_mat(1, 1, CV_8UC3, cv::Vec3b(hue, saturation, value));
   cv::Mat rgb_mat;
-  cv::cvtColor(hsv_mat, rgb_mat, CV_HSV2BGR);
+  cv::cvtColor(hsv_mat, rgb_mat, cv::COLOR_HSV2BGR);
   return cv::Vec3b(rgb_mat.data[0], rgb_mat.data[1], rgb_mat.data[2]);
 }
 

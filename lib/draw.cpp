@@ -30,7 +30,7 @@ static cv::Scalar hsv_to_bgr(cv::Scalar hsv)
 {
   cv::Mat hsv_mat(1, 1, CV_8UC3, hsv);
   cv::Mat rgb_mat;
-  cv::cvtColor(hsv_mat, rgb_mat, CV_HSV2BGR);
+  cv::cvtColor(hsv_mat, rgb_mat, cv::COLOR_HSV2BGR);
   return cv::Scalar(rgb_mat.data[0], rgb_mat.data[1], rgb_mat.data[2]);
 }
 

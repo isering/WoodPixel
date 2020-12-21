@@ -42,7 +42,7 @@ namespace fs = boost::filesystem;
 
 void Texture::load_texture(const boost::filesystem::path& filename, double scale)
 {
-  std::ifstream file(filename.wstring(), std::iostream::binary);
+  std::ifstream file(filename.string(), std::iostream::binary);
   if (!file.good())
   {
     throw std::runtime_error("Unable to read image: " + filename.string());
@@ -128,8 +128,8 @@ Texture Texture::rotate(double angle_rad) const
   cv::invertAffineTransform(texture_rotated.transformation_matrix, texture_rotated.transformation_matrix_inv);
 
   cv::warpAffine(texture, texture_rotated.texture, texture_rotated.transformation_matrix, rotated_rect.size());
-  cv::warpAffine(mask_done, texture_rotated.mask_done, texture_rotated.transformation_matrix, rotated_rect.size(), CV_INTER_NN);
-  cv::warpAffine(mask_rotation, texture_rotated.mask_rotation, texture_rotated.transformation_matrix, rotated_rect.size(), CV_INTER_NN);
+  cv::warpAffine(mask_done, texture_rotated.mask_done, texture_rotated.transformation_matrix, rotated_rect.size(), cv::INTER_NEAREST);
+  cv::warpAffine(mask_rotation, texture_rotated.mask_rotation, texture_rotated.transformation_matrix, rotated_rect.size(), cv::INTER_NEAREST);
 
   for (const cv::Point2d& p : marker.markers_pix)
   {
@@ -154,7 +154,7 @@ void Texture::mask_patch(std::vector<Texture>& rotated_textures, int index, cv::
   {
     cv::Mat transform_patch = AffineTransformation::concat(texture.transformation_matrix, rotated_textures[index].transformation_matrix_inv);
     cv::Mat mask_rotated;
-    cv::warpAffine(mask, mask_rotated, transform_patch, texture.mask_done.size(), CV_INTER_NN);
+    cv::warpAffine(mask, mask_rotated, transform_patch, texture.mask_done.size(), cv::INTER_NEAREST);
     mask_rotated = cv::max(mask_rotated, texture.mask_rotation_inv());
     texture.mask_done = cv::min(texture.mask_done, mask_rotated);
   }
@@ -253,7 +253,7 @@ cv::Mat Texture::template_match(const Texture& kernel) const
   {
     response[i].convertTo(response_float, CV_32FC1, 1.0/65535.0);
     kernel.response[i].convertTo(kernel_response_float, CV_32FC1, 1.0 / 65535.0);
-    cv::matchTemplate(response_float, kernel_response_float, match, CV_TM_SQDIFF);
+    cv::matchTemplate(response_float, kernel_response_float, match, cv::TM_SQDIFF);
     match_sum += match;
   }
 
@@ -277,7 +277,7 @@ cv::Mat Texture::template_match(const Texture& kernel, cv::Mat mask) const
   {
     response[i].convertTo(response_float, CV_32FC1, 1.0/65535.0);
     kernel.response[i].convertTo(kernel_response_float, CV_32FC1, 1.0 / 65535.0);
-    cv::matchTemplate(response_float, kernel_response_float, match, CV_TM_SQDIFF, mask_float);
+    cv::matchTemplate(response_float, kernel_response_float, match, cv::TM_SQDIFF, mask_float);
     match_sum += match;
   }
 

@@ -131,14 +131,6 @@ FeatureVector FeatureEvaluator::evaluate_with_histogram_matching(cv::Mat texture
   return FeatureVector(response_vec);
 }
 
-struct HistogramMean
-{
-  float add(int x, int y, float val)
-  {
-    
-  }
-};
-
 HistogramVector FeatureEvaluator::compute_feature_histogram(const FeatureVector& feature_vec, const cv::Size& patch_size) const
 {
   cv::Mat feature_float;

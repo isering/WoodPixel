@@ -95,18 +95,11 @@ cv::Mat GaborFilterBank::draw() const
     for (int x = 0; x < m_gabor_filters.width(); ++x)
     {
       cv::Mat kernel;
-      
-
-      cv::normalize(m_gabor_filters(y, x).kernel_real, kernel, 1.0, 0.0, CV_MINMAX);
-      //minmax(kernel);
-
+      cv::normalize(m_gabor_filters(y, x).kernel_real, kernel, 1.0, 0.0, cv::NORM_MINMAX);
       cv::Rect rect_target(x * max_cols, y * max_rows, kernel.cols, kernel.rows);
       kernel.copyTo(image(rect_target));
-      //image(rect_target) = kernel;
     }
   }
-
-  //minmax(image);
 
   return image;
 }

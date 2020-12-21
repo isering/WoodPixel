@@ -66,7 +66,7 @@ public:
       m_update = false;
     }
 
-    if (m_edge_image_future.valid() && m_edge_image_future._Is_ready())
+    if (m_edge_image_future.valid() && m_edge_image_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     {
       m_edge_image = m_edge_image_future.get();
       m_ready = true;

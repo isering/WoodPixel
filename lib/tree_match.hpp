@@ -33,7 +33,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "feature_evaluator.hpp"
 #include "gabor_filter_bank.hpp"
 #include "grid.hpp"
-#include "match.hpp"
 #include "patch.hpp"
 #include "texture.hpp"
 

@@ -23,6 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef BILATERAL_FILTER_FUTURE_HPP_
 #define BILATERAL_FILTER_FUTURE_HPP_
 
+#include <chrono>
 #include <future>
 
 #include "future_base.hpp"
@@ -68,7 +69,7 @@ public:
       m_update = false;
     }
 
-    if (m_filtered_image_future.valid() && m_filtered_image_future._Is_ready())
+    if (m_filtered_image_future.valid() && m_filtered_image_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     {
       m_filtered_image =  m_filtered_image_future.get();
       m_ready = true;

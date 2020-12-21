@@ -161,7 +161,7 @@ void FeatureVector::render(const std::vector<FeatureVector>& features)
       const double scale_max = 65535.0 * (response_max[i] - global_min) / (global_max - global_min);
 
       cv::Mat response;
-      cv::normalize(features[i][cur_index], response, scale_max, scale_min, CV_MINMAX);
+      cv::normalize(features[i][cur_index], response, scale_max, scale_min, cv::NORM_MINMAX);
 
       response.copyTo(image_out(cv::Rect(current_col, 0, features[i][cur_index].cols, features[i][cur_index].rows)));
       current_col += features[i][cur_index].cols;

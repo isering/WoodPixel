@@ -26,19 +26,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <list>
 
+#include <opencv2/highgui/highgui_c.h>
+
 #include "hough_circle_detect.hpp"
 
 std::vector<cv::Vec3f> HoughCircleDetect::compute(const cv::Mat& image, double param_1, double param_2, double dpi, double circle_size_mm)
 {
-	std::vector<cv::Vec3f> circle_vec;
+  std::vector<cv::Vec3f> circle_vec;
 
   double circle_radius_pixel = 0.5 * circle_size_mm * dpi / 25.4;
   int circle_radius_min = static_cast<int>(0.9 * circle_radius_pixel);
   int circle_radius_max = static_cast<int>(1.1 * circle_radius_pixel);
+  
+  cv::HoughCircles(image, circle_vec, cv::HOUGH_GRADIENT, 2.0, 25.0, param_1, param_2, circle_radius_min, circle_radius_max);
 
-	cv::HoughCircles(image, circle_vec, CV_HOUGH_GRADIENT, 2.0, 25.0, param_1, param_2, circle_radius_min, circle_radius_max);
-
-	return circle_vec;
+  return circle_vec;
 }
 
 std::future<std::vector<cv::Vec3f>> HoughCircleDetect::compute_background(const cv::Mat& image, double param_1, double param_2, double dpi, double circle_size_mm)

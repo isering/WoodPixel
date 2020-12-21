@@ -33,7 +33,7 @@ std::vector<cv::Vec4f> line_segment_detect(cv::Mat texture)
 
   if (texture.channels() == 3)
   {
-    cv::cvtColor(texture, texture_gray, CV_BGR2GRAY);
+    cv::cvtColor(texture, texture_gray, cv::COLOR_BGR2GRAY);
   }
   else if (texture.channels() == 1)
   {

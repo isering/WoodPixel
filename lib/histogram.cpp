@@ -359,7 +359,7 @@ void temp_histogram_matching(std::vector<cv::Mat>& source_planes, cv::Mat mask_s
 cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_source, const std::vector<Texture>& target)
 {  
   cv::Mat texture_source_hsv;
-  cv::cvtColor(texture_source, texture_source_hsv, CV_BGR2HSV);
+  cv::cvtColor(texture_source, texture_source_hsv, cv::COLOR_BGR2HSV);
 
   std::vector<cv::Mat> source_hsv_planes;
   cv::split(texture_source_hsv, source_hsv_planes);
@@ -368,7 +368,7 @@ cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_s
   for (const Texture& t : target)
   {
     cv::Mat texture_target_hsv;
-    cv::cvtColor(t.texture, texture_target_hsv, CV_BGR2HSV);
+    cv::cvtColor(t.texture, texture_target_hsv, cv::COLOR_BGR2HSV);
     std::vector<cv::Mat> temp;
     cv::split(texture_target_hsv, temp);
     target_hsv_planes.push_back(temp);
@@ -384,7 +384,7 @@ cv::Mat Histogram::histogram_matching_hsv(cv::Mat texture_source, cv::Mat mask_s
   cv::merge(source_hsv_planes, source_hsv_out);
 
   cv::Mat source_bgr_out;
-  cv::cvtColor(source_hsv_out, source_bgr_out, CV_HSV2BGR);
+  cv::cvtColor(source_hsv_out, source_bgr_out, cv::COLOR_HSV2BGR);
 
   return source_bgr_out;
 }

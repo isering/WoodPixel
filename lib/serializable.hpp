@@ -63,7 +63,7 @@ public:
   static void serialize(boost::property_tree::ptree& tree, const std::string& key, const std::vector<T>& vec, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
   {
     boost::property_tree::ptree tree_vec;
-    for (std::vector<T>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
+    for (typename std::vector<T>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
     {
       tree_vec.push_back(std::make_pair("", iter->save(base_path, path)));
     }
@@ -101,7 +101,7 @@ public:
   static void serialize(boost::property_tree::ptree& tree, const std::string& key, const std::vector<cv::Point_<T>>& vec, const boost::filesystem::path& base_path, const boost::filesystem::path& path)
   {
     boost::property_tree::ptree tree_vec;
-    for (std::vector<cv::Point_<T>>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
+    for (typename std::vector<cv::Point_<T>>::const_iterator iter = vec.begin(); iter != vec.end(); ++iter)
     {
       boost::property_tree::ptree tree_elem;
       serialize(tree_elem, "x", iter->x, base_path, path);

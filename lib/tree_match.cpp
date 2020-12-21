@@ -38,6 +38,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <boost/tokenizer.hpp>
 #include <omp.h>
 #include <opencv2/saliency.hpp>
+#include <opencv2/saliency/saliencySpecializedClasses.hpp>
 
 #include "adaptive_patch.hpp"
 #include "affine_transformation.hpp"
@@ -46,10 +47,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "generate_patches.hpp"
 #include "histogram.hpp"
 #include "line_segment_detect.hpp"
-#include "match.hpp"
 #include "opencv_extra.hpp"
 #include "texture.hpp"
 #include "timer.hpp"
+#include "tree_match.hpp"
 
 namespace fs = boost::filesystem;
 namespace pt = boost::property_tree;
@@ -81,7 +82,7 @@ cv::Mat TreeMatch::compute_priority_map(const cv::Mat& texture_in)
 {
   cv::Mat texture;
   texture_in.convertTo(texture, CV_32FC3, 1.0 / 65535.0);
-  cv::cvtColor(texture, texture, CV_BGR2GRAY);
+  cv::cvtColor(texture, texture, cv::COLOR_BGR2GRAY);
 
   cv::GaussianBlur(texture, texture, cv::Size(3, 3), 0.0);
   cv::Laplacian(texture, texture, CV_32FC1);
@@ -656,7 +657,7 @@ cv::Mat TreeMatch::draw_patch(const Patch& patch) const
 static cv::Mat warp_nn(cv::Mat mat, cv::Mat transformation, cv::Size size)
 {
   cv::Mat result;
-  cv::warpAffine(mat, result, transformation, size, CV_INTER_NN);
+  cv::warpAffine(mat, result, transformation, size, cv::INTER_NEAREST);
   return result;
 }
 

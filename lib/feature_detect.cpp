@@ -35,7 +35,7 @@ std::vector<cv::Point2f> feature_detect(cv::Mat texture, int max_corners, double
 
   if (texture.channels() == 3)
   {
-    cv::cvtColor(texture, texture_gray, CV_BGR2GRAY);
+    cv::cvtColor(texture, texture_gray, cv::COLOR_BGR2GRAY);
   }
   else if (texture.channels() == 1)
   {

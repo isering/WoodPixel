@@ -24,6 +24,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include "config.h"
 #endif
 
+#include <cmath>
+
 #include <boost/format.hpp>
 
 #include "generate_patches.hpp"
@@ -43,7 +45,7 @@ void MorphGridFuture::loop()
     m_update = false;
   }
 
-  if (m_morph_grid_data_future.valid() && m_morph_grid_data_future._Is_ready())
+  if (m_morph_grid_data_future.valid() && m_morph_grid_data_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
   {
     if (m_is_grid_updated)
     {
@@ -69,7 +71,7 @@ void MorphGridFuture::loop()
     m_update_patches = false;
   }
 
-  if (m_patch_data_future.valid() && m_patch_data_future._Is_ready())
+  if (m_patch_data_future.valid() && m_patch_data_future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
   {
     PatchData data = m_patch_data_future.get();
     m_patches = data.patches;
@@ -847,8 +849,8 @@ T interpolate(const cv::Mat_<T> image, cv::Point_<TPoint> p)
   
   if (p_int.x >= 0 && p_int.x < image.cols-1 && p_int.y >= 0 && p_int.y < image.rows-1)
   {
-    T f_1 = static_cast<T>((1.0 - p.x) * image.at<T>(p_int.y, p_int.x) + p.x * image.at<T>(p_int.y, p_int.x+1));
-    T f_2 = static_cast<T>((1.0 - p.x) * image.at<T>(p_int.y+1, p_int.x) + p.x * image.at<T>(p_int.y+1, p_int.x+1));
+    T f_1 = static_cast<T>((1.0 - p.x) * image.template at<T>(p_int.y, p_int.x) + p.x * image.template at<T>(p_int.y, p_int.x+1));
+    T f_2 = static_cast<T>((1.0 - p.x) * image.template at<T>(p_int.y+1, p_int.x) + p.x * image.template at<T>(p_int.y+1, p_int.x+1));
     return static_cast<T>((1.0 - p.y) * f_1 + p.y * f_2);
   }
 
@@ -872,7 +874,7 @@ T interpolate(const cv::Mat_<T> image, cv::Point_<TPoint> p)
     p_int.y = image.rows-1;
   }
 
-  return image.at<T>(p_int);
+  return image.template at<T>(p_int);
 }
 
 DataGrid<unsigned char> MorphGridFuture::relax_grid(DataGrid<unsigned char> grid, int num_iterations, cv::Mat im_dist, cv::Mat gradient_dist_x, cv::Mat gradient_dist_y, cv::Mat density, int grid_size) const
@@ -915,7 +917,7 @@ DataGrid<unsigned char> MorphGridFuture::relax_grid(DataGrid<unsigned char> grid
               if (x != 0 || y != 0)
               {
                 const cv::Vec2f& p_other = X.at<cv::Vec2f>(y+del_y, x+del_x);
-                float spring_constant = std::powf(1.5f, interpolate<float>(density, cv::Point2f(p_other[0], p_other[1])));
+                float spring_constant = std::pow(1.5f, interpolate<float>(density, cv::Point2f(p_other[0], p_other[1])));
                 spring_constant *= del_x * del_x + del_y * del_y;
                 F_ptr[x] += spring_constant * w_2 * (p_other - cv::Vec2f(p));
               }

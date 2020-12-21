@@ -3,8 +3,8 @@ WoodPixel - Supplementary code for Computational Parquetry:
             Fabricated Style Transfer with Wood Pixels
             ACM Transactions on Graphics 39(2), 2020
 
-Copyright (C) 2020  Julian Iseringhausen, University of Bonn, <iseringhausen@cs.uni-bonn.de>
-Copyright (C) 2020  Matthias Hullin, University of Bonn, <hullin@cs.uni-bonn.de>
+Copyright (C) 2020 Julian Iseringhausen <opensource@iseringhausen.graphics>
+Copyright (C) 2020 Matthias Hullin, University of Bonn <hullin@cs.uni-bonn.de>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

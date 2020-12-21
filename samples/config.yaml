@@ -1,0 +1,21 @@
+# Training parameters
+samples_train: 100000      # Number of training patches per epoch
+samples_test: 5000         # Number of test patches per epoch
+epochs: 250                # Number of training epochs
+learning_rate: 1e-4        # Learning rate for Adam optimizer
+loss: mean_squared_error   # Model loss
+batch_size: 16             # Mini batch size
+save_period: 2
+
+# Model parameters
+shape_narrow: 32             # Size of the narrowest bit of the network
+kernel_size: 3               # Convolutional kernel size
+model_depth: 4               # Depth of encoder-decoder network
+num_filters: 16              # Number of filters for first convolutional layer
+conv_per_layer: 2            # Number of convolutions in each layer
+final_activation: sigmoid    # Activation function in final layer
+residual_network: true       # Train UNet
+
+# Directories
+train_dir: data_crop/train  # Path to training set
+test_dir: data_crop/test    # Path to validation set

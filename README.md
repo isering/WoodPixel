@@ -15,7 +15,7 @@ sudo apt update && sudo apt install \
 build-essential \
 cmake \
 git \
-libboost-dev \
+libboost-all-dev \
 libopencv-dev \
 ```
 
